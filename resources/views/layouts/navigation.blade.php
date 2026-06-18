@@ -49,6 +49,10 @@
                             <x-dropdown-link :href="route('events.mine')">
                                 {{ __('My Events') }}
                             </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('events.todos')">
+                                {{ __('To-Do List') }}
+                            </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>
 
@@ -134,6 +138,10 @@
 
             <x-responsive-nav-link :href="route('events.mine')" :active="request()->routeIs('events.mine')">
                 {{ __('My Events') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('events.todos')" :active="request()->routeIs('events.todos')">
+                {{ __('To-Do List') }}
             </x-responsive-nav-link>
 
             @if (Auth::user()?->canManageUsers())

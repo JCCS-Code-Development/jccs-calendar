@@ -117,13 +117,41 @@
                                         $day = $calendarStart->copy()->addDays($dayIndex);
                                         $dayKey = $day->format('Y-m-d');
                                         $eventsForDay = $weeklyCalendarEventsByDate->get($dayKey, collect());
-                                        $remindersForDay = $eventsForDay->filter(fn ($event) => strtolower($event->eventType?->name ?? '') === 'reminder');
-                                        $timedEventsForDay = $eventsForDay->reject(fn ($event) => strtolower($event->eventType?->name ?? '') === 'reminder');
+                                        $topEventsForDay = $eventsForDay->filter(function ($event) use ($toDashboardEventDateTime) {
+                                            $eventTypeName = strtolower($event->eventType?->name ?? '');
+
+                                            if ($eventTypeName === 'reminder') {
+                                                return true;
+                                            }
+
+                                            $eventStart = $event->start_datetime ? $toDashboardEventDateTime($event->start_datetime) : null;
+                                            $eventEnd = $event->end_datetime ? $toDashboardEventDateTime($event->end_datetime) : null;
+
+                                            return $eventStart
+                                                && $eventStart->format('H:i') === '00:00'
+                                                && $eventEnd
+                                                && in_array($eventEnd->format('H:i'), ['23:58', '23:59'], true);
+                                        });
+                                        $timedEventsForDay = $eventsForDay->reject(function ($event) use ($toDashboardEventDateTime) {
+                                            $eventTypeName = strtolower($event->eventType?->name ?? '');
+
+                                            if ($eventTypeName === 'reminder') {
+                                                return true;
+                                            }
+
+                                            $eventStart = $event->start_datetime ? $toDashboardEventDateTime($event->start_datetime) : null;
+                                            $eventEnd = $event->end_datetime ? $toDashboardEventDateTime($event->end_datetime) : null;
+
+                                            return $eventStart
+                                                && $eventStart->format('H:i') === '00:00'
+                                                && $eventEnd
+                                                && in_array($eventEnd->format('H:i'), ['23:58', '23:59'], true);
+                                        });
                                     @endphp
 
                                     <div class="dashboard-week-day-column">
                                         <div class="dashboard-week-reminder-strip">
-                                            @foreach ($remindersForDay as $reminder)
+                                            @foreach ($topEventsForDay as $reminder)
                                                 @php
                                                     $reminderStart = $toDashboardEventDateTime($reminder->start_datetime);
                                                     $reminderEnd = $reminder->end_datetime
@@ -134,8 +162,8 @@
                                                 @endphp
 
                                                 <button type="button"
-                                                        class="dashboard-week-reminder-dot"
-                                                        title="{{ $reminder->title }} | {{ $reminderStart->format('g:i A') }} - {{ $reminderEnd->format('g:i A') }}"
+                                                        class="dashboard-week-reminder-dot {{ strtolower($reminder->status ?? '') === 'completed' ? 'dashboard-event-completed' : '' }}"
+                                                        title="{{ $reminder->title }} | {{ strtolower($reminder->eventType?->name ?? '') === 'reminder' ? $reminderStart->format('g:i A') . ' - ' . $reminderEnd->format('g:i A') : 'Any time' }}"
                                                         data-title="{{ $reminder->title }}"
                                                         data-type="{{ $reminder->eventType?->name ?? 'Reminder' }}"
                                                         data-subtype="{{ $reminder->event_subtype ?? '' }}"
@@ -145,10 +173,11 @@
                                                         data-priority="{{ ucfirst($reminder->priority ?? 'N/A') }}"
                                                         data-location="{{ $reminder->location }}"
                                                         data-description="{{ $reminder->description }}"
-                                                        data-start="{{ $reminderStart->format('g:i A') }}"
-                                                        data-end="{{ $reminderEnd->format('g:i A') }}"
+                                                        data-start="{{ strtolower($reminder->eventType?->name ?? '') === 'reminder' ? $reminderStart->format('g:i A') : 'Any time' }}"
+                                                        data-end="{{ strtolower($reminder->eventType?->name ?? '') === 'reminder' ? $reminderEnd->format('g:i A') : '' }}"
                                                         data-edit-url="{{ route('events.edit', $reminder) }}"
                                                         data-delete-url="{{ route('events.destroy', $reminder) }}"
+                                                        data-mark-done-url="{{ route('events.mark-done', $reminder) }}"
                                                         data-event-id="{{ $reminder->id }}"
                                                         onmouseenter="highlightDashboardCalendarEvent('{{ $reminder->id }}')"
                                                         onmouseleave="unhighlightDashboardCalendarEvent('{{ $reminder->id }}')"
@@ -177,16 +206,17 @@
                                                 $startMinutes = max(0, $dayStart->diffInMinutes($clampedStart, false));
                                                 $endMinutes = max($startMinutes + 15, $dayStart->diffInMinutes($clampedEnd, false));
                                                 $eventTop = min(100, ($startMinutes / $calendarTotalMinutes) * 100);
-                                                $eventHeight = max(8, min(100 - $eventTop, (($endMinutes - $startMinutes) / $calendarTotalMinutes) * 100));
+                                                $eventHeight = max(1, min(100 - $eventTop, (($endMinutes - $startMinutes) / $calendarTotalMinutes) * 100));
                                                 $assignedName = $event->assignedUser?->name ?? 'Unassigned';
                                                 $eventColor = $userCalendarColors[$assignedName] ?? '#9ca3af';
                                                 $calendarEventIsPast = $eventEnd->lessThan($eventNow) || $day->lt($eventNow->copy()->startOfDay());
+                                                $calendarEventIsCompleted = strtolower($event->status ?? '') === 'completed';
                                             @endphp
 
                                             <button type="button"
                                                     class="dashboard-week-event-line"
                                                     title="{{ $event->title }} | {{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}"
-                                                    style="top: {{ $eventTop }}%; height: {{ $eventHeight }}%; background-color: {{ $calendarEventIsPast ? '#9ca3af' : $eventColor }};"
+                                                    style="top: {{ $eventTop }}%; height: {{ $eventHeight }}%; background-color: {{ $eventColor }}; {{ $calendarEventIsPast ? 'opacity:.65;' : '' }}"
                                                     data-title="{{ $event->title }}"
                                                     data-type="{{ $event->eventType?->name ?? 'Event' }}"
                                                     data-subtype="{{ $event->event_subtype ?? '' }}"
@@ -200,13 +230,14 @@
                                                     data-end="{{ $eventEnd->format('g:i A') }}"
                                                     data-edit-url="{{ route('events.edit', $event) }}"
                                                     data-delete-url="{{ route('events.destroy', $event) }}"
+                                                    data-mark-done-url="{{ route('events.mark-done', $event) }}"
                                                     data-event-id="{{ $event->id }}"
                                                     onmouseenter="highlightDashboardCalendarEvent('{{ $event->id }}')"
                                                     onmouseleave="unhighlightDashboardCalendarEvent('{{ $event->id }}')"
                                                     onclick="openDashboardEventDetails(this)"></button>
 
                                             <button type="button"
-                                                    class="dashboard-week-event-label {{ $calendarEventIsPast ? 'dashboard-week-event-past' : '' }}"
+                                                    class="dashboard-week-event-label {{ $calendarEventIsCompleted ? 'dashboard-event-completed' : '' }} {{ $calendarEventIsPast ? 'dashboard-week-event-past' : '' }}"
                                                     style="top: {{ $eventTop }}%;"
                                                     data-title="{{ $event->title }}"
                                                     data-type="{{ $event->eventType?->name ?? 'Event' }}"
@@ -221,11 +252,12 @@
                                                     data-end="{{ $eventEnd->format('g:i A') }}"
                                                     data-edit-url="{{ route('events.edit', $event) }}"
                                                     data-delete-url="{{ route('events.destroy', $event) }}"
+                                                    data-mark-done-url="{{ route('events.mark-done', $event) }}"
                                                     data-event-id="{{ $event->id }}"
                                                     onmouseenter="highlightDashboardCalendarEvent('{{ $event->id }}')"
                                                     onmouseleave="unhighlightDashboardCalendarEvent('{{ $event->id }}')"
                                                     onclick="openDashboardEventDetails(this)">
-                                                {{ $event->title }}
+                                                <span class="dashboard-week-event-title-text">{{ $event->title }}</span>
                                                 <span>{{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}</span>
                                             </button>
                                         @endforeach
@@ -302,6 +334,16 @@
                         style="background:#f3f4f6; color:#374151; padding:10px 16px; border-radius:8px; font-weight:700; border:1px solid #d1d5db;">
                     Back
                 </button>
+
+                <form id="dashboardEventModalMarkDoneForm" method="POST" action="#" style="display:inline-flex;">
+                    @csrf
+                    @method('PATCH')
+                    <button id="dashboardEventModalMarkDoneButton"
+                            type="submit"
+                            style="background-color:#dcfce7; color:#166534; padding:10px 16px; border-radius:8px; font-weight:700; border:1px solid #bbf7d0; box-shadow:0 2px 6px rgba(22,101,52,.08);">
+                        Mark Done
+                    </button>
+                </form>
 
                 <a id="dashboardEventModalEdit"
                    href="#"
@@ -717,6 +759,16 @@
             color:#4b5563 !important;
         }
 
+        .dashboard-event-completed .dashboard-week-event-title-text,
+        .dashboard-event-completed .dashboard-week-reminder-label {
+            text-decoration: line-through !important;
+        }
+
+        .dashboard-event-completed,
+        .dashboard-event-completed * {
+            text-decoration-color: currentColor;
+        }
+
         .dashboard-week-event-hidden {
             display: none !important;
         }
@@ -918,6 +970,8 @@
             const body = document.getElementById('dashboardEventModalBody');
             const editButton = document.getElementById('dashboardEventModalEdit');
             const deleteButton = document.getElementById('dashboardEventModalDelete');
+            const markDoneForm = document.getElementById('dashboardEventModalMarkDoneForm');
+            const markDoneButton = document.getElementById('dashboardEventModalMarkDoneButton');
             const eventTypeLabel = button.dataset.subtype
                 ? `${button.dataset.type || 'Event'} - ${button.dataset.subtype}`
                 : (button.dataset.type || 'Event');
@@ -928,10 +982,17 @@
             editButton.setAttribute('href', button.dataset.editUrl || '#');
             deleteButton.setAttribute('onclick', `closeDashboardEventModal(); openDashboardDeleteModal('${button.dataset.deleteUrl}')`);
 
+            const isCompleted = (button.dataset.status || '').toLowerCase() === 'completed';
+            markDoneForm.setAttribute('action', button.dataset.markDoneUrl || '#');
+            markDoneButton.disabled = isCompleted;
+            markDoneButton.textContent = isCompleted ? 'Done' : 'Mark Done';
+            markDoneButton.style.opacity = isCompleted ? '.6' : '1';
+            markDoneButton.style.cursor = isCompleted ? 'not-allowed' : 'pointer';
+
             body.innerHTML = `
                 <div class="dashboard-event-modal-detail"><strong>Type:</strong> ${eventTypeLabel}</div>
                 <div class="dashboard-event-modal-detail"><strong>Assigned:</strong> ${button.dataset.assigned || 'Unassigned'}</div>
-                <div class="dashboard-event-modal-detail"><strong>Time:</strong> ${button.dataset.start || 'N/A'} - ${button.dataset.end || 'N/A'}</div>
+                <div class="dashboard-event-modal-detail"><strong>Time:</strong> ${button.dataset.start === 'Any time' ? 'Any time' : `${button.dataset.start || 'N/A'} - ${button.dataset.end || 'N/A'}`}</div>
                 <div class="dashboard-event-modal-detail"><strong>Status:</strong> ${button.dataset.status || 'N/A'}</div>
                 <div class="dashboard-event-modal-detail"><strong>Priority:</strong> ${button.dataset.priority || 'N/A'}</div>
                 ${button.dataset.location ? `<div class="dashboard-event-modal-detail"><strong>Location:</strong> ${button.dataset.location}</div>` : ''}

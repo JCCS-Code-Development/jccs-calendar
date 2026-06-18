@@ -27,6 +27,12 @@
                         $selectedEventTypeId = old('event_type_id', $event->event_type_id);
                         $selectedEventType = $eventTypes->firstWhere('id', (int) $selectedEventTypeId);
                         $isReminderEvent = strtolower($selectedEventType?->name ?? '') === 'reminder';
+                        $eventStartDateTime = \Carbon\Carbon::parse($event->start_datetime);
+                        $eventEndDateTime = $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime) : null;
+                        $isAllDayTodoEvent = ! $isReminderEvent
+                            && $eventStartDateTime->format('H:i') === '00:00'
+                            && $eventEndDateTime
+                            && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true);
                         $selectedSubtype = old('event_subtype', $event->event_subtype);
 
                         $eventCategoryOrder = [
@@ -239,7 +245,7 @@
                         </select>
                     </div>
 
-                    <div id="start_datetime_group" class="mb-4 {{ $isReminderEvent ? 'hidden' : '' }}">
+                    <div id="start_datetime_group" class="mb-4 {{ $isReminderEvent || $isAllDayTodoEvent ? 'hidden' : '' }}">
                         <label class="block font-medium">Start Date/Time</label>
                         <input id="start_datetime" type="datetime-local" name="start_datetime" value="{{ old('start_datetime', \Carbon\Carbon::parse($event->start_datetime)->format('Y-m-d\TH:i')) }}" class="w-full border-gray-300 rounded" required>
                     </div>
@@ -249,7 +255,22 @@
                         <input id="reminder_date" type="date" name="reminder_date" value="{{ old('reminder_date', \Carbon\Carbon::parse($event->start_datetime)->format('Y-m-d')) }}" class="w-full border-gray-300 rounded">
                     </div>
 
-                    <div id="end_datetime_group" class="mb-4 {{ $isReminderEvent ? 'hidden' : '' }}">
+                    <div id="any_time_todo_group" class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4">
+                        <label class="flex items-start gap-3 font-medium text-gray-800">
+                            <input id="is_all_day_todo" type="checkbox" name="is_all_day_todo" value="1" class="mt-1 rounded border-gray-300" @checked(old('is_all_day_todo', $isAllDayTodoEvent))>
+                            <span>
+                                Any time during the day / To-do item
+                                <span class="block text-sm font-normal text-gray-600">Use this when the item does not need an exact time. It will appear at the top of the calendar with reminders and in the To-Do List tab.</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div id="all_day_date_group" class="mb-4 {{ $isAllDayTodoEvent && ! $isReminderEvent ? '' : 'hidden' }}">
+                        <label class="block font-medium">To-Do Date</label>
+                        <input id="all_day_date" type="date" name="all_day_date" value="{{ old('all_day_date', \Carbon\Carbon::parse($event->start_datetime)->format('Y-m-d')) }}" class="w-full border-gray-300 rounded">
+                    </div>
+
+                    <div id="end_datetime_group" class="mb-4 {{ $isReminderEvent || $isAllDayTodoEvent ? 'hidden' : '' }}">
                         <label class="block font-medium">End Date/Time</label>
                         <input id="end_datetime" type="datetime-local" name="end_datetime" value="{{ old('end_datetime', $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime)->format('Y-m-d\TH:i') : '') }}" class="w-full border-gray-300 rounded">
                     </div>
@@ -326,6 +347,10 @@
         return getSelectedEventTypeName() === 'reminder';
     }
 
+    function isAnyTimeTodoChecked() {
+        return document.getElementById('is_all_day_todo')?.checked || false;
+    }
+
     function populateSubtypeOptions() {
         const eventTypeName = getSelectedEventTypeName();
         const subtypeSelect = document.getElementById('event_subtype');
@@ -351,21 +376,26 @@
 
     function toggleReminderDateFields() {
         const isReminder = isReminderEventType();
+        const isAnyTimeTodo = isAnyTimeTodoChecked();
         const startGroup = document.getElementById('start_datetime_group');
         const endGroup = document.getElementById('end_datetime_group');
         const reminderGroup = document.getElementById('reminder_date_group');
+        const allDayDateGroup = document.getElementById('all_day_date_group');
         const startInput = document.getElementById('start_datetime');
         const endInput = document.getElementById('end_datetime');
         const reminderInput = document.getElementById('reminder_date');
+        const allDayDateInput = document.getElementById('all_day_date');
 
-        startGroup.classList.toggle('hidden', isReminder);
-        endGroup.classList.toggle('hidden', isReminder);
+        startGroup.classList.toggle('hidden', isReminder || isAnyTimeTodo);
+        endGroup.classList.toggle('hidden', isReminder || isAnyTimeTodo);
         reminderGroup.classList.toggle('hidden', !isReminder);
+        allDayDateGroup.classList.toggle('hidden', !isAnyTimeTodo || isReminder);
 
-        startInput.required = !isReminder;
+        startInput.required = !isReminder && !isAnyTimeTodo;
         reminderInput.required = isReminder;
+        allDayDateInput.required = isAnyTimeTodo && !isReminder;
 
-        if (isReminder) {
+        if (isReminder || isAnyTimeTodo) {
             endInput.value = '';
         }
     }
@@ -459,6 +489,7 @@
         const eventTypeSelect = document.getElementById('event_type_id');
         const subtypeSelect = document.getElementById('event_subtype');
         const addSupplyItemButton = document.getElementById('add_supply_item');
+        const anyTimeTodoCheckbox = document.getElementById('is_all_day_todo');
 
         if (!eventTypeSelect || !subtypeSelect) {
             return;
@@ -473,6 +504,10 @@
 
         subtypeSelect.addEventListener('change', toggleDynamicEventDetails);
 
+        if (anyTimeTodoCheckbox) {
+            anyTimeTodoCheckbox.addEventListener('change', toggleReminderDateFields);
+        }
+
         if (addSupplyItemButton) {
             addSupplyItemButton.addEventListener('click', addSupplyItemRow);
         }
@@ -484,16 +519,27 @@
         toggleDynamicEventDetails();
 
         form.addEventListener('submit', function () {
+            const startInput = document.getElementById('start_datetime');
+            const endInput = document.getElementById('end_datetime');
+
             if (isReminderEventType()) {
                 const reminderDate = document.getElementById('reminder_date').value;
-                const startInput = document.getElementById('start_datetime');
-                const endInput = document.getElementById('end_datetime');
 
                 if (reminderDate) {
                     startInput.value = `${reminderDate}T00:00`;
                 }
 
                 endInput.value = '';
+                return;
+            }
+
+            if (isAnyTimeTodoChecked()) {
+                const allDayDate = document.getElementById('all_day_date').value;
+
+                if (allDayDate) {
+                    startInput.value = `${allDayDate}T00:00`;
+                    endInput.value = `${allDayDate}T23:59`;
+                }
             }
         });
     });

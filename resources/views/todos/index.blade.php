@@ -46,8 +46,8 @@
         }
 
         .events-event-card .events-card-title {
-            font-size: 15px !important;
-            line-height: 1.15 !important;
+            font-size: 17px !important;
+            line-height: 1.2 !important;
         }
 
         .events-event-card .events-card-time-label {
@@ -147,8 +147,6 @@
         .events-mini-calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
-            max-height: 285px;
-            overflow-y: auto;
             overflow-x: hidden;
         }
 
@@ -165,7 +163,7 @@
         }
 
         .events-mini-calendar-day {
-            min-height: 1490px;
+            min-height: 420px;
             padding: 8px;
             border-right: 1px solid #f3f4f6;
             border-bottom: 1px solid #f3f4f6;
@@ -190,32 +188,19 @@
 
         .events-week-timeline {
             position: relative;
-            height: 1440px;
+            min-height: 360px;
             margin-top: 10px;
-            border-left: 1px solid #e5e7eb;
-            background: repeating-linear-gradient(
-                to bottom,
-                #ffffff 0,
-                #ffffff 59px,
-                #f3f4f6 60px
-            );
+            background: #ffffff;
             overflow: visible;
         }
 
         .events-week-time-label {
-            position: absolute;
-            left: 6px;
-            transform: translateY(-50%);
-            font-size: 9px;
-            font-weight: 800;
-            color: #9ca3af;
-            background: rgba(255, 255, 255, .85);
-            padding-right: 3px;
+            display: none;
         }
 
         .events-week-event-line {
             position: absolute;
-            left: 42px;
+            left: 10px;
             width: 8px;
             border-radius: 999px;
             box-shadow: 0 1px 4px rgba(17, 24, 39, .20);
@@ -223,7 +208,7 @@
 
         .events-week-event-label {
             position: absolute;
-            left: 58px;
+            left: 26px;
             right: 4px;
             transform: translateY(-2px);
             font-size: 10px;
@@ -244,6 +229,52 @@
             font-weight: 700;
             color: #6b7280;
             margin-top: 1px;
+        }
+
+        .events-week-reminder-pill {
+            position: relative;
+            left: auto;
+            transform: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 100%;
+            min-height: 32px;
+            padding: 5px 10px;
+            margin-bottom: 8px;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .18);
+            font-size: clamp(9px, .9vw, 11px);
+            font-weight: 800;
+            color: #111827;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .events-week-reminder-color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .events-week-reminder-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .events-week-priority-label {
+            margin-left: auto;
+            flex-shrink: 0;
+            font-size: 8px;
+            font-weight: 900;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: .03em;
         }
 
         .user-events-modal-day-grid {
@@ -310,6 +341,55 @@
 
                 $eventsByDate = $events
                     ->groupBy(fn ($event) => $toEventDateTime($event->start_datetime)->format('Y-m-d'));
+
+                $eventPrimaryDetail = function ($event) {
+                    $details = is_array($event->details ?? null) ? $event->details : [];
+                    $eventTypeName = strtolower($event->eventType?->name ?? '');
+
+                    if ($eventTypeName === 'supplies') {
+                        $items = collect($details['items'] ?? [])
+                            ->map(function ($item) {
+                                $name = $item['name'] ?? null;
+                                $quantity = $item['quantity'] ?? null;
+
+                                if (! $name && ! $quantity) {
+                                    return null;
+                                }
+
+                                return trim(($name ?: 'Unnamed item') . ($quantity ? ' #' . $quantity : ''));
+                            })
+                            ->filter()
+                            ->join(', ');
+
+                        return ['label' => 'Item', 'value' => $items ?: 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'communication') {
+                        return ['label' => 'Person', 'value' => $details['person'] ?? $details['company'] ?? $details['participants'] ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'meeting') {
+                        return ['label' => 'Participants', 'value' => $details['participants'] ?? $details['person'] ?? $details['company'] ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'logistics') {
+                        return ['label' => 'Worker(s)', 'value' => $details['workers'] ?? $details['team_workers'] ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'site visit') {
+                        return ['label' => 'Company / Project', 'value' => $details['company'] ?? $details['project'] ?? $details['person'] ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'estimate/invoice') {
+                        return ['label' => 'Estimate / Invoice', 'value' => $details['invoice_or_estimate'] ?? $details['number'] ?? $details['name'] ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'payment') {
+                        return ['label' => 'Payment', 'value' => $details['payment_name'] ?? $details['payment_document_number'] ?? $details['payment_amount'] ?? 'N/A'];
+                    }
+
+                    return ['label' => null, 'value' => null];
+                };
             @endphp
 
             <div class="events-mini-calendar">
@@ -318,7 +398,7 @@
                         <h3 class="text-lg font-extrabold text-gray-950">
                             Week of {{ $calendarStart->format('M d') }} - {{ $calendarEnd->format('M d, Y') }}
                         </h3>
-                        <p class="text-xs font-semibold text-gray-500 mt-1">Colored vertical bars show each reminder time slot from start to end time.</p>
+                        <p class="text-xs font-semibold text-gray-500 mt-1">Each day is a blank priority space. To-do items are stacked by importance, not by exact time.</p>
                     </div>
                 </div>
 
@@ -330,19 +410,23 @@
                     @for ($day = $calendarStart->copy(); $day->lte($calendarEnd); $day->addDay())
                         @php
                             $dateKey = $day->format('Y-m-d');
-                            $eventsForDay = $eventsByDate->get($dateKey, collect());
+                            $prioritySortOrder = [
+                                'urgent' => 0,
+                                'high' => 1,
+                                'medium' => 2,
+                                'normal' => 3,
+                                'low' => 4,
+                            ];
+                            $eventsForDay = $eventsByDate
+                                ->get($dateKey, collect())
+                                ->sortBy(fn ($event) => $prioritySortOrder[strtolower($event->priority ?? 'normal')] ?? 3)
+                                ->values();
                         @endphp
 
                         <div class="events-mini-calendar-day {{ $day->isToday() ? 'events-mini-calendar-day-today' : '' }}">
                             <div class="events-mini-calendar-date">{{ $day->format('M j') }}</div>
 
-                            <div class="events-week-timeline" style="height: {{ $calendarTimelineHeight }}px;">
-                                @foreach ([0 => '12a', 3 => '3a', 6 => '6a', 9 => '9a', 12 => '12p', 15 => '3p', 18 => '6p', 21 => '9p'] as $hour => $label)
-                                    @php
-                                        $labelTop = (($hour - $calendarStartHour) * 60) * $calendarPixelsPerMinute;
-                                    @endphp
-                                    <span class="events-week-time-label" style="top: {{ $labelTop }}px;">{{ $label }}</span>
-                                @endforeach
+                            <div class="events-week-timeline">
 
                                 @foreach ($eventsForDay as $calendarEvent)
                                     @php
@@ -376,15 +460,20 @@
                                         $calendarEventColor = $userCalendarColors[$calendarUserName] ?? '#6b7280';
                                         $calendarEventIsPast = $eventEnd->lessThan($eventNow) || $day->lt($eventNow->copy()->startOfDay());
                                         $calendarEventIsCompleted = strtolower((string) $calendarEvent->status) === 'completed';
+                                        $calendarEventIsReminder = strtolower($calendarEvent->eventType?->name ?? '') === 'reminder';
+                                        $calendarEventIsAnyTimeTodo = ! $calendarEventIsReminder
+                                            && $eventStart->format('H:i') === '00:00'
+                                            && $calendarEvent->end_datetime
+                                            && in_array($eventEnd->format('H:i'), ['23:58', '23:59'], true);
+                                        $calendarEventShowsAtTop = $calendarEventIsReminder || $calendarEventIsAnyTimeTodo;
                                     @endphp
 
-                                    <div class="events-week-event-line"
-                                         title="{{ $calendarEvent->title }} | {{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}"
-                                         style="top: {{ $eventTop }}px; height: {{ $eventHeight }}px; background-color: {{ $calendarEventIsPast ? '#9ca3af' : $calendarEventColor }};"></div>
-
-                                    <div class="events-week-event-label {{ $calendarEventIsCompleted ? 'todo-completed-text' : '' }}" style="top: {{ $eventTop }}px; {{ $calendarEventIsPast ? 'background:#e5e7eb; color:#374151;' : '' }}">
-                                        {{ $calendarEvent->title }}
-                                        <span>{{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}</span>
+                                    <div class="events-week-reminder-pill {{ $calendarEventIsCompleted ? 'todo-completed-text' : '' }}"
+                                         title="{{ $calendarEvent->title }} | {{ $calendarEvent->priority ?: 'Normal' }} priority"
+                                         style="{{ $calendarEventIsPast ? 'opacity:.65;' : '' }}">
+                                        <span class="events-week-reminder-color-dot" style="background-color:{{ $calendarEventColor }};"></span>
+                                        <span class="events-week-reminder-label">{{ $calendarEvent->title }}</span>
+                                        <span class="events-week-priority-label">{{ $calendarEvent->priority ?: 'Normal' }}</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -417,7 +506,7 @@
             <div class="mb-6">
                 <form id="eventFiltersPanel"
                       method="GET"
-                      action="{{ ($isMyEvents ?? false) ? route('events.mine') : route('events.index') }}"
+                      action="{{ route('events.todos') }}"
                       class="hidden bg-white border rounded-xl shadow-sm p-4">
                     <div class="grid grid-cols-1 {{ ($isMyEvents ?? false) ? 'md:grid-cols-4' : 'md:grid-cols-5' }} gap-4 items-end">
                         <div>
@@ -477,7 +566,7 @@
                                 Apply
                             </button>
 
-                            <a href="{{ ($isMyEvents ?? false) ? route('events.mine') : route('events.index') }}"
+                            <a href="{{ route('events.todos') }}"
                                style="background-color:#e5e7eb; color:#111827; padding:10px 16px; border-radius:6px; font-weight:600; text-decoration:none;">
                                 Clear
                             </a>
@@ -492,19 +581,36 @@
                         $userModalEvents = collect($dateSections)
                             ->flatMap(fn ($days) => collect($days)->flatMap(fn ($dayEvents) => $dayEvents))
                             ->sortBy('start_datetime')
-                            ->map(function ($event) use ($userCalendarColors, $eventTimezone) {
+                            ->map(function ($event) use ($userCalendarColors, $eventTimezone, $eventPrimaryDetail) {
                                 $assignedUserName = $event->assignedUser?->name ?? 'Unassigned';
                                 $eventStartDateTime = \Carbon\Carbon::parse($event->start_datetime, $eventTimezone);
                                 $eventEndDateTime = $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime, $eventTimezone) : null;
+                                $primaryDetail = $eventPrimaryDetail($event);
+                                $primaryDetailValue = $primaryDetail['value'];
+
+                                $isAnyTimeTodo = strtolower($event->eventType?->name ?? '') !== 'reminder'
+                                    && $eventStartDateTime->format('H:i') === '00:00'
+                                    && $eventEndDateTime
+                                    && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true);
+
+                                if (is_array($primaryDetailValue)) {
+                                    $primaryDetailValue = collect($primaryDetailValue)->filter()->join(', ');
+                                }
 
                                 return [
                                     'type' => $event->eventType?->name ?? 'N/A',
+                                    'subtype' => $event->event_subtype,
                                     'title' => $event->title,
+                                    'primary_detail_label' => $primaryDetail['label'],
+                                    'primary_detail_value' => $primaryDetailValue,
+                                    'priority' => $event->priority,
+                                    'location' => $event->location,
+                                    'description' => $event->description,
                                     'status' => $event->status,
                                     'start' => $eventStartDateTime->toIso8601String(),
-                                    'start_display' => $eventStartDateTime->format('g:i A'),
+                                    'start_display' => $isAnyTimeTodo ? 'Any time' : $eventStartDateTime->format('g:i A'),
                                     'end' => $eventEndDateTime ? $eventEndDateTime->toIso8601String() : null,
-                                    'end_display' => $eventEndDateTime ? $eventEndDateTime->format('g:i A') : 'N/A',
+                                    'end_display' => $isAnyTimeTodo ? '' : ($eventEndDateTime ? $eventEndDateTime->format('g:i A') : 'N/A'),
                                     'date_key' => $eventStartDateTime->format('Y-m-d'),
                                     'day_display' => $eventStartDateTime->format('D, M j'),
                                     'color' => $userCalendarColors[$assignedUserName] ?? '#6b7280',
@@ -554,11 +660,26 @@
                                                                     $isCompletedTodo = strtolower((string) $event->status) === 'completed';
                                                                     $isPastEvent = $sectionIsPast || ($eventPastCheckDateTime && $eventPastCheckDateTime->lessThan($eventNow));
                                                                     $eventActionColor = $userCalendarColors[$event->assignedUser?->name ?? 'Unassigned'] ?? '#6b7280';
+                                                                    $primaryDetail = $eventPrimaryDetail($event);
+                                                                    $primaryDetailValue = $primaryDetail['value'];
+
+                                                                    if (is_array($primaryDetailValue)) {
+                                                                        $primaryDetailValue = collect($primaryDetailValue)->filter()->join(', ');
+                                                                    }
+                                                                @endphp
+
+                                                                @php
+                                                                    $eventIsAnyTimeTodo = strtolower($event->eventType?->name ?? '') !== 'reminder'
+                                                                        && $eventStartDateTime
+                                                                        && $eventStartDateTime->format('H:i') === '00:00'
+                                                                        && $eventEndDateTime
+                                                                        && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true);
                                                                 @endphp
 
                                                                 <div class="events-event-card {{ $isPastEvent ? 'events-event-card-past bg-gray-200 border-gray-400' : 'bg-white border-gray-300' }} border p-4 shadow-sm cursor-pointer w-full"
                                                                      style="--event-card-color: {{ $isPastEvent ? '#d1d5db' : '#ffffff' }}; border-radius:8px; {{ $isPastEvent ? 'background-color:#d1d5db !important; color:#374151;' : '' }}"
                                                                      data-type="{{ $event->eventType?->name ?? 'N/A' }}"
+                                                                     data-subtype="{{ $event->event_subtype }}"
                                                                      data-title="{{ $event->title }}"
                                                                      data-description="{{ $event->description }}"
                                                                      data-status="{{ $event->status }}"
@@ -573,34 +694,45 @@
                                                                      onclick="event.stopPropagation(); openEventDetailsFromRow(this)">
                                                                     <div class="flex justify-between gap-3 mb-3 items-start">
                                                                         <div class="flex gap-3 items-start min-w-0 flex-1 pr-2">
-                                                                            <form method="POST" action="{{ route('events.update-status', $event) }}" class="todo-check-form" onclick="event.stopPropagation();">
+                                                                            <form method="POST" action="{{ route('events.mark-done', $event) }}" class="todo-check-form" onclick="event.stopPropagation();">
                                                                                 @csrf
                                                                                 @method('PATCH')
-                                                                                <input type="hidden" name="status" value="{{ $isCompletedTodo ? 'Pending' : 'Completed' }}">
                                                                                 <input type="checkbox"
                                                                                        class="todo-check-input"
-                                                                                       aria-label="Mark {{ $event->title }} as {{ $isCompletedTodo ? 'pending' : 'completed' }}"
+                                                                                       aria-label="Mark {{ $event->title }} as completed"
                                                                                        @checked($isCompletedTodo)
+                                                                                       @disabled($isCompletedTodo)
                                                                                        onchange="this.form.submit()">
                                                                             </form>
 
                                                                             <div class="min-w-0 flex-1">
                                                                                 <p class="events-card-type font-extrabold {{ $isPastEvent ? 'text-gray-500' : 'text-blue-600' }} uppercase tracking-wide mb-1 truncate {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->eventType?->name ?? 'N/A' }}</p>
-                                                                                <h6 class="events-card-title font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-950' }} mt-1 truncate {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->title }}</h6>
+                                                                                <p class="events-card-details truncate {{ $isPastEvent ? 'text-gray-500' : 'text-gray-700' }} {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">
+                                                                                    <span class="font-semibold text-gray-700">Sub-type:</span> {{ $event->event_subtype ?: 'N/A' }}
+                                                                                </p>
+                                                                                <h6 class="events-card-title font-semibold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-950' }} mt-2 mb-4 truncate {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->title }}</h6>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="text-right shrink-0 leading-tight" style="min-width:62px;">
-                                                                            <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Start</p>
-                                                                            <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">{{ \Carbon\Carbon::parse($event->start_datetime, $eventTimezone)->format('g:i A') }}</p>
+                                                                        <div class="text-right shrink-0 leading-tight" style="min-width:74px;">
+                                                                            @if ($eventIsAnyTimeTodo)
+                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Time</p>
+                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">Any time</p>
+                                                                            @else
+                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Start</p>
+                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">{{ \Carbon\Carbon::parse($event->start_datetime, $eventTimezone)->format('g:i A') }}</p>
 
-                                                                            <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide mt-2">End</p>
-                                                                            <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">
-                                                                                {{ $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime, $eventTimezone)->format('g:i A') : 'N/A' }}
-                                                                            </p>
+                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide mt-2">End</p>
+                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">
+                                                                                    {{ $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime, $eventTimezone)->format('g:i A') : 'N/A' }}
+                                                                                </p>
+                                                                            @endif
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="events-card-details grid grid-cols-1 gap-1 {{ $isPastEvent ? 'text-gray-500' : 'text-gray-600' }} {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">
+                                                                        @if (!empty($primaryDetail['label']) && !empty($primaryDetailValue) && $primaryDetailValue !== 'N/A')
+                                                                            <p class="truncate"><span class="font-semibold text-gray-700">{{ $primaryDetail['label'] }}:</span> {{ $primaryDetailValue }}</p>
+                                                                        @endif
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Status:</span> {{ $event->status }}</p>
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Priority:</span> {{ $event->priority }}</p>
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Location:</span> {{ $event->location ?: 'No location provided' }}</p>
@@ -887,9 +1019,14 @@
                     eventBlock.style.setProperty('--event-color', eventItem.color || '#6b7280');
                     eventBlock.innerHTML = `
                         <p style="font-size:10px; font-weight:900; color:#2563eb; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px;">${eventItem.type || 'N/A'}</p>
-                        <h3 style="font-size:14px; font-weight:900; color:#111827; line-height:1.2; margin-bottom:7px;">${eventItem.title || 'Untitled To-Do'}</h3>
-                        <p style="font-size:12px; font-weight:800; color:#374151; margin-bottom:4px;">${eventItem.start_display || 'N/A'} - ${eventItem.end_display || 'N/A'}</p>
-                        <p style="font-size:12px; font-weight:700; color:#6b7280;"><span style="color:#374151;">Status:</span> ${eventItem.status || 'N/A'}</p>
+                        <p style="font-size:12px; font-weight:700; color:#374151; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Sub-type:</span> ${eventItem.subtype || 'N/A'}</p>
+                        <h3 style="font-size:16px; font-weight:600; color:#111827; line-height:1.25; margin-bottom:12px;">${eventItem.title || 'Untitled To-Do'}</h3>
+                        ${eventItem.primary_detail_label && eventItem.primary_detail_value && eventItem.primary_detail_value !== 'N/A' ? `<p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">${eventItem.primary_detail_label}:</span> ${eventItem.primary_detail_value}</p>` : ''}
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Time:</span> ${eventItem.start_display === 'Any time' ? 'Any time' : `${eventItem.start_display || 'N/A'} - ${eventItem.end_display || 'N/A'}`}</p>
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Status:</span> ${eventItem.status || 'N/A'}</p>
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Priority:</span> ${eventItem.priority || 'N/A'}</p>
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Location:</span> ${eventItem.location || 'No location provided'}</p>
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Description:</span> ${eventItem.description || 'No description provided'}</p>
                     `;
                     dayColumn.appendChild(eventBlock);
                 });
@@ -917,6 +1054,7 @@
         function openEventDetailsFromRow(element) {
             openEventDetails({
                 type: element.dataset.type,
+                subtype: element.dataset.subtype,
                 title: element.dataset.title,
                 description: element.dataset.description,
                 status: element.dataset.status,
@@ -931,12 +1069,12 @@
         }
 
         function openEventDetails(eventData) {
-            document.getElementById('detailType').textContent = eventData.type || 'N/A';
+            document.getElementById('detailType').textContent = eventData.subtype ? `${eventData.type || 'N/A'} - ${eventData.subtype}` : (eventData.type || 'N/A');
             document.getElementById('detailTitle').textContent = eventData.title || 'Untitled To-Do';
             document.getElementById('detailDescription').textContent = eventData.description || 'No description provided.';
             document.getElementById('detailStatus').textContent = eventData.status || 'N/A';
             document.getElementById('detailPriority').textContent = eventData.priority || 'N/A';
-            document.getElementById('detailStart').textContent = eventData.start || 'N/A';
+            document.getElementById('detailStart').textContent = eventData.start && String(eventData.start).includes('00:00:00') && eventData.type !== 'Reminder' ? 'Any time' : (eventData.start || 'N/A');
             document.getElementById('detailAssignedTo').textContent = eventData.assignedTo || 'Unassigned';
             document.getElementById('detailLocation').textContent = eventData.location || 'No location provided.';
             document.getElementById('detailEditButton').setAttribute('href', eventData.editUrl);

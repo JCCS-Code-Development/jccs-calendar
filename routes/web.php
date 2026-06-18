@@ -38,9 +38,18 @@ Route::patch('/all-events/{event}/status', [EventController::class, 'updateStatu
     ->middleware(['auth'])
     ->name('events.update-status');
 
+Route::patch('/all-events/{event}/mark-done', [EventController::class, 'markDone'])
+    ->middleware(['auth'])
+    ->name('events.mark-done');
+
+
 Route::get('/my-events', [EventController::class, 'myEvents'])
     ->middleware(['auth'])
     ->name('events.mine');
+
+Route::get('/to-do-list', [EventController::class, 'todos'])
+    ->middleware(['auth'])
+    ->name('events.todos');
 
 Route::get('/calendar-view', [CalendarController::class, 'index'])
     ->middleware(['auth'])

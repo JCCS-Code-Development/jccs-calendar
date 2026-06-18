@@ -26,6 +26,13 @@ class StoreEventRequest extends FormRequest
                 'end_datetime' => null,
             ]);
         }
+
+        if (strtolower($eventType?->name ?? '') !== 'reminder' && $this->boolean('is_all_day_todo') && $this->filled('all_day_date')) {
+            $this->merge([
+                'start_datetime' => $this->input('all_day_date') . ' 00:00:00',
+                'end_datetime' => $this->input('all_day_date') . ' 23:59:00',
+            ]);
+        }
     }
 
     /**
@@ -62,6 +69,8 @@ class StoreEventRequest extends FormRequest
             'details.payment_method' => ['nullable', 'string', 'max:255'],
             'details.payment_status' => ['nullable', 'string', 'max:255'],
             'reminder_date' => ['nullable', 'date'],
+            'is_all_day_todo' => ['nullable', 'boolean'],
+            'all_day_date' => ['nullable', 'date'],
             'start_datetime' => ['required', 'date'],
             'end_datetime' => ['nullable', 'date', 'after_or_equal:start_datetime'],
             'status' => ['required', 'string'],

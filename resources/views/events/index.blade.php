@@ -38,41 +38,58 @@
 
         .events-event-card {
             transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+            overflow: hidden;
         }
 
         .events-event-card .events-card-type {
-            font-size: 14px !important;
+            font-size: clamp(10px, 1.1vw, 14px) !important;
             line-height: 1.1 !important;
         }
 
         .events-event-card .events-card-title {
-            font-size: 15px !important;
-            line-height: 1.15 !important;
+            font-size: clamp(12px, 1.35vw, 17px) !important;
+            line-height: 1.18 !important;
         }
 
         .events-event-card .events-card-time-label {
-            font-size: 16px !important;
+            font-size: clamp(9px, 1vw, 16px) !important;
             line-height: 1.05 !important;
         }
 
         .events-event-card .events-card-time-value {
-            font-size: 14px !important;
+            font-size: clamp(10px, 1.05vw, 14px) !important;
             line-height: 1.1 !important;
         }
 
         .events-event-card .events-card-details {
-            font-size: 14px !important;
-            line-height: 1.3 !important;
+            font-size: clamp(10px, 1.05vw, 14px) !important;
+            line-height: 1.28 !important;
         }
 
         .events-event-card .events-card-description {
-            font-size: 13px !important;
-            line-height: 1.3 !important;
+            font-size: clamp(10px, 1vw, 13px) !important;
+            line-height: 1.28 !important;
         }
 
         .events-event-card .events-card-details span {
-            font-size: 14px !important;
-            line-height: 1.3 !important;
+            font-size: clamp(10px, 1.05vw, 14px) !important;
+            line-height: 1.28 !important;
+        }
+
+        .events-event-card .text-right.shrink-0 {
+            min-width: clamp(52px, 6vw, 74px) !important;
+            max-width: clamp(52px, 6vw, 74px) !important;
+            overflow: hidden;
+        }
+
+        .events-event-card .flex.justify-between {
+            gap: clamp(8px, 1vw, 12px) !important;
+        }
+
+        .events-event-card button,
+        .events-event-card a {
+            font-size: clamp(11px, 1vw, 13px) !important;
+            padding: clamp(7px, .9vw, 10px) clamp(12px, 1.2vw, 16px) !important;
         }
 
         .events-event-card.events-event-card-past {
@@ -84,6 +101,23 @@
 
         .events-event-card.events-event-card-past * {
             color: #374151 !important;
+        }
+
+        .events-event-card.events-event-completed p,
+        .events-event-card.events-event-completed h6,
+        .events-event-card.events-event-completed span,
+        .events-week-event-label.events-event-completed .events-week-event-title-text,
+        .events-week-event-label.events-event-completed .events-week-event-time-text,
+        .events-week-reminder-pill.events-event-completed .events-week-reminder-label,
+        .user-events-modal-event.events-event-completed p,
+        .user-events-modal-event.events-event-completed h3,
+        .user-events-modal-event.events-event-completed span {
+            text-decoration: line-through !important;
+        }
+
+        .events-event-completed,
+        .events-event-completed * {
+            text-decoration-color: currentColor;
         }
 
         .events-user-card-clickable:hover .events-event-card {
@@ -193,7 +227,7 @@
 
         .events-week-event-line {
             position: absolute;
-            left: 42px;
+            left: 10px;
             width: 8px;
             border-radius: 999px;
             box-shadow: 0 1px 4px rgba(17, 24, 39, .20);
@@ -201,7 +235,7 @@
 
         .events-week-event-label {
             position: absolute;
-            left: 58px;
+            left: 26px;
             right: 4px;
             transform: translateY(-2px);
             font-size: 10px;
@@ -222,6 +256,46 @@
             font-weight: 700;
             color: #6b7280;
             margin-top: 1px;
+        }
+
+        .events-week-reminder-pill {
+            position: absolute;
+            left: 10px;
+            transform: translateY(-2px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: auto;
+            max-width: calc(100% - 20px);
+            min-height: 32px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .18);
+            font-size: 10px;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .events-week-reminder-color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            display: inline-block;
+            flex: none;
+        }
+
+        .events-week-reminder-label {
+            display: inline-block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 800;
+            color: #111827;
         }
 
         .user-events-modal-day-grid {
@@ -288,6 +362,59 @@
 
                 $eventsByDate = $events
                     ->groupBy(fn ($event) => $toEventDateTime($event->start_datetime)->format('Y-m-d'));
+
+                $eventPrimaryDetail = function ($event) {
+                    $details = is_array($event->details ?? null) ? $event->details : [];
+                    $eventTypeName = strtolower($event->eventType?->name ?? '');
+
+                    if ($eventTypeName === 'supplies') {
+                        $items = collect($details['items'] ?? [])
+                            ->map(function ($item) {
+                                $name = $item['name'] ?? null;
+                                $quantity = $item['quantity'] ?? null;
+
+                                if (! $name && ! $quantity) {
+                                    return null;
+                                }
+
+                                return trim(($name ?: 'Unnamed item') . ($quantity ? ' #' . $quantity : ''));
+                            })
+                            ->filter()
+                            ->join(', ');
+
+                        return ['label' => 'Item', 'value' => $items ?: 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'communication') {
+                        return ['label' => 'Person', 'value' => $details['person'] ?? $details['company'] ?? $details['participants'] ?? $event->assignedUser?->name ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'meeting') {
+                        return ['label' => 'Participants', 'value' => $details['participants'] ?? $details['person'] ?? $details['company'] ?? $event->assignedUser?->name ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'logistics') {
+                        return ['label' => 'Worker(s)', 'value' => $details['workers'] ?? $details['team_workers'] ?? $event->assignedUser?->name ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'site visit') {
+                        return ['label' => 'Company / Project', 'value' => $details['company'] ?? $details['project'] ?? $details['person'] ?? $event->assignedUser?->name ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'estimate/invoice') {
+                        return ['label' => 'Estimate / Invoice', 'value' => $details['invoice_or_estimate'] ?? $details['number'] ?? $details['name'] ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'payment') {
+                        return ['label' => 'Payment', 'value' => $details['payment_name'] ?? $details['payment_document_number'] ?? $details['payment_amount'] ?? 'N/A'];
+                    }
+
+                    if ($eventTypeName === 'reminder') {
+                        return ['label' => null, 'value' => null];
+                    }
+
+                    return ['label' => null, 'value' => null];
+                };
             @endphp
 
             <div class="events-mini-calendar">
@@ -346,23 +473,38 @@
                                         $clampedEnd = $eventEnd->gt($dayEnd) ? $dayEnd : $eventEnd;
 
                                         $startMinutes = max(0, min($calendarTotalMinutes, $dayStart->diffInMinutes($clampedStart, false)));
-                                        $endMinutes = max($startMinutes + 15, min($calendarTotalMinutes, $dayStart->diffInMinutes($clampedEnd, false)));
-                                        $durationMinutes = max(15, $endMinutes - $startMinutes);
+                                        $endMinutes = max($startMinutes + 1, min($calendarTotalMinutes, $dayStart->diffInMinutes($clampedEnd, false)));
+                                        $durationMinutes = max(1, $endMinutes - $startMinutes);
                                         $eventTop = $startMinutes * $calendarPixelsPerMinute;
-                                        $eventHeight = max(12, $durationMinutes * $calendarPixelsPerMinute);
+                                        $eventHeight = max(1, $durationMinutes * $calendarPixelsPerMinute);
                                         $calendarUserName = $calendarEvent->assignedUser?->name ?? 'Unassigned';
                                         $calendarEventColor = $userCalendarColors[$calendarUserName] ?? '#6b7280';
                                         $calendarEventIsPast = $eventEnd->lessThan($eventNow) || $day->lt($eventNow->copy()->startOfDay());
+                                        $calendarEventIsCompleted = strtolower($calendarEvent->status ?? '') === 'completed';
+                                        $calendarEventIsReminder = strtolower($calendarEvent->eventType?->name ?? '') === 'reminder';
+                                        $calendarEventIsAnyTimeTodo = ! $calendarEventIsReminder
+                                            && $eventStart->format('H:i') === '00:00'
+                                            && $calendarEvent->end_datetime
+                                            && in_array($eventEnd->format('H:i'), ['23:58', '23:59'], true);
+                                        $calendarEventShowsAtTop = $calendarEventIsReminder || $calendarEventIsAnyTimeTodo;
                                     @endphp
 
-                                    <div class="events-week-event-line"
-                                         title="{{ $calendarEvent->title }} | {{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}"
-                                         style="top: {{ $eventTop }}px; height: {{ $eventHeight }}px; background-color: {{ $calendarEventIsPast ? '#9ca3af' : $calendarEventColor }};"></div>
+                                    @if ($calendarEventShowsAtTop)
+                                        <div class="events-week-reminder-pill {{ $calendarEventIsCompleted ? 'events-event-completed' : '' }}"
+                                             style="top: {{ $eventTop }}px; {{ $calendarEventIsPast ? 'opacity:.65;' : '' }}">
+                                            <span class="events-week-reminder-color-dot" style="background-color:{{ $calendarEventColor }};"></span>
+                                            <span class="events-week-reminder-label">{{ $calendarEvent->title }}</span>
+                                        </div>
+                                    @else
+                                        <div class="events-week-event-line"
+                                             title="{{ $calendarEvent->title }} | {{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}"
+                                             style="top: {{ $eventTop }}px; height: {{ $eventHeight }}px; background-color: {{ $calendarEventColor }}; {{ $calendarEventIsPast ? 'opacity:.65;' : '' }}"></div>
 
-                                    <div class="events-week-event-label" style="top: {{ $eventTop }}px; {{ $calendarEventIsPast ? 'background:#e5e7eb; color:#374151;' : '' }}">
-                                        {{ $calendarEvent->title }}
-                                        <span>{{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}</span>
-                                    </div>
+                                        <div class="events-week-event-label {{ $calendarEventIsCompleted ? 'events-event-completed' : '' }}" style="top: {{ $eventTop }}px; {{ $calendarEventIsPast ? 'background:#e5e7eb; color:#374151;' : '' }}">
+                                            <span class="events-week-event-title-text">{{ $calendarEvent->title }}</span>
+                                            <span class="events-week-event-time-text">{{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}</span>
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -469,15 +611,29 @@
                         $userModalEvents = collect($dateSections)
                             ->flatMap(fn ($days) => collect($days)->flatMap(fn ($dayEvents) => $dayEvents))
                             ->sortBy('start_datetime')
-                            ->map(function ($event) use ($userCalendarColors, $eventTimezone) {
+                            ->map(function ($event) use ($userCalendarColors, $eventTimezone, $eventPrimaryDetail) {
                                 $assignedUserName = $event->assignedUser?->name ?? 'Unassigned';
                                 $eventStartDateTime = \Carbon\Carbon::parse($event->start_datetime, $eventTimezone);
                                 $eventEndDateTime = $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime, $eventTimezone) : null;
 
+                                $primaryDetail = $eventPrimaryDetail($event);
+                                $primaryDetailValue = $primaryDetail['value'];
+
+                                if (is_array($primaryDetailValue)) {
+                                    $primaryDetailValue = collect($primaryDetailValue)->filter()->join(', ');
+                                }
+
                                 return [
                                     'type' => $event->eventType?->name ?? 'N/A',
+                                    'subtype' => $event->event_subtype,
                                     'title' => $event->title,
+                                    'primary_detail_label' => $primaryDetail['label'],
+                                    'primary_detail_value' => $primaryDetailValue,
+                                    'priority' => $event->priority,
+                                    'location' => $event->location,
+                                    'description' => $event->description,
                                     'status' => $event->status,
+                                    'is_completed' => strtolower($event->status ?? '') === 'completed',
                                     'start' => $eventStartDateTime->toIso8601String(),
                                     'start_display' => $eventStartDateTime->format('g:i A'),
                                     'end' => $eventEndDateTime ? $eventEndDateTime->toIso8601String() : null,
@@ -530,9 +686,21 @@
                                                                     $sectionIsPast = str_contains(strtolower($sectionTitle), 'past');
                                                                     $isPastEvent = $sectionIsPast || ($eventPastCheckDateTime && $eventPastCheckDateTime->lessThan($eventNow));
                                                                     $eventActionColor = $userCalendarColors[$event->assignedUser?->name ?? 'Unassigned'] ?? '#6b7280';
+                                                                    $eventIsCompleted = strtolower($event->status ?? '') === 'completed';
+                                                                    $eventIsAnyTimeTodo = $eventStartDateTime
+                                                                        && ! (strtolower($event->eventType?->name ?? '') === 'reminder')
+                                                                        && $eventStartDateTime->format('H:i') === '00:00'
+                                                                        && $eventEndDateTime
+                                                                        && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true);
+                                                                    $primaryDetail = $eventPrimaryDetail($event);
+                                                                    $primaryDetailValue = $primaryDetail['value'];
+
+                                                                    if (is_array($primaryDetailValue)) {
+                                                                        $primaryDetailValue = collect($primaryDetailValue)->filter()->join(', ');
+                                                                    }
                                                                 @endphp
 
-                                                                <div class="events-event-card {{ $isPastEvent ? 'events-event-card-past bg-gray-200 border-gray-400' : 'bg-white border-gray-300' }} border p-4 shadow-sm cursor-pointer w-full"
+                                                                <div class="events-event-card {{ $eventIsCompleted ? 'events-event-completed' : '' }} {{ $isPastEvent ? 'events-event-card-past bg-gray-200 border-gray-400' : 'bg-white border-gray-300' }} border p-4 shadow-sm cursor-pointer w-full"
                                                                      style="--event-card-color: {{ $isPastEvent ? '#d1d5db' : '#ffffff' }}; border-radius:8px; {{ $isPastEvent ? 'background-color:#d1d5db !important; color:#374151;' : '' }}"
                                                                      data-type="{{ $event->eventType?->name ?? 'N/A' }}"
                                                                      data-subtype="{{ $event->event_subtype ?? '' }}"
@@ -548,37 +716,43 @@
                                                                      data-event-color="{{ $eventActionColor }}"
                                                                      data-edit-url="{{ route('events.edit', $event) }}"
                                                                      data-delete-url="{{ route('events.destroy', $event) }}"
+                                                                     data-mark-done-url="{{ route('events.mark-done', $event) }}"
                                                                      onclick="event.stopPropagation(); openEventDetailsFromRow(this)">
                                                                     <div class="flex justify-between gap-3 mb-3 items-start">
                                                                         <div class="min-w-0 flex-1 pr-2">
                                                                             <p class="events-card-type font-extrabold {{ $isPastEvent ? 'text-gray-500' : 'text-blue-600' }} uppercase tracking-wide mb-1 truncate">
-                                                                                {{ $event->eventType?->name ?? 'N/A' }}{{ $event->event_subtype ? ' - ' . $event->event_subtype : '' }}
+                                                                                {{ $event->eventType?->name ?? 'N/A' }}
                                                                             </p>
-                                                                            <h6 class="events-card-title font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-950' }} mt-1 truncate">{{ $event->title }}</h6>
+                                                                            <p class="events-card-details truncate {{ $isPastEvent ? 'text-gray-500' : 'text-gray-700' }}">
+                                                                                <span class="font-semibold text-gray-700">Sub-type:</span> {{ $event->event_subtype ?: 'N/A' }}
+                                                                            </p>
+                                                                            <h6 class="events-card-title font-semibold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-950' }} mt-2 mb-4 truncate">{{ $event->title }}</h6>
                                                                         </div>
-                                                                        <div class="text-right shrink-0 leading-tight" style="min-width:62px;">
-                                                                            <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Start</p>
-                                                                            <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">{{ \Carbon\Carbon::parse($event->start_datetime, $eventTimezone)->format('g:i A') }}</p>
+                                                                        <div class="text-right shrink-0 leading-tight" style="min-width:clamp(52px, 6vw, 74px);">
+                                                                            @if ($eventIsAnyTimeTodo)
+                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Time</p>
+                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">Any time</p>
+                                                                            @else
+                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Start</p>
+                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">{{ \Carbon\Carbon::parse($event->start_datetime, $eventTimezone)->format('g:i A') }}</p>
 
-                                                                            <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide mt-2">End</p>
-                                                                            <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">
-                                                                                {{ $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime, $eventTimezone)->format('g:i A') : 'N/A' }}
-                                                                            </p>
+                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide mt-2">End</p>
+                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">
+                                                                                    {{ $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime, $eventTimezone)->format('g:i A') : 'N/A' }}
+                                                                                </p>
+                                                                            @endif
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="events-card-details grid grid-cols-1 gap-1 {{ $isPastEvent ? 'text-gray-500' : 'text-gray-600' }}">
+                                                                        @if (!empty($primaryDetail['label']) && !empty($primaryDetailValue) && $primaryDetailValue !== 'N/A')
+                                                                            <p class="truncate"><span class="font-semibold text-gray-700">{{ $primaryDetail['label'] }}:</span> {{ $primaryDetailValue }}</p>
+                                                                        @endif
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Status:</span> {{ $event->status }}</p>
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Priority:</span> {{ $event->priority }}</p>
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Location:</span> {{ $event->location ?: 'No location provided' }}</p>
-                                                                        @if ($event->event_subtype)
-                                                                            <p class="truncate"><span class="font-semibold text-gray-700">Sub-Type:</span> {{ $event->event_subtype }}</p>
-                                                                        @endif
+                                                                        <p class="truncate"><span class="font-semibold text-gray-700">Description:</span> {{ $event->description ?: 'No description provided' }}</p>
                                                                     </div>
-
-                                                                    @if ($event->description)
-                                                                        <p class="events-card-description {{ $isPastEvent ? 'text-gray-500' : 'text-gray-700' }} mt-2 line-clamp-2">{{ $event->description }}</p>
-                                                                    @endif
 
                                                                     <div class="flex justify-center items-center gap-2 mt-3 border-t border-gray-300" style="padding-top:16px; padding-bottom:0;">
                                                                         <a href="{{ route('events.edit', $event) }}"
@@ -696,6 +870,15 @@
                         style="background:#e5e7eb; color:#111827; padding:9px 14px; border-radius:6px; font-weight:600;">
                     Back
                 </button>
+
+                <form id="detailMarkDoneForm" method="POST" action="#" style="display:inline-flex;">
+                    @csrf
+                    @method('PATCH')
+                    <button id="detailMarkDoneButton" type="submit"
+                            style="background-color:#dcfce7; color:#166534; padding:10px 16px; border-radius:8px; font-weight:700; border:1px solid #bbf7d0; box-shadow:0 2px 6px rgba(22,101,52,.08); font-size:13px; line-height:1; display:inline-flex; align-items:center; justify-content:center;">
+                        Mark Done
+                    </button>
+                </form>
 
                 <a id="detailEditButton" href="#"
                    style="background-color:#fef3c7; color:#92400e; padding:10px 16px; border-radius:8px; font-weight:700; border:1px solid #fde68a; box-shadow:0 2px 6px rgba(146,64,14,.08); text-decoration:none; font-size:13px; line-height:1; display:inline-flex; align-items:center; justify-content:center;">
@@ -858,13 +1041,17 @@
 
                 dayEvents.forEach(function (eventItem) {
                     const eventBlock = document.createElement('div');
-                    eventBlock.className = 'user-events-modal-event';
+                    eventBlock.className = `user-events-modal-event ${eventItem.is_completed ? 'events-event-completed' : ''}`;
                     eventBlock.style.setProperty('--event-color', eventItem.color || '#6b7280');
                     eventBlock.innerHTML = `
                         <p style="font-size:10px; font-weight:900; color:#2563eb; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px;">${eventItem.type || 'N/A'}</p>
-                        <h3 style="font-size:14px; font-weight:900; color:#111827; line-height:1.2; margin-bottom:7px;">${eventItem.title || 'Untitled Event'}</h3>
-                        <p style="font-size:12px; font-weight:800; color:#374151; margin-bottom:4px;">${eventItem.start_display || 'N/A'} - ${eventItem.end_display || 'N/A'}</p>
-                        <p style="font-size:12px; font-weight:700; color:#6b7280;"><span style="color:#374151;">Status:</span> ${eventItem.status || 'N/A'}</p>
+                        <p style="font-size:12px; font-weight:700; color:#374151; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Sub-type:</span> ${eventItem.subtype || 'N/A'}</p>
+                        <h3 class="user-events-modal-event-title" style="font-size:16px; font-weight:600; color:#111827; line-height:1.25; margin-bottom:12px;">${eventItem.title || 'Untitled Event'}</h3>
+                        ${eventItem.primary_detail_label && eventItem.primary_detail_value && eventItem.primary_detail_value !== 'N/A' ? `<p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">${eventItem.primary_detail_label}:</span> ${eventItem.primary_detail_value}</p>` : ''}
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Status:</span> ${eventItem.status || 'N/A'}</p>
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Priority:</span> ${eventItem.priority || 'N/A'}</p>
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Location:</span> ${eventItem.location || 'No location provided'}</p>
+                        <p style="font-size:12px; font-weight:700; color:#6b7280; margin-bottom:4px;"><span style="color:#374151; font-weight:800;">Description:</span> ${eventItem.description || 'No description provided'}</p>
                     `;
                     dayColumn.appendChild(eventBlock);
                 });
@@ -903,6 +1090,7 @@
                 location: element.dataset.location,
                 editUrl: element.dataset.editUrl,
                 deleteUrl: element.dataset.deleteUrl,
+                markDoneUrl: element.dataset.markDoneUrl,
                 eventColor: element.dataset.eventColor,
             });
         }
@@ -1014,6 +1202,16 @@
             document.getElementById('detailLocation').textContent = eventData.location || 'No location provided.';
             renderEventExtraDetails(eventData.details || {});
             document.getElementById('detailEditButton').setAttribute('href', eventData.editUrl);
+            const markDoneForm = document.getElementById('detailMarkDoneForm');
+            const markDoneButton = document.getElementById('detailMarkDoneButton');
+            const isCompleted = (eventData.status || '').toLowerCase() === 'completed';
+
+            markDoneForm.setAttribute('action', eventData.markDoneUrl || '#');
+            markDoneButton.disabled = isCompleted;
+            markDoneButton.textContent = isCompleted ? 'Done' : 'Mark Done';
+            markDoneButton.style.opacity = isCompleted ? '.6' : '1';
+            markDoneButton.style.cursor = isCompleted ? 'not-allowed' : 'pointer';
+
             const detailDeleteButton = document.getElementById('detailDeleteButton');
             detailDeleteButton.onclick = function () {
                 closeEventDetails();

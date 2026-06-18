@@ -1,13 +1,14 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreEventRequest;
+use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\EventType;
 use App\Models\User;
-use App\Http\Requests\StoreEventRequest;
-use App\Http\Requests\UpdateEventRequest;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
@@ -65,10 +66,46 @@ class EventController extends Controller
         ]);
     }
 
+    public function todos(Request $request)
+    {
+        abort_unless(auth()->user()?->canViewAllEvents() || auth()->user()?->canManageEvents(), 403);
+
+        $selectedDateRange = $request->date_range;
+        $canViewTodoEvents = auth()->user()?->canViewAllEvents() || auth()->user()?->canManageEvents();
+
+        $query = Event::with(['eventType', 'assignedUser'])
+            ->when($request->filled('event_type_id'), fn ($q) => $q->where('event_type_id', $request->event_type_id))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->when(! $canViewTodoEvents, fn ($q) => $q->where('assigned_user_id', auth()->id()))
+            ->when($request->filled('assigned_user_id') && $canViewTodoEvents, fn ($q) => $q->where('assigned_user_id', $request->assigned_user_id));
+
+        if ($selectedDateRange) {
+            $this->applyDateRangeFilter($query, $selectedDateRange);
+        }
+
+        $events = $query->orderBy('start_datetime')->get();
+
+
+        return view('todos.index', [
+            'events' => $events,
+            'eventGroups' => $this->groupEventsByUserAndDate($events, $selectedDateRange),
+            'userColors' => $this->buildUserColorMap($events),
+            'userCalendarColors' => $this->buildUserCalendarColorMap(),
+            'eventTypes' => EventType::orderBy('name')->get(),
+            'users' => User::orderBy('name')->get(),
+            'selectedEventType' => $request->event_type_id,
+            'selectedStatus' => $request->status,
+            'selectedAssignedUser' => $request->assigned_user_id,
+            'selectedDateRange' => $selectedDateRange,
+            'isMyEvents' => false,
+        ]);
+    }
+
     private function applyDateRangeFilter($query, ?string $dateRange): void
     {
         $today = Carbon::today();
         $tomorrow = $today->copy()->addDay();
+        $startOfWeek = $today->copy()->startOfWeek();
         $endOfWeek = $today->copy()->endOfWeek();
         $endOfMonth = $today->copy()->endOfMonth();
 
@@ -85,8 +122,8 @@ class EventController extends Controller
                 $endOfMonth,
             ]),
             'rest' => $query->where('start_datetime', '>', $endOfMonth),
-            'today_forward' => $query->where('start_datetime', '>=', $today),
-            default => $query->where('start_datetime', '>=', $today),
+            'today_forward' => $query->where('start_datetime', '>=', $startOfWeek),
+            default => $query->where('start_datetime', '>=', $startOfWeek),
         };
     }
 
@@ -110,10 +147,19 @@ class EventController extends Controller
     {
         $today = Carbon::today();
         $tomorrow = $today->copy()->addDay();
+        $startOfWeek = $today->copy()->startOfWeek();
         $endOfWeek = $today->copy()->endOfWeek();
         $endOfMonth = $today->copy()->endOfMonth();
 
         return [
+            'Earlier This Week' => $this->groupEventsByDay(
+                $events->filter(function ($event) use ($startOfWeek, $today) {
+                    $eventDate = Carbon::parse($event->start_datetime);
+
+                    return $eventDate->greaterThanOrEqualTo($startOfWeek)
+                        && $eventDate->lessThan($today);
+                })
+            ),
             'Today' => $this->groupEventsByDay(
                 $events->filter(fn ($event) => Carbon::parse($event->start_datetime)->isSameDay($today))
             ),
@@ -123,6 +169,7 @@ class EventController extends Controller
             'This Week' => $this->groupEventsByDay(
                 $events->filter(function ($event) use ($tomorrow, $endOfWeek) {
                     $eventDate = Carbon::parse($event->start_datetime);
+
                     return $eventDate->greaterThan($tomorrow->copy()->endOfDay())
                         && $eventDate->lessThanOrEqualTo($endOfWeek);
                 })
@@ -130,6 +177,7 @@ class EventController extends Controller
             'This Month' => $this->groupEventsByDay(
                 $events->filter(function ($event) use ($endOfWeek, $endOfMonth) {
                     $eventDate = Carbon::parse($event->start_datetime);
+
                     return $eventDate->greaterThan($endOfWeek)
                         && $eventDate->lessThanOrEqualTo($endOfMonth);
                 })
@@ -156,7 +204,7 @@ class EventController extends Controller
             'this_week' => 'This Week',
             'this_month' => 'This Month',
             'rest' => 'Rest',
-            'today_forward' => 'Today Forward',
+            'today_forward' => 'Current Week Forward',
             default => 'Events',
         };
     }
@@ -276,7 +324,7 @@ class EventController extends Controller
         abort_unless(auth()->user()?->canManageEvents(), 403);
 
         $validated = $request->validated();
-        unset($validated['reminder_date']);
+        unset($validated['reminder_date'], $validated['is_all_day_todo'], $validated['all_day_date']);
 
         $validated = $this->normalizeEventDetails($validated);
         $validated = $this->normalizeEventDateTimes($validated);
@@ -305,7 +353,7 @@ class EventController extends Controller
         abort_unless(auth()->user()?->canManageEvents(), 403);
 
         $validated = $request->validated();
-        unset($validated['reminder_date']);
+        unset($validated['reminder_date'], $validated['is_all_day_todo'], $validated['all_day_date']);
 
         $validated = $this->normalizeEventDetails($validated);
         $validated = $this->normalizeEventDateTimes($validated);
@@ -313,6 +361,17 @@ class EventController extends Controller
         $event->update($validated);
 
         return redirect()->route('events.index');
+    }
+
+    public function markDone(Event $event)
+    {
+        abort_unless(auth()->user()?->canManageEvents(), 403);
+
+        $event->update([
+            'status' => 'Completed',
+        ]);
+
+        return back();
     }
 
     private function normalizeEventDetails(array $validated): array
