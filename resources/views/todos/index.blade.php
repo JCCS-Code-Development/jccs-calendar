@@ -26,6 +26,73 @@
             align-items: start;
         }
 
+        .events-user-list-view {
+            grid-template-columns: 1fr !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable {
+            min-height: auto !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable > .px-5 {
+            padding-bottom: 24px !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .bg-white\/85 {
+            min-height: auto !important;
+            margin-bottom: 12px !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .p-4.space-y-3 {
+            padding: 10px 14px !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-event-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-event-card > .flex.justify-between {
+            margin-bottom: 0 !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-card-title {
+            margin: 2px 0 0 0 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-card-details {
+            display: block !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-card-description {
+            display: none !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-event-card > .events-card-details {
+            min-width: 0;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-event-card > .flex.justify-center {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            border-top: 0 !important;
+            justify-content: flex-end !important;
+        }
+
+        @media (max-width: 900px) {
+            .events-user-list-view .events-user-card-clickable .events-event-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .events-user-card-clickable {
             transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
         }
@@ -144,6 +211,57 @@
             background: linear-gradient(to right, #ffffff, #f9fafb);
         }
 
+        .events-week-user-key {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+            max-width: 52%;
+        }
+
+        .events-week-user-key-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #111827;
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(17, 24, 39, .08);
+        }
+
+        .events-week-user-key-link:hover,
+        .events-week-user-key-link-active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .events-week-user-key-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            display: inline-block;
+            flex: none;
+        }
+
+        @media (max-width: 900px) {
+            .events-mini-calendar-header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .events-week-user-key {
+                justify-content: flex-start;
+                max-width: 100%;
+            }
+        }
+
         .events-mini-calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -238,43 +356,62 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            width: 100%;
-            max-width: 100%;
+            width: calc(100% - 16px);
+            max-width: none;
             min-height: 32px;
-            padding: 5px 10px;
-            margin-bottom: 8px;
+            padding: 5px 12px;
+            margin: 0 8px 6px 8px;
             border-radius: 999px;
             background: #ffffff;
             border: 1px solid #d1d5db;
             box-shadow: 0 2px 6px rgba(15, 23, 42, .18);
-            font-size: clamp(9px, .9vw, 11px);
+            font-size: 12px;
             font-weight: 800;
             color: #111827;
             line-height: 1.15;
             white-space: nowrap;
             overflow: hidden;
+            cursor: pointer;
+        }
+
+        .events-week-reminder-pill:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .20);
         }
 
         .events-week-reminder-color-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 999px;
             flex-shrink: 0;
+        }
+
+        .events-week-reminder-check-form {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+            margin: 0;
+        }
+
+        .events-week-reminder-check-input {
+            width: 15px;
+            height: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            accent-color: #2563eb;
         }
 
         .events-week-reminder-label {
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 12px;
+            line-height: 1.15;
         }
 
         .events-week-priority-label {
-            margin-left: auto;
-            flex-shrink: 0;
-            font-size: 8px;
-            font-weight: 900;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: .03em;
+            display: none;
         }
 
         .user-events-modal-day-grid {
@@ -400,6 +537,32 @@
                         </h3>
                         <p class="text-xs font-semibold text-gray-500 mt-1">Each day is a blank priority space. To-do items are stacked by importance, not by exact time.</p>
                     </div>
+
+                    @if (!($isMyEvents ?? false))
+                        <div class="events-week-user-key" aria-label="User color key">
+                            <a href="{{ route('events.todos', array_filter([
+                                'event_type_id' => $selectedEventType,
+                                'status' => $selectedStatus,
+                                'date_range' => $selectedDateRange,
+                            ], fn ($value) => $value !== null && $value !== '')) }}"
+                               class="events-week-user-key-link {{ empty($selectedAssignedUser) ? 'events-week-user-key-link-active' : '' }}">
+                                All
+                            </a>
+
+                            @foreach ($users as $keyUser)
+                                <a href="{{ route('events.todos', array_filter([
+                                    'event_type_id' => $selectedEventType,
+                                    'status' => $selectedStatus,
+                                    'date_range' => $selectedDateRange,
+                                    'assigned_user_id' => $keyUser->id,
+                                ], fn ($value) => $value !== null && $value !== '')) }}"
+                                   class="events-week-user-key-link {{ (string) $selectedAssignedUser === (string) $keyUser->id ? 'events-week-user-key-link-active' : '' }}">
+                                    <span class="events-week-user-key-dot" style="background-color: {{ $userCalendarColors[$keyUser->name] ?? '#6b7280' }};"></span>
+                                    {{ $keyUser->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <div class="events-mini-calendar-grid">
@@ -470,7 +633,36 @@
 
                                     <div class="events-week-reminder-pill {{ $calendarEventIsCompleted ? 'todo-completed-text' : '' }}"
                                          title="{{ $calendarEvent->title }} | {{ $calendarEvent->priority ?: 'Normal' }} priority"
-                                         style="{{ $calendarEventIsPast ? 'opacity:.65;' : '' }}">
+                                         style="{{ $calendarEventIsPast ? 'opacity:.65;' : '' }}; cursor:pointer;"
+                                         data-type="{{ $calendarEvent->eventType?->name ?? 'N/A' }}"
+                                         data-subtype="{{ $calendarEvent->event_subtype }}"
+                                         data-title="{{ $calendarEvent->title }}"
+                                         data-description="{{ $calendarEvent->description }}"
+                                         data-status="{{ $calendarEvent->status }}"
+                                         data-priority="{{ $calendarEvent->priority }}"
+                                         data-start="{{ $calendarEvent->start_datetime }}"
+                                         data-end="{{ $calendarEvent->end_datetime }}"
+                                         data-assigned-to="{{ $calendarEvent->assignedUser?->name ?? 'Unassigned' }}"
+                                         data-location="{{ $calendarEvent->location }}"
+                                         data-event-color="{{ $calendarEventColor }}"
+                                         data-edit-url="{{ route('events.edit', $calendarEvent) }}"
+                                         data-delete-url="{{ route('events.destroy', $calendarEvent) }}"
+                                         data-mark-done-url="{{ route('events.mark-done', $calendarEvent) }}"
+                                         onclick="openEventDetailsFromRow(this)">
+                                        @if ($calendarEventIsReminder)
+                                            <form method="POST"
+                                                  action="{{ route('events.mark-done', $calendarEvent) }}"
+                                                  class="events-week-reminder-check-form"
+                                                  onclick="event.stopPropagation();">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="checkbox"
+                                                       class="events-week-reminder-check-input"
+                                                       title="{{ $calendarEventIsCompleted ? 'Undo done' : 'Mark done' }}"
+                                                       @checked($calendarEventIsCompleted)
+                                                       onchange="this.form.submit();">
+                                            </form>
+                                        @endif
                                         <span class="events-week-reminder-color-dot" style="background-color:{{ $calendarEventColor }};"></span>
                                         <span class="events-week-reminder-label">{{ $calendarEvent->title }}</span>
                                         <span class="events-week-priority-label">{{ $calendarEvent->priority ?: 'Normal' }}</span>
@@ -495,6 +687,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18l-7 8v6l-4 2v-8L3 4z" />
                         </svg>
                         Filter
+                    </button>
+
+                    <button id="eventsViewToggleButton"
+                            type="button"
+                            onclick="toggleEventsUserView()"
+                            style="background-color:#e0f2fe; color:#075985; padding:12px 16px; border-radius:8px; font-weight:700; border:1px solid #7dd3fc; box-shadow:0 8px 18px rgba(14,165,233,.14); display:flex; align-items:center; gap:8px;">
+                        List View
                     </button>
 
                     <a href="{{ route('events.create') }}" style="background-color:#2563eb; color:white; padding:12px 18px; border-radius:8px; font-weight:700; box-shadow:0 8px 18px rgba(37,99,235,.22);">
@@ -574,7 +773,7 @@
                     </div>
                 </form>
             </div>
-            <div class="{{ ($isMyEvents ?? false) ? 'events-user-grid-single' : 'events-user-grid' }}">
+            <div id="eventsUserViewGrid" class="{{ ($isMyEvents ?? false) ? 'events-user-grid-single' : 'events-user-grid' }}">
                 @forelse ($eventGroups as $userName => $dateSections)
                     @php
                         $userEventCount = collect($dateSections)->flatten(2)->count();
@@ -588,10 +787,11 @@
                                 $primaryDetail = $eventPrimaryDetail($event);
                                 $primaryDetailValue = $primaryDetail['value'];
 
-                                $isAnyTimeTodo = strtolower($event->eventType?->name ?? '') !== 'reminder'
-                                    && $eventStartDateTime->format('H:i') === '00:00'
-                                    && $eventEndDateTime
-                                    && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true);
+                                $eventIsReminder = strtolower($event->eventType?->name ?? '') === 'reminder';
+                                $isAnyTimeTodo = $eventIsReminder
+                                    || ($eventStartDateTime->format('H:i') === '00:00'
+                                        && $eventEndDateTime
+                                        && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true));
 
                                 if (is_array($primaryDetailValue)) {
                                     $primaryDetailValue = collect($primaryDetailValue)->filter()->join(', ');
@@ -658,7 +858,9 @@
                                                                     $eventPastCheckDateTime = $eventEndDateTime ?: $eventStartDateTime;
                                                                     $sectionIsPast = str_contains(strtolower($sectionTitle), 'past');
                                                                     $isCompletedTodo = strtolower((string) $event->status) === 'completed';
+                                                                    $eventIsReminder = strtolower($event->eventType?->name ?? '') === 'reminder';
                                                                     $isPastEvent = $sectionIsPast || ($eventPastCheckDateTime && $eventPastCheckDateTime->lessThan($eventNow));
+                                                                    $eventShouldUsePastStyle = $eventIsReminder ? $isCompletedTodo : $isPastEvent;
                                                                     $eventActionColor = $userCalendarColors[$event->assignedUser?->name ?? 'Unassigned'] ?? '#6b7280';
                                                                     $primaryDetail = $eventPrimaryDetail($event);
                                                                     $primaryDetailValue = $primaryDetail['value'];
@@ -669,15 +871,15 @@
                                                                 @endphp
 
                                                                 @php
-                                                                    $eventIsAnyTimeTodo = strtolower($event->eventType?->name ?? '') !== 'reminder'
-                                                                        && $eventStartDateTime
-                                                                        && $eventStartDateTime->format('H:i') === '00:00'
-                                                                        && $eventEndDateTime
-                                                                        && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true);
+                                                                    $eventIsAnyTimeTodo = $eventIsReminder
+                                                                        || ($eventStartDateTime
+                                                                            && $eventStartDateTime->format('H:i') === '00:00'
+                                                                            && $eventEndDateTime
+                                                                            && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true));
                                                                 @endphp
 
-                                                                <div class="events-event-card {{ $isPastEvent ? 'events-event-card-past bg-gray-200 border-gray-400' : 'bg-white border-gray-300' }} border p-4 shadow-sm cursor-pointer w-full"
-                                                                     style="--event-card-color: {{ $isPastEvent ? '#d1d5db' : '#ffffff' }}; border-radius:8px; {{ $isPastEvent ? 'background-color:#d1d5db !important; color:#374151;' : '' }}"
+                                                                <div class="events-event-card {{ $eventShouldUsePastStyle ? 'events-event-card-past bg-gray-200 border-gray-400' : 'bg-white border-gray-300' }} border p-4 shadow-sm cursor-pointer w-full"
+                                                                     style="--event-card-color: {{ $eventShouldUsePastStyle ? '#d1d5db' : '#ffffff' }}; border-radius:8px; {{ $eventShouldUsePastStyle ? 'background-color:#d1d5db !important; color:#374151;' : '' }}"
                                                                      data-type="{{ $event->eventType?->name ?? 'N/A' }}"
                                                                      data-subtype="{{ $event->event_subtype }}"
                                                                      data-title="{{ $event->title }}"
@@ -694,42 +896,47 @@
                                                                      onclick="event.stopPropagation(); openEventDetailsFromRow(this)">
                                                                     <div class="flex justify-between gap-3 mb-3 items-start">
                                                                         <div class="flex gap-3 items-start min-w-0 flex-1 pr-2">
-                                                                            <form method="POST" action="{{ route('events.mark-done', $event) }}" class="todo-check-form" onclick="event.stopPropagation();">
-                                                                                @csrf
-                                                                                @method('PATCH')
-                                                                                <input type="checkbox"
-                                                                                       class="todo-check-input"
-                                                                                       aria-label="Mark {{ $event->title }} as completed"
-                                                                                       @checked($isCompletedTodo)
-                                                                                       @disabled($isCompletedTodo)
-                                                                                       onchange="this.form.submit()">
-                                                                            </form>
+                                                                            @if (!$eventIsReminder)
+                                                                                <form method="POST" action="{{ route('events.mark-done', $event) }}" class="todo-check-form" onclick="event.stopPropagation();">
+                                                                                    @csrf
+                                                                                    @method('PATCH')
+                                                                                    <input type="checkbox"
+                                                                                           class="todo-check-input"
+                                                                                           aria-label="Mark {{ $event->title }} as completed"
+                                                                                           @checked($isCompletedTodo)
+                                                                                           @disabled($isCompletedTodo)
+                                                                                           onchange="this.form.submit()">
+                                                                                </form>
+                                                                            @endif
 
                                                                             <div class="min-w-0 flex-1">
-                                                                                <p class="events-card-type font-extrabold {{ $isPastEvent ? 'text-gray-500' : 'text-blue-600' }} uppercase tracking-wide mb-1 truncate {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->eventType?->name ?? 'N/A' }}</p>
-                                                                                <p class="events-card-details truncate {{ $isPastEvent ? 'text-gray-500' : 'text-gray-700' }} {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">
+                                                                                <div class="events-card-type-row mb-1">
+                                                                                    @if ($eventIsReminder)
+                                                                                        <form method="POST"
+                                                                                              action="{{ route('events.mark-done', $event) }}"
+                                                                                              class="events-card-reminder-check-form"
+                                                                                              onclick="event.stopPropagation();">
+                                                                                            @csrf
+                                                                                            @method('PATCH')
+                                                                                            <input type="checkbox"
+                                                                                                   class="events-card-reminder-check-input"
+                                                                                                   title="{{ $isCompletedTodo ? 'Undo done' : 'Mark done' }}"
+                                                                                                   @checked($isCompletedTodo)
+                                                                                                   onchange="this.form.submit();">
+                                                                                        </form>
+                                                                                    @endif
+
+                                                                                    <p class="events-card-type font-extrabold {{ $eventShouldUsePastStyle ? 'text-gray-500' : 'text-blue-600' }} uppercase tracking-wide truncate {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->eventType?->name ?? 'N/A' }}</p>
+                                                                                </div>
+                                                                                <p class="events-card-details truncate {{ $eventShouldUsePastStyle ? 'text-gray-500' : 'text-gray-700' }} {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">
                                                                                     <span class="font-semibold text-gray-700">Sub-type:</span> {{ $event->event_subtype ?: 'N/A' }}
                                                                                 </p>
-                                                                                <h6 class="events-card-title font-semibold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-950' }} mt-2 mb-4 truncate {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->title }}</h6>
+                                                                                <h6 class="events-card-title font-semibold {{ $eventShouldUsePastStyle ? 'text-gray-700' : 'text-gray-950' }} mt-2 mb-4 truncate {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->title }}</h6>
                                                                             </div>
-                                                                        </div>
-                                                                        <div class="text-right shrink-0 leading-tight" style="min-width:74px;">
-                                                                            @if ($eventIsAnyTimeTodo)
-                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Time</p>
-                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">Any time</p>
-                                                                            @else
-                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Start</p>
-                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">{{ \Carbon\Carbon::parse($event->start_datetime, $eventTimezone)->format('g:i A') }}</p>
-
-                                                                                <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide mt-2">End</p>
-                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">
-                                                                                    {{ $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime, $eventTimezone)->format('g:i A') : 'N/A' }}
-                                                                                </p>
-                                                                            @endif
                                                                         </div>
                                                                     </div>
 
-                                                                    <div class="events-card-details grid grid-cols-1 gap-1 {{ $isPastEvent ? 'text-gray-500' : 'text-gray-600' }} {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">
+                                                                    <div class="events-card-details grid grid-cols-1 gap-1 {{ $eventShouldUsePastStyle ? 'text-gray-500' : 'text-gray-600' }} {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">
                                                                         @if (!empty($primaryDetail['label']) && !empty($primaryDetailValue) && $primaryDetailValue !== 'N/A')
                                                                             <p class="truncate"><span class="font-semibold text-gray-700">{{ $primaryDetail['label'] }}:</span> {{ $primaryDetailValue }}</p>
                                                                         @endif
@@ -739,7 +946,7 @@
                                                                     </div>
 
                                                                     @if ($event->description)
-                                                                        <p class="events-card-description {{ $isPastEvent ? 'text-gray-500' : 'text-gray-700' }} mt-2 line-clamp-2 {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->description }}</p>
+                                                                        <p class="events-card-description {{ $eventShouldUsePastStyle ? 'text-gray-500' : 'text-gray-700' }} mt-2 line-clamp-2 {{ $isCompletedTodo ? 'todo-completed-text' : '' }}">{{ $event->description }}</p>
                                                                     @endif
 
                                                                     <div class="flex justify-center items-center gap-2 mt-3 border-t border-gray-300" style="padding-top:16px; padding-bottom:0;">
@@ -923,7 +1130,11 @@
                     return;
                 }
 
-                if (checkDate < now) {
+                const isReminder = (card.dataset.type || '').toLowerCase() === 'reminder';
+                const isCompleted = (card.dataset.status || '').toLowerCase() === 'completed';
+                const shouldUsePastStyle = isReminder ? isCompleted : checkDate < now;
+
+                if (shouldUsePastStyle) {
                     card.classList.add('events-event-card-past', 'bg-gray-200', 'border-gray-400');
                     card.classList.remove('bg-white', 'border-gray-300');
                     card.style.setProperty('background', '#d1d5db', 'important');
@@ -941,6 +1152,10 @@
                     card.style.removeProperty('background-color');
                     card.style.removeProperty('color');
                     card.style.setProperty('--event-card-color', '#ffffff');
+
+                    card.querySelectorAll('*').forEach(function (child) {
+                        child.style.removeProperty('color');
+                    });
                 }
             });
         }
@@ -948,6 +1163,29 @@
         function toggleEventFilters() {
             const panel = document.getElementById('eventFiltersPanel');
             panel.classList.toggle('hidden');
+        }
+
+        function setEventsUserView(isListView) {
+            const grid = document.getElementById('eventsUserViewGrid');
+            const button = document.getElementById('eventsViewToggleButton');
+
+            if (!grid || !button) {
+                return;
+            }
+
+            grid.classList.toggle('events-user-list-view', isListView);
+            button.textContent = isListView ? 'Box View' : 'List View';
+            localStorage.setItem('todosUserViewMode', isListView ? 'list' : 'boxes');
+        }
+
+        function toggleEventsUserView() {
+            const grid = document.getElementById('eventsUserViewGrid');
+
+            if (!grid) {
+                return;
+            }
+
+            setEventsUserView(!grid.classList.contains('events-user-list-view'));
         }
 
         function formatModalDate(date) {
@@ -1042,13 +1280,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            const hasActiveFilters = @json((bool) ($selectedEventType || $selectedStatus || ($selectedDateRange && $selectedDateRange !== 'today_forward') || $selectedAssignedUser));
-
-            if (hasActiveFilters) {
-                toggleEventFilters();
-            }
-
             applyPastDueEventStyles();
+            setEventsUserView(localStorage.getItem('todosUserViewMode') === 'list');
         });
 
         function openEventDetailsFromRow(element) {
@@ -1060,6 +1293,7 @@
                 status: element.dataset.status,
                 priority: element.dataset.priority,
                 start: element.dataset.start,
+                end: element.dataset.end,
                 assignedTo: element.dataset.assignedTo,
                 location: element.dataset.location,
                 editUrl: element.dataset.editUrl,
@@ -1074,7 +1308,13 @@
             document.getElementById('detailDescription').textContent = eventData.description || 'No description provided.';
             document.getElementById('detailStatus').textContent = eventData.status || 'N/A';
             document.getElementById('detailPriority').textContent = eventData.priority || 'N/A';
-            document.getElementById('detailStart').textContent = eventData.start && String(eventData.start).includes('00:00:00') && eventData.type !== 'Reminder' ? 'Any time' : (eventData.start || 'N/A');
+            const eventTypeName = (eventData.type || '').toLowerCase();
+            const eventStartValue = String(eventData.start || '');
+            const eventEndValue = String(eventData.end || '');
+            const isAllDayReminder = eventTypeName === 'reminder' && eventStartValue.includes('00:00');
+            const isAnyTimeTodo = eventStartValue.includes('00:00:00') && (eventEndValue.includes('23:58') || eventEndValue.includes('23:59'));
+
+            document.getElementById('detailStart').textContent = (isAllDayReminder || isAnyTimeTodo) ? 'Any time' : (eventData.start || 'N/A');
             document.getElementById('detailAssignedTo').textContent = eventData.assignedTo || 'Unassigned';
             document.getElementById('detailLocation').textContent = eventData.location || 'No location provided.';
             document.getElementById('detailEditButton').setAttribute('href', eventData.editUrl);

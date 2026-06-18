@@ -233,6 +233,7 @@
 
                     <div id="any_time_todo_group" class="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4">
                         <label class="flex items-start gap-3 font-medium text-gray-800">
+                            <input type="hidden" name="is_all_day_todo" id="forced_is_all_day_todo" value="{{ old('is_all_day_todo') ? '1' : '0' }}">
                             <input id="is_all_day_todo" type="checkbox" name="is_all_day_todo" value="1" class="mt-1 rounded border-gray-300" @checked(old('is_all_day_todo'))>
                             <span>
                                 Any time during the day / To-do item
@@ -356,6 +357,20 @@
 
     function toggleReminderDateFields() {
         const isReminder = isReminderEventType();
+        const anyTimeTodoCheckbox = document.getElementById('is_all_day_todo');
+        const forcedAnyTimeTodoInput = document.getElementById('forced_is_all_day_todo');
+
+        if (anyTimeTodoCheckbox && forcedAnyTimeTodoInput) {
+            if (isReminder) {
+                anyTimeTodoCheckbox.checked = true;
+                anyTimeTodoCheckbox.disabled = true;
+                forcedAnyTimeTodoInput.value = '1';
+            } else {
+                anyTimeTodoCheckbox.disabled = false;
+                forcedAnyTimeTodoInput.value = anyTimeTodoCheckbox.checked ? '1' : '0';
+            }
+        }
+
         const isAnyTimeTodo = isAnyTimeTodoChecked();
         const startGroup = document.getElementById('start_datetime_group');
         const endGroup = document.getElementById('end_datetime_group');
@@ -485,7 +500,15 @@
         subtypeSelect.addEventListener('change', toggleDynamicEventDetails);
 
         if (anyTimeTodoCheckbox) {
-            anyTimeTodoCheckbox.addEventListener('change', toggleReminderDateFields);
+            anyTimeTodoCheckbox.addEventListener('change', function () {
+                const forcedAnyTimeTodoInput = document.getElementById('forced_is_all_day_todo');
+
+                if (forcedAnyTimeTodoInput) {
+                    forcedAnyTimeTodoInput.value = this.checked ? '1' : '0';
+                }
+
+                toggleReminderDateFields();
+            });
         }
 
         if (addSupplyItemButton) {

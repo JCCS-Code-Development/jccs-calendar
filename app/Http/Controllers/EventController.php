@@ -16,18 +16,20 @@ class EventController extends Controller
     {
         abort_unless(auth()->user()?->canViewAllEvents(), 403);
 
+        $selectedDateRange = $request->date_range ?: 'today_tomorrow';
+
         $query = Event::with(['eventType', 'assignedUser'])
             ->when($request->filled('event_type_id'), fn ($q) => $q->where('event_type_id', $request->event_type_id))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('assigned_user_id'), fn ($q) => $q->where('assigned_user_id', $request->assigned_user_id));
 
-        $this->applyDateRangeFilter($query, $request->date_range);
+        $this->applyDateRangeFilter($query, $selectedDateRange);
 
         $events = $query->orderBy('start_datetime')->get();
 
         return view('events.index', [
             'events' => $events,
-            'eventGroups' => $this->groupEventsByUserAndDate($events, $request->date_range),
+            'eventGroups' => $this->groupEventsByUserAndDate($events, $selectedDateRange),
             'userColors' => $this->buildUserColorMap($events),
             'userCalendarColors' => $this->buildUserCalendarColorMap(),
             'eventTypes' => EventType::orderBy('name')->get(),
@@ -35,25 +37,27 @@ class EventController extends Controller
             'selectedEventType' => $request->event_type_id,
             'selectedStatus' => $request->status,
             'selectedAssignedUser' => $request->assigned_user_id,
-            'selectedDateRange' => $request->date_range ?: 'today_forward',
+            'selectedDateRange' => $selectedDateRange,
             'isMyEvents' => false,
         ]);
     }
 
     public function myEvents(Request $request)
     {
+        $selectedDateRange = $request->date_range ?: 'today_tomorrow';
+
         $query = Event::with(['eventType', 'assignedUser'])
             ->where('assigned_user_id', auth()->id())
             ->when($request->filled('event_type_id'), fn ($q) => $q->where('event_type_id', $request->event_type_id))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status));
 
-        $this->applyDateRangeFilter($query, $request->date_range);
+        $this->applyDateRangeFilter($query, $selectedDateRange);
 
         $events = $query->orderBy('start_datetime')->get();
 
         return view('events.index', [
             'events' => $events,
-            'eventGroups' => $this->groupEventsByUserAndDate($events, $request->date_range),
+            'eventGroups' => $this->groupEventsByUserAndDate($events, $selectedDateRange),
             'userColors' => $this->buildUserColorMap($events),
             'userCalendarColors' => $this->buildUserCalendarColorMap(),
             'eventTypes' => EventType::orderBy('name')->get(),
@@ -61,7 +65,7 @@ class EventController extends Controller
             'selectedEventType' => $request->event_type_id,
             'selectedStatus' => $request->status,
             'selectedAssignedUser' => null,
-            'selectedDateRange' => $request->date_range ?: 'today_forward',
+            'selectedDateRange' => $selectedDateRange,
             'isMyEvents' => true,
         ]);
     }
@@ -70,7 +74,7 @@ class EventController extends Controller
     {
         abort_unless(auth()->user()?->canViewAllEvents() || auth()->user()?->canManageEvents(), 403);
 
-        $selectedDateRange = $request->date_range;
+        $selectedDateRange = $request->date_range ?: 'today_tomorrow';
         $canViewTodoEvents = auth()->user()?->canViewAllEvents() || auth()->user()?->canManageEvents();
 
         $query = Event::with(['eventType', 'assignedUser'])
@@ -79,9 +83,7 @@ class EventController extends Controller
             ->when(! $canViewTodoEvents, fn ($q) => $q->where('assigned_user_id', auth()->id()))
             ->when($request->filled('assigned_user_id') && $canViewTodoEvents, fn ($q) => $q->where('assigned_user_id', $request->assigned_user_id));
 
-        if ($selectedDateRange) {
-            $this->applyDateRangeFilter($query, $selectedDateRange);
-        }
+        $this->applyDateRangeFilter($query, $selectedDateRange);
 
         $events = $query->orderBy('start_datetime')->get();
 
@@ -113,6 +115,10 @@ class EventController extends Controller
             'past' => $query->where('start_datetime', '<', $today),
             'today' => $query->whereDate('start_datetime', $today),
             'tomorrow' => $query->whereDate('start_datetime', $tomorrow),
+            'today_tomorrow' => $query->whereBetween('start_datetime', [
+                $today->copy()->startOfDay(),
+                $tomorrow->copy()->endOfDay(),
+            ]),
             'this_week' => $query->whereBetween('start_datetime', [
                 $tomorrow->copy()->addDay()->startOfDay(),
                 $endOfWeek,
@@ -123,7 +129,10 @@ class EventController extends Controller
             ]),
             'rest' => $query->where('start_datetime', '>', $endOfMonth),
             'today_forward' => $query->where('start_datetime', '>=', $startOfWeek),
-            default => $query->where('start_datetime', '>=', $startOfWeek),
+            default => $query->whereBetween('start_datetime', [
+                $today->copy()->startOfDay(),
+                $tomorrow->copy()->endOfDay(),
+            ]),
         };
     }
 
@@ -201,6 +210,7 @@ class EventController extends Controller
             'past' => 'Past',
             'today' => 'Today',
             'tomorrow' => 'Tomorrow',
+            'today_tomorrow' => 'Today & Tomorrow',
             'this_week' => 'This Week',
             'this_month' => 'This Month',
             'rest' => 'Rest',
@@ -367,8 +377,10 @@ class EventController extends Controller
     {
         abort_unless(auth()->user()?->canManageEvents(), 403);
 
+        $wasCompleted = strtolower($event->status ?? '') === 'completed';
+
         $event->update([
-            'status' => 'Completed',
+            'status' => $wasCompleted ? 'Scheduled' : 'Completed',
         ]);
 
         return back();

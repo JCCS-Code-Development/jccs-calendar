@@ -26,6 +26,73 @@
             align-items: start;
         }
 
+        .events-user-list-view {
+            grid-template-columns: 1fr !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable {
+            min-height: auto !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable > .px-5 {
+            padding-bottom: 24px !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .bg-white\/85 {
+            min-height: auto !important;
+            margin-bottom: 12px !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .p-4.space-y-3 {
+            padding: 10px 14px !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-event-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-event-card > .flex.justify-between {
+            margin-bottom: 0 !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-card-title {
+            margin: 2px 0 0 0 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-card-details {
+            display: block !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-card-description {
+            display: none !important;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-event-card > .events-card-details {
+            min-width: 0;
+        }
+
+        .events-user-list-view .events-user-card-clickable .events-event-card > .flex.justify-center {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            border-top: 0 !important;
+            justify-content: flex-end !important;
+        }
+
+        @media (max-width: 900px) {
+            .events-user-list-view .events-user-card-clickable .events-event-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .events-user-card-clickable {
             transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
         }
@@ -39,6 +106,50 @@
         .events-event-card {
             transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
             overflow: hidden;
+        }
+
+        .events-card-reminder-check-form {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 8px;
+        }
+
+        .events-card-reminder-check-input {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            accent-color: #2563eb;
+        }
+
+        .events-card-type-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .events-card-reminder-check-form {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 8px;
+        }
+
+        .events-card-reminder-check-input {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            accent-color: #2563eb;
+        }
+
+        .events-card-type-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .events-event-card .events-card-type {
@@ -156,6 +267,108 @@
             background: linear-gradient(to right, #ffffff, #f9fafb);
         }
 
+        .events-week-user-key {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+            max-width: 52%;
+        }
+
+        .events-week-user-key-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #111827;
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(17, 24, 39, .08);
+        }
+
+        .events-week-user-key-link:hover,
+        .events-week-user-key-link-active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .events-week-user-key-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            display: inline-block;
+            flex: none;
+        }
+
+        @media (max-width: 900px) {
+            .events-mini-calendar-header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .events-week-user-key {
+                justify-content: flex-start;
+                max-width: 100%;
+            }
+        }
+
+        .events-week-user-key {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+            max-width: 52%;
+        }
+
+        .events-week-user-key-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #111827;
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(17, 24, 39, .08);
+        }
+
+        .events-week-user-key-link:hover,
+        .events-week-user-key-link-active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .events-week-user-key-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            display: inline-block;
+            flex: none;
+        }
+
+        @media (max-width: 900px) {
+            .events-mini-calendar-header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .events-week-user-key {
+                justify-content: flex-start;
+                max-width: 100%;
+            }
+        }
+
         .events-mini-calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -236,18 +449,19 @@
         .events-week-event-label {
             position: absolute;
             left: 26px;
-            right: 4px;
+            right: 8px;
             transform: translateY(-2px);
             font-size: 10px;
             font-weight: 800;
             color: #111827;
             line-height: 1.15;
-            background: rgba(255, 255, 255, .82);
-            border-radius: 5px;
-            padding: 3px 4px;
+            background: rgba(255, 255, 255, .88);
+            border-radius: 7px;
+            padding: 4px 6px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            box-shadow: 0 2px 6px rgba(17, 24, 39, .12);
         }
 
         .events-week-event-label span {
@@ -258,15 +472,29 @@
             margin-top: 1px;
         }
 
+        .events-week-event-type-text {
+            display: block;
+            font-size: 8px !important;
+            font-weight: 900 !important;
+            color: #2563eb !important;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .events-week-reminder-pill {
             position: absolute;
-            left: 10px;
+            left: 8px;
+            right: 8px;
             transform: translateY(-2px);
             display: inline-flex;
             align-items: center;
             gap: 8px;
             width: auto;
-            max-width: calc(100% - 20px);
+            max-width: none;
             min-height: 32px;
             padding: 5px 12px;
             border-radius: 999px;
@@ -279,6 +507,25 @@
             line-height: 1.15;
             white-space: nowrap;
             overflow: hidden;
+            cursor: pointer;
+        }
+
+        .events-week-reminder-pill:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .20);
+        }
+
+        .events-week-reminder-pill.events-event-completed {
+            background: #d1d5db !important;
+            background-color: #d1d5db !important;
+            border-color: #9ca3af !important;
+            color: #374151 !important;
+            opacity: 1 !important;
+        }
+
+        .events-week-reminder-pill.events-event-completed .events-week-reminder-label {
+            color: #374151 !important;
         }
 
         .events-week-reminder-color-dot {
@@ -287,6 +534,22 @@
             border-radius: 999px;
             display: inline-block;
             flex: none;
+        }
+
+        .events-week-reminder-check-form {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+            margin: 0;
+        }
+
+        .events-week-reminder-check-input {
+            width: 15px;
+            height: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            accent-color: #2563eb;
         }
 
         .events-week-reminder-label {
@@ -347,6 +610,15 @@
             @php
                 $eventTimezone = 'America/New_York';
                 $calendarDate = \Carbon\Carbon::today($eventTimezone);
+
+                if (($selectedDateRange ?? null) === 'past' && $events->isNotEmpty()) {
+                    $calendarDate = $events
+                        ->sortByDesc('start_datetime')
+                        ->first()
+                        ?->start_datetime
+                            ? \Carbon\Carbon::parse($events->sortByDesc('start_datetime')->first()->start_datetime, $eventTimezone)
+                            : $calendarDate;
+                }
                 $calendarStart = $calendarDate->copy()->startOfWeek(\Carbon\Carbon::MONDAY);
                 $calendarEnd = $calendarDate->copy()->endOfWeek(\Carbon\Carbon::SUNDAY);
                 $calendarStartHour = 0;
@@ -423,8 +695,52 @@
                         <h3 class="text-lg font-extrabold text-gray-950">
                             Week of {{ $calendarStart->format('M d') }} - {{ $calendarEnd->format('M d, Y') }}
                         </h3>
-                        <p class="text-xs font-semibold text-gray-500 mt-1">Colored vertical bars show each event time slot from start to end time.</p>
+                        <p class="text-xs font-semibold text-gray-500 mt-1">
+                            @if (($selectedDateRange ?? null) === 'past')
+                                Showing the most recent week with past history from the selected results.
+                            @else
+                                Colored vertical bars show each event time slot from start to end time.
+                            @endif
+                        </p>
                     </div>
+
+                    @if (!($isMyEvents ?? false))
+                        <div class="events-week-user-key" aria-label="User color key">
+                            <a href="{{ route('events.index', array_filter([
+                                'event_type_id' => $selectedEventType,
+                                'status' => $selectedStatus,
+                                'date_range' => $selectedDateRange,
+                            ], fn ($value) => $value !== null && $value !== '')) }}"
+                               class="events-week-user-key-link {{ empty($selectedAssignedUser) ? 'events-week-user-key-link-active' : '' }}">
+                                All
+                            </a>
+
+                            @foreach ($users as $keyUser)
+                                <a href="{{ route('events.index', array_filter([
+                                    'event_type_id' => $selectedEventType,
+                                    'status' => $selectedStatus,
+                                    'date_range' => $selectedDateRange,
+                                    'assigned_user_id' => $keyUser->id,
+                                ], fn ($value) => $value !== null && $value !== '')) }}"
+                                   class="events-week-user-key-link {{ (string) $selectedAssignedUser === (string) $keyUser->id ? 'events-week-user-key-link-active' : '' }}">
+                                    <span class="events-week-user-key-dot" style="background-color: {{ $userCalendarColors[$keyUser->name] ?? '#6b7280' }};"></span>
+                                    {{ $keyUser->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="events-week-user-key" aria-label="User color key">
+                            <a href="{{ route('events.mine', array_filter([
+                                'event_type_id' => $selectedEventType,
+                                'status' => $selectedStatus,
+                                'date_range' => $selectedDateRange,
+                            ], fn ($value) => $value !== null && $value !== '')) }}"
+                               class="events-week-user-key-link events-week-user-key-link-active">
+                                <span class="events-week-user-key-dot" style="background-color: {{ $userCalendarColors[auth()->user()->name] ?? '#6b7280' }};"></span>
+                                {{ auth()->user()->name }}
+                            </a>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="events-mini-calendar-grid">
@@ -491,7 +807,37 @@
 
                                     @if ($calendarEventShowsAtTop)
                                         <div class="events-week-reminder-pill {{ $calendarEventIsCompleted ? 'events-event-completed' : '' }}"
-                                             style="top: {{ $eventTop }}px; {{ $calendarEventIsPast ? 'opacity:.65;' : '' }}">
+                                             style="top: {{ $eventTop }}px;"
+                                             data-type="{{ $calendarEvent->eventType?->name ?? 'N/A' }}"
+                                             data-subtype="{{ $calendarEvent->event_subtype }}"
+                                             data-title="{{ $calendarEvent->title }}"
+                                             data-description="{{ $calendarEvent->description }}"
+                                             data-status="{{ $calendarEvent->status }}"
+                                             data-priority="{{ $calendarEvent->priority }}"
+                                             data-start="{{ $calendarEvent->start_datetime }}"
+                                             data-end="{{ $calendarEvent->end_datetime }}"
+                                             data-assigned-to="{{ $calendarEvent->assignedUser?->name ?? 'Unassigned' }}"
+                                             data-location="{{ $calendarEvent->location }}"
+                                             data-details='@json($calendarEvent->details ?? [])'
+                                             data-event-color="{{ $calendarEventColor }}"
+                                             data-edit-url="{{ route('events.edit', $calendarEvent) }}"
+                                             data-delete-url="{{ route('events.destroy', $calendarEvent) }}"
+                                             data-mark-done-url="{{ route('events.mark-done', $calendarEvent) }}"
+                                             onclick="openEventDetailsFromRow(this)">
+                                            @if ($calendarEventIsReminder)
+                                                <form method="POST"
+                                                      action="{{ route('events.mark-done', $calendarEvent) }}"
+                                                      class="events-week-reminder-check-form"
+                                                      onclick="event.stopPropagation();">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="checkbox"
+                                                           class="events-week-reminder-check-input"
+                                                           title="{{ $calendarEventIsCompleted ? 'Undo done' : 'Mark done' }}"
+                                                           @checked($calendarEventIsCompleted)
+                                                           onchange="this.form.submit();">
+                                                </form>
+                                            @endif
                                             <span class="events-week-reminder-color-dot" style="background-color:{{ $calendarEventColor }};"></span>
                                             <span class="events-week-reminder-label">{{ $calendarEvent->title }}</span>
                                         </div>
@@ -501,6 +847,9 @@
                                              style="top: {{ $eventTop }}px; height: {{ $eventHeight }}px; background-color: {{ $calendarEventColor }}; {{ $calendarEventIsPast ? 'opacity:.65;' : '' }}"></div>
 
                                         <div class="events-week-event-label {{ $calendarEventIsCompleted ? 'events-event-completed' : '' }}" style="top: {{ $eventTop }}px; {{ $calendarEventIsPast ? 'background:#e5e7eb; color:#374151;' : '' }}">
+                                            <span class="events-week-event-type-text">
+                                                {{ $calendarEvent->eventType?->name ?? 'N/A' }}{{ $calendarEvent->event_subtype ? ' - ' . $calendarEvent->event_subtype : '' }}
+                                            </span>
                                             <span class="events-week-event-title-text">{{ $calendarEvent->title }}</span>
                                             <span class="events-week-event-time-text">{{ $eventStart->format('g:i A') }} - {{ $eventEnd->format('g:i A') }}</span>
                                         </div>
@@ -525,6 +874,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18l-7 8v6l-4 2v-8L3 4z" />
                         </svg>
                         Filter
+                    </button>
+
+                    <button id="eventsViewToggleButton"
+                            type="button"
+                            onclick="toggleEventsUserView()"
+                            style="background-color:#e0f2fe; color:#075985; padding:12px 16px; border-radius:8px; font-weight:700; border:1px solid #7dd3fc; box-shadow:0 8px 18px rgba(14,165,233,.14); display:flex; align-items:center; gap:8px;">
+                        List View
                     </button>
 
                     <a href="{{ route('events.create') }}" style="background-color:#2563eb; color:white; padding:12px 18px; border-radius:8px; font-weight:700; box-shadow:0 8px 18px rgba(37,99,235,.22);">
@@ -566,13 +922,14 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Date View</label>
                             <select name="date_range" class="w-full border-gray-300 rounded">
-                                <option value="today_forward" @selected($selectedDateRange === 'today_forward')>Today Forward</option>
-                                <option value="past" @selected($selectedDateRange === 'past')>Past</option>
+                                <option value="today_tomorrow" @selected($selectedDateRange === 'today_tomorrow')>Today & Tomorrow</option>
+                                <option value="today_forward" @selected($selectedDateRange === 'today_forward')>All Upcoming</option>
+                                <option value="past" @selected($selectedDateRange === 'past')>Past History</option>
                                 <option value="today" @selected($selectedDateRange === 'today')>Today</option>
                                 <option value="tomorrow" @selected($selectedDateRange === 'tomorrow')>Tomorrow</option>
                                 <option value="this_week" @selected($selectedDateRange === 'this_week')>This Week</option>
                                 <option value="this_month" @selected($selectedDateRange === 'this_month')>This Month</option>
-                                <option value="rest" @selected($selectedDateRange === 'rest')>Rest</option>
+                                <option value="rest" @selected($selectedDateRange === 'rest')>Future After This Month</option>
                             </select>
                         </div>
 
@@ -604,7 +961,7 @@
                     </div>
                 </form>
             </div>
-            <div class="{{ ($isMyEvents ?? false) ? 'events-user-grid-single' : 'events-user-grid' }}">
+            <div id="eventsUserViewGrid" class="{{ ($isMyEvents ?? false) ? 'events-user-grid-single' : 'events-user-grid' }}">
                 @forelse ($eventGroups as $userName => $dateSections)
                     @php
                         $userEventCount = collect($dateSections)->flatten(2)->count();
@@ -687,8 +1044,10 @@
                                                                     $isPastEvent = $sectionIsPast || ($eventPastCheckDateTime && $eventPastCheckDateTime->lessThan($eventNow));
                                                                     $eventActionColor = $userCalendarColors[$event->assignedUser?->name ?? 'Unassigned'] ?? '#6b7280';
                                                                     $eventIsCompleted = strtolower($event->status ?? '') === 'completed';
+                                                                    $eventIsReminder = strtolower($event->eventType?->name ?? '') === 'reminder';
+                                                                    $eventShouldUsePastStyle = $eventIsReminder ? $eventIsCompleted : $isPastEvent;
                                                                     $eventIsAnyTimeTodo = $eventStartDateTime
-                                                                        && ! (strtolower($event->eventType?->name ?? '') === 'reminder')
+                                                                        && ! $eventIsReminder
                                                                         && $eventStartDateTime->format('H:i') === '00:00'
                                                                         && $eventEndDateTime
                                                                         && in_array($eventEndDateTime->format('H:i'), ['23:58', '23:59'], true);
@@ -700,8 +1059,8 @@
                                                                     }
                                                                 @endphp
 
-                                                                <div class="events-event-card {{ $eventIsCompleted ? 'events-event-completed' : '' }} {{ $isPastEvent ? 'events-event-card-past bg-gray-200 border-gray-400' : 'bg-white border-gray-300' }} border p-4 shadow-sm cursor-pointer w-full"
-                                                                     style="--event-card-color: {{ $isPastEvent ? '#d1d5db' : '#ffffff' }}; border-radius:8px; {{ $isPastEvent ? 'background-color:#d1d5db !important; color:#374151;' : '' }}"
+                                                                <div class="events-event-card {{ $eventIsCompleted ? 'events-event-completed' : '' }} {{ $eventShouldUsePastStyle ? 'events-event-card-past bg-gray-200 border-gray-400' : 'bg-white border-gray-300' }} border p-4 shadow-sm cursor-pointer w-full"
+                                                                     style="--event-card-color: {{ $eventShouldUsePastStyle ? '#d1d5db' : '#ffffff' }}; border-radius:8px; {{ $eventShouldUsePastStyle ? 'background-color:#d1d5db !important; color:#374151;' : '' }}"
                                                                      data-type="{{ $event->eventType?->name ?? 'N/A' }}"
                                                                      data-subtype="{{ $event->event_subtype ?? '' }}"
                                                                      data-details='@json($event->details ?? [])'
@@ -720,31 +1079,48 @@
                                                                      onclick="event.stopPropagation(); openEventDetailsFromRow(this)">
                                                                     <div class="flex justify-between gap-3 mb-3 items-start">
                                                                         <div class="min-w-0 flex-1 pr-2">
-                                                                            <p class="events-card-type font-extrabold {{ $isPastEvent ? 'text-gray-500' : 'text-blue-600' }} uppercase tracking-wide mb-1 truncate">
-                                                                                {{ $event->eventType?->name ?? 'N/A' }}
-                                                                            </p>
-                                                                            <p class="events-card-details truncate {{ $isPastEvent ? 'text-gray-500' : 'text-gray-700' }}">
+                                                                            <div class="events-card-type-row mb-1">
+                                                                                @if ($eventIsReminder)
+                                                                                    <form method="POST"
+                                                                                          action="{{ route('events.mark-done', $event) }}"
+                                                                                          class="events-card-reminder-check-form"
+                                                                                          onclick="event.stopPropagation();">
+                                                                                        @csrf
+                                                                                        @method('PATCH')
+                                                                                        <input type="checkbox"
+                                                                                               class="events-card-reminder-check-input"
+                                                                                               title="{{ $eventIsCompleted ? 'Undo done' : 'Mark done' }}"
+                                                                                               @checked($eventIsCompleted)
+                                                                                               onchange="this.form.submit();">
+                                                                                    </form>
+                                                                                @endif
+
+                                                                                <p class="events-card-type font-extrabold {{ $eventShouldUsePastStyle ? 'text-gray-500' : 'text-blue-600' }} uppercase tracking-wide truncate">
+                                                                                    {{ $event->eventType?->name ?? 'N/A' }}
+                                                                                </p>
+                                                                            </div>
+                                                                            <p class="events-card-details truncate {{ $eventShouldUsePastStyle ? 'text-gray-500' : 'text-gray-700' }}">
                                                                                 <span class="font-semibold text-gray-700">Sub-type:</span> {{ $event->event_subtype ?: 'N/A' }}
                                                                             </p>
-                                                                            <h6 class="events-card-title font-semibold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-950' }} mt-2 mb-4 truncate">{{ $event->title }}</h6>
+                                                                            <h6 class="events-card-title font-semibold {{ $eventShouldUsePastStyle ? 'text-gray-700' : 'text-gray-950' }} mt-2 mb-4 truncate">{{ $event->title }}</h6>
                                                                         </div>
                                                                         <div class="text-right shrink-0 leading-tight" style="min-width:clamp(52px, 6vw, 74px);">
                                                                             @if ($eventIsAnyTimeTodo)
                                                                                 <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Time</p>
-                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">Any time</p>
+                                                                                <p class="events-card-time-value font-extrabold {{ $eventShouldUsePastStyle ? 'text-gray-700' : 'text-gray-900' }}">Any time</p>
                                                                             @else
                                                                                 <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide">Start</p>
-                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">{{ \Carbon\Carbon::parse($event->start_datetime, $eventTimezone)->format('g:i A') }}</p>
+                                                                                <p class="events-card-time-value font-extrabold {{ $eventShouldUsePastStyle ? 'text-gray-700' : 'text-gray-900' }}">{{ \Carbon\Carbon::parse($event->start_datetime, $eventTimezone)->format('g:i A') }}</p>
 
                                                                                 <p class="events-card-time-label font-bold text-gray-500 uppercase tracking-wide mt-2">End</p>
-                                                                                <p class="events-card-time-value font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-900' }}">
+                                                                                <p class="events-card-time-value font-extrabold {{ $eventShouldUsePastStyle ? 'text-gray-700' : 'text-gray-900' }}">
                                                                                     {{ $event->end_datetime ? \Carbon\Carbon::parse($event->end_datetime, $eventTimezone)->format('g:i A') : 'N/A' }}
                                                                                 </p>
                                                                             @endif
                                                                         </div>
                                                                     </div>
 
-                                                                    <div class="events-card-details grid grid-cols-1 gap-1 {{ $isPastEvent ? 'text-gray-500' : 'text-gray-600' }}">
+                                                                    <div class="events-card-details grid grid-cols-1 gap-1 {{ $eventShouldUsePastStyle ? 'text-gray-500' : 'text-gray-600' }}">
                                                                         @if (!empty($primaryDetail['label']) && !empty($primaryDetailValue) && $primaryDetailValue !== 'N/A')
                                                                             <p class="truncate"><span class="font-semibold text-gray-700">{{ $primaryDetail['label'] }}:</span> {{ $primaryDetailValue }}</p>
                                                                         @endif
@@ -949,7 +1325,11 @@
                     return;
                 }
 
-                if (checkDate < now) {
+                const isReminder = (card.dataset.type || '').toLowerCase() === 'reminder';
+                const isCompleted = (card.dataset.status || '').toLowerCase() === 'completed';
+                const shouldUsePastStyle = isReminder ? isCompleted : checkDate < now;
+
+                if (shouldUsePastStyle) {
                     card.classList.add('events-event-card-past', 'bg-gray-200', 'border-gray-400');
                     card.classList.remove('bg-white', 'border-gray-300');
                     card.style.setProperty('background', '#d1d5db', 'important');
@@ -976,6 +1356,29 @@
             panel.classList.toggle('hidden');
         }
 
+        function setEventsUserView(isListView) {
+            const grid = document.getElementById('eventsUserViewGrid');
+            const button = document.getElementById('eventsViewToggleButton');
+
+            if (!grid || !button) {
+                return;
+            }
+
+            grid.classList.toggle('events-user-list-view', isListView);
+            button.textContent = isListView ? 'Box View' : 'List View';
+            localStorage.setItem('eventsUserViewMode', isListView ? 'list' : 'boxes');
+        }
+
+        function toggleEventsUserView() {
+            const grid = document.getElementById('eventsUserViewGrid');
+
+            if (!grid) {
+                return;
+            }
+
+            setEventsUserView(!grid.classList.contains('events-user-list-view'));
+        }
+
         function formatModalDate(date) {
             return date.toLocaleDateString('en-US', {
                 weekday: 'short',
@@ -984,13 +1387,10 @@
             });
         }
 
-        function getCurrentWeekDays() {
-            const today = new Date();
-            const start = new Date(today);
-            const dayOfWeek = today.getDay();
-            const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const displayedCalendarWeekStart = @json($calendarStart->toDateString());
 
-            start.setDate(today.getDate() - daysSinceMonday);
+        function getCurrentWeekDays() {
+            const start = new Date(`${displayedCalendarWeekStart}T00:00:00`);
             start.setHours(0, 0, 0, 0);
 
             return Array.from({ length: 7 }, function (_, index) {
@@ -1067,13 +1467,14 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            const hasActiveFilters = @json((bool) ($selectedEventType || $selectedStatus || ($selectedDateRange && $selectedDateRange !== 'today_forward') || $selectedAssignedUser));
+            const hasActiveFilters = @json((bool) ($selectedEventType || $selectedStatus || ($selectedDateRange && $selectedDateRange !== 'today_tomorrow') || $selectedAssignedUser));
 
             if (hasActiveFilters) {
                 toggleEventFilters();
             }
 
             applyPastDueEventStyles();
+            setEventsUserView(localStorage.getItem('eventsUserViewMode') === 'list');
         });
 
         function openEventDetailsFromRow(element) {
@@ -1086,6 +1487,7 @@
                 status: element.dataset.status,
                 priority: element.dataset.priority,
                 start: element.dataset.start,
+                end: element.dataset.end,
                 assignedTo: element.dataset.assignedTo,
                 location: element.dataset.location,
                 editUrl: element.dataset.editUrl,
@@ -1197,7 +1599,16 @@
             document.getElementById('detailDescription').textContent = eventData.description || 'No description provided.';
             document.getElementById('detailStatus').textContent = eventData.status || 'N/A';
             document.getElementById('detailPriority').textContent = eventData.priority || 'N/A';
-            document.getElementById('detailStart').textContent = eventData.start || 'N/A';
+            const eventStartDate = parseEventDateTimeForPastCheck(eventData.start);
+            const eventEndDate = parseEventDateTimeForPastCheck(eventData.end);
+            const isAnyTimeEvent = eventStartDate
+                && eventStartDate.getHours() === 0
+                && eventStartDate.getMinutes() === 0
+                && (!eventEndDate || (eventEndDate.getHours() === 23 && eventEndDate.getMinutes() >= 58));
+
+            document.getElementById('detailStart').textContent = eventStartDate
+                ? `${eventStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}${isAnyTimeEvent ? ' / Any Time' : ` ${eventStartDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}`
+                : 'N/A';
             document.getElementById('detailAssignedTo').textContent = eventData.assignedTo || 'Unassigned';
             document.getElementById('detailLocation').textContent = eventData.location || 'No location provided.';
             renderEventExtraDetails(eventData.details || {});
@@ -1207,10 +1618,13 @@
             const isCompleted = (eventData.status || '').toLowerCase() === 'completed';
 
             markDoneForm.setAttribute('action', eventData.markDoneUrl || '#');
-            markDoneButton.disabled = isCompleted;
-            markDoneButton.textContent = isCompleted ? 'Done' : 'Mark Done';
-            markDoneButton.style.opacity = isCompleted ? '.6' : '1';
-            markDoneButton.style.cursor = isCompleted ? 'not-allowed' : 'pointer';
+            markDoneButton.disabled = false;
+            markDoneButton.textContent = isCompleted ? 'Undo Done' : 'Mark Done';
+            markDoneButton.style.opacity = '1';
+            markDoneButton.style.cursor = 'pointer';
+            markDoneButton.style.backgroundColor = isCompleted ? '#e5e7eb' : '#dcfce7';
+            markDoneButton.style.color = isCompleted ? '#111827' : '#166534';
+            markDoneButton.style.borderColor = isCompleted ? '#d1d5db' : '#bbf7d0';
 
             const detailDeleteButton = document.getElementById('detailDeleteButton');
             detailDeleteButton.onclick = function () {
