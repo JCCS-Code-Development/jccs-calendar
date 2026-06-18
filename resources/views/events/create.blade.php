@@ -26,16 +26,28 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="block font-medium">Event Type</label>
+                        <label for="event_type_id" class="block font-medium">Event Type</label>
                         <select id="event_type_id" name="event_type_id" class="w-full border-gray-300 rounded" required>
-                            @foreach ($eventTypes as $eventType)
+                            <option value="" data-event-type-name="" @selected(old('event_type_id') === null || old('event_type_id') === '')>
+                                -- Select Event Type --
+                            </option>
+
+                            @forelse ($eventTypes as $eventType)
                                 <option value="{{ $eventType->id }}"
-                                        data-event-type-name="{{ strtolower($eventType->name) }}"
-                                        @selected(old('event_type_id') == $eventType->id)>
+                                        data-event-type-name="{{ strtolower(trim($eventType->name)) }}"
+                                        @selected((string) old('event_type_id') === (string) $eventType->id)>
                                     {{ $eventType->name }}
                                 </option>
-                            @endforeach
+                            @empty
+                                <option value="" disabled>No event types available</option>
+                            @endforelse
                         </select>
+
+                        @if ($eventTypes->isEmpty())
+                            <p class="mt-2 text-sm text-red-600">
+                                No event types are available. Please add event types before creating an event.
+                            </p>
+                        @endif
                     </div>
                     <div class="mb-4">
                         <label class="block font-medium">Assigned To</label>
@@ -112,6 +124,11 @@
 <script>
     function isReminderEventType() {
         const eventTypeSelect = document.getElementById('event_type_id');
+
+        if (!eventTypeSelect || !eventTypeSelect.value) {
+            return false;
+        }
+
         const selectedOption = eventTypeSelect.options[eventTypeSelect.selectedIndex];
         const eventTypeName = selectedOption?.dataset?.eventTypeName || '';
 
@@ -141,6 +158,11 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         const eventTypeSelect = document.getElementById('event_type_id');
+
+        if (!eventTypeSelect) {
+            return;
+        }
+
         const form = eventTypeSelect.closest('form');
 
         eventTypeSelect.addEventListener('change', toggleReminderDateFields);
