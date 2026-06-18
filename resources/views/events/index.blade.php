@@ -535,6 +535,8 @@
                                                                 <div class="events-event-card {{ $isPastEvent ? 'events-event-card-past bg-gray-200 border-gray-400' : 'bg-white border-gray-300' }} border p-4 shadow-sm cursor-pointer w-full"
                                                                      style="--event-card-color: {{ $isPastEvent ? '#d1d5db' : '#ffffff' }}; border-radius:8px; {{ $isPastEvent ? 'background-color:#d1d5db !important; color:#374151;' : '' }}"
                                                                      data-type="{{ $event->eventType?->name ?? 'N/A' }}"
+                                                                     data-subtype="{{ $event->event_subtype ?? '' }}"
+                                                                     data-details='@json($event->details ?? [])'
                                                                      data-title="{{ $event->title }}"
                                                                      data-description="{{ $event->description }}"
                                                                      data-status="{{ $event->status }}"
@@ -549,7 +551,9 @@
                                                                      onclick="event.stopPropagation(); openEventDetailsFromRow(this)">
                                                                     <div class="flex justify-between gap-3 mb-3 items-start">
                                                                         <div class="min-w-0 flex-1 pr-2">
-                                                                            <p class="events-card-type font-extrabold {{ $isPastEvent ? 'text-gray-500' : 'text-blue-600' }} uppercase tracking-wide mb-1 truncate">{{ $event->eventType?->name ?? 'N/A' }}</p>
+                                                                            <p class="events-card-type font-extrabold {{ $isPastEvent ? 'text-gray-500' : 'text-blue-600' }} uppercase tracking-wide mb-1 truncate">
+                                                                                {{ $event->eventType?->name ?? 'N/A' }}{{ $event->event_subtype ? ' - ' . $event->event_subtype : '' }}
+                                                                            </p>
                                                                             <h6 class="events-card-title font-extrabold {{ $isPastEvent ? 'text-gray-700' : 'text-gray-950' }} mt-1 truncate">{{ $event->title }}</h6>
                                                                         </div>
                                                                         <div class="text-right shrink-0 leading-tight" style="min-width:62px;">
@@ -567,6 +571,9 @@
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Status:</span> {{ $event->status }}</p>
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Priority:</span> {{ $event->priority }}</p>
                                                                         <p class="truncate"><span class="font-semibold text-gray-700">Location:</span> {{ $event->location ?: 'No location provided' }}</p>
+                                                                        @if ($event->event_subtype)
+                                                                            <p class="truncate"><span class="font-semibold text-gray-700">Sub-Type:</span> {{ $event->event_subtype }}</p>
+                                                                        @endif
                                                                     </div>
 
                                                                     @if ($event->description)
@@ -676,6 +683,11 @@
             <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:22px;">
                 <p style="font-size:12px; color:#6b7280; font-weight:700; margin-bottom:6px;">Description / Internal Notes</p>
                 <p id="detailDescription" style="color:#111827; white-space:pre-wrap;"></p>
+            </div>
+
+            <div id="detailExtraDetailsWrapper" style="display:none; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:22px;">
+                <p style="font-size:12px; color:#6b7280; font-weight:700; margin-bottom:6px;">Event Details</p>
+                <div id="detailExtraDetails" style="display:grid; grid-template-columns:1fr; gap:8px; color:#111827; font-size:14px;"></div>
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:10px;">
@@ -880,6 +892,8 @@
         function openEventDetailsFromRow(element) {
             openEventDetails({
                 type: element.dataset.type,
+                subtype: element.dataset.subtype,
+                details: parseEventDetails(element.dataset.details),
                 title: element.dataset.title,
                 description: element.dataset.description,
                 status: element.dataset.status,
@@ -893,8 +907,104 @@
             });
         }
 
+        function parseEventDetails(detailsJson) {
+            if (!detailsJson) {
+                return {};
+            }
+
+            try {
+                return JSON.parse(detailsJson);
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function formatEventDetailLabel(key) {
+            const customLabels = {
+                engineer: 'Engineer',
+                participants: 'Participants',
+                person: 'Person',
+                company: 'Company',
+                workers: 'Worker(s)',
+                project: 'Project',
+                estimated_due_date: 'Estimated Due Date',
+                logistics_location: 'Logistics Location',
+                team_workers: 'Worker(s)',
+                invoice_or_estimate: 'Invoice or Estimate',
+                number: 'Number',
+                name: 'Name',
+                payment_amount: 'Payment Amount',
+                payment_date: 'Payment Date / Due Date',
+                payment_document_number: 'Invoice or Estimate Number',
+                payment_name: 'Project / Client Name',
+                payment_method: 'Payment Method',
+                payment_status: 'Payment Status',
+            };
+
+            return customLabels[key] || key.replaceAll('_', ' ').replace(/\b\w/g, function (letter) {
+                return letter.toUpperCase();
+            });
+        }
+
+        function formatEventDetailValue(key, value) {
+            if (Array.isArray(value)) {
+                if (key === 'items') {
+                    return value.map(function (item) {
+                        const name = item.name || 'Unnamed item';
+                        const quantity = item.quantity ? ` #${item.quantity}` : '';
+
+                        return `${name}${quantity}`;
+                    }).join('<br>');
+                }
+
+                return value.join('<br>');
+            }
+
+            if (key === 'payment_amount' && value !== null && value !== '') {
+                const amount = Number(value);
+
+                if (!Number.isNaN(amount)) {
+                    return `$${amount.toFixed(2)}`;
+                }
+            }
+
+            return value;
+        }
+
+        function renderEventExtraDetails(details) {
+            const wrapper = document.getElementById('detailExtraDetailsWrapper');
+            const detailsContainer = document.getElementById('detailExtraDetails');
+            const entries = Object.entries(details || {}).filter(function ([key, value]) {
+                if (Array.isArray(value)) {
+                    return value.length > 0;
+                }
+
+                return value !== null && value !== '';
+            });
+
+            detailsContainer.innerHTML = '';
+
+            if (entries.length === 0) {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            entries.forEach(function ([key, value]) {
+                const row = document.createElement('div');
+                row.style.borderBottom = '1px solid #e5e7eb';
+                row.style.paddingBottom = '8px';
+                row.innerHTML = `
+                    <p style="font-size:12px; color:#6b7280; font-weight:700;">${formatEventDetailLabel(key)}</p>
+                    <p style="font-weight:700; color:#111827; white-space:pre-wrap;">${formatEventDetailValue(key, value)}</p>
+                `;
+                detailsContainer.appendChild(row);
+            });
+
+            wrapper.style.display = 'block';
+        }
+
         function openEventDetails(eventData) {
-            document.getElementById('detailType').textContent = eventData.type || 'N/A';
+            document.getElementById('detailType').textContent = eventData.subtype ? `${eventData.type || 'N/A'} - ${eventData.subtype}` : (eventData.type || 'N/A');
             document.getElementById('detailTitle').textContent = eventData.title || 'Untitled Event';
             document.getElementById('detailDescription').textContent = eventData.description || 'No description provided.';
             document.getElementById('detailStatus').textContent = eventData.status || 'N/A';
@@ -902,6 +1012,7 @@
             document.getElementById('detailStart').textContent = eventData.start || 'N/A';
             document.getElementById('detailAssignedTo').textContent = eventData.assignedTo || 'Unassigned';
             document.getElementById('detailLocation').textContent = eventData.location || 'No location provided.';
+            renderEventExtraDetails(eventData.details || {});
             document.getElementById('detailEditButton').setAttribute('href', eventData.editUrl);
             const detailDeleteButton = document.getElementById('detailDeleteButton');
             detailDeleteButton.onclick = function () {

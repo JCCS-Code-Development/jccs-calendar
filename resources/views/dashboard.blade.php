@@ -138,6 +138,8 @@
                                                         title="{{ $reminder->title }} | {{ $reminderStart->format('g:i A') }} - {{ $reminderEnd->format('g:i A') }}"
                                                         data-title="{{ $reminder->title }}"
                                                         data-type="{{ $reminder->eventType?->name ?? 'Reminder' }}"
+                                                        data-subtype="{{ $reminder->event_subtype ?? '' }}"
+                                                        data-details='@json($reminder->details ?? [])'
                                                         data-assigned="{{ $reminderAssignedName }}"
                                                         data-status="{{ ucfirst($reminder->status ?? 'N/A') }}"
                                                         data-priority="{{ ucfirst($reminder->priority ?? 'N/A') }}"
@@ -187,6 +189,8 @@
                                                     style="top: {{ $eventTop }}%; height: {{ $eventHeight }}%; background-color: {{ $calendarEventIsPast ? '#9ca3af' : $eventColor }};"
                                                     data-title="{{ $event->title }}"
                                                     data-type="{{ $event->eventType?->name ?? 'Event' }}"
+                                                    data-subtype="{{ $event->event_subtype ?? '' }}"
+                                                    data-details='@json($event->details ?? [])'
                                                     data-assigned="{{ $assignedName }}"
                                                     data-status="{{ ucfirst($event->status ?? 'N/A') }}"
                                                     data-priority="{{ ucfirst($event->priority ?? 'N/A') }}"
@@ -206,6 +210,8 @@
                                                     style="top: {{ $eventTop }}%;"
                                                     data-title="{{ $event->title }}"
                                                     data-type="{{ $event->eventType?->name ?? 'Event' }}"
+                                                    data-subtype="{{ $event->event_subtype ?? '' }}"
+                                                    data-details='@json($event->details ?? [])'
                                                     data-assigned="{{ $assignedName }}"
                                                     data-status="{{ ucfirst($event->status ?? 'N/A') }}"
                                                     data-priority="{{ ucfirst($event->priority ?? 'N/A') }}"
@@ -812,25 +818,125 @@
             document.getElementById('dashboardDeleteForm').setAttribute('action', '');
         }
 
+        function parseDashboardEventDetails(detailsJson) {
+            if (!detailsJson) {
+                return {};
+            }
+
+            try {
+                return JSON.parse(detailsJson);
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function formatDashboardEventDetailLabel(key) {
+            const customLabels = {
+                engineer: 'Engineer',
+                participants: 'Participants',
+                person: 'Person',
+                company: 'Company',
+                items: 'Item(s)',
+                workers: 'Worker(s)',
+                project: 'Project',
+                estimated_due_date: 'Estimated Due Date',
+                logistics_location: 'Logistics Location',
+                team_workers: 'Worker(s)',
+                invoice_or_estimate: 'Invoice or Estimate',
+                number: 'Number',
+                name: 'Name',
+                payment_amount: 'Payment Amount',
+                payment_date: 'Payment Date / Due Date',
+                payment_document_number: 'Invoice or Estimate Number',
+                payment_name: 'Project / Client Name',
+                payment_method: 'Payment Method',
+                payment_status: 'Payment Status',
+            };
+
+            return customLabels[key] || key.replaceAll('_', ' ').replace(/\b\w/g, function (letter) {
+                return letter.toUpperCase();
+            });
+        }
+
+        function formatDashboardEventDetailValue(key, value) {
+            if (Array.isArray(value)) {
+                if (key === 'items') {
+                    return value.map(function (item) {
+                        const name = item.name || 'Unnamed item';
+                        const quantity = item.quantity ? ` #${item.quantity}` : '';
+
+                        return `${name}${quantity}`;
+                    }).join('<br>');
+                }
+
+                return value.join('<br>');
+            }
+
+            if (key === 'payment_amount' && value !== null && value !== '') {
+                const amount = Number(value);
+
+                if (!Number.isNaN(amount)) {
+                    return `$${amount.toFixed(2)}`;
+                }
+            }
+
+            return value;
+        }
+
+        function renderDashboardEventExtraDetails(details) {
+            const entries = Object.entries(details || {}).filter(function ([key, value]) {
+                if (Array.isArray(value)) {
+                    return value.length > 0;
+                }
+
+                return value !== null && value !== '';
+            });
+
+            if (entries.length === 0) {
+                return '';
+            }
+
+            const detailRows = entries.map(function ([key, value]) {
+                return `
+                    <div class="dashboard-event-modal-detail">
+                        <strong>${formatDashboardEventDetailLabel(key)}:</strong> ${formatDashboardEventDetailValue(key, value)}
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div style="margin-top:14px; padding-top:12px; border-top:1px solid #e5e7eb;">
+                    <div style="font-size:12px; color:#6b7280; font-weight:900; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px;">Event Details</div>
+                    ${detailRows}
+                </div>
+            `;
+        }
+
         function openDashboardEventDetails(button) {
             const modal = document.getElementById('dashboardEventModal');
             const title = document.getElementById('dashboardEventModalTitle');
             const body = document.getElementById('dashboardEventModalBody');
             const editButton = document.getElementById('dashboardEventModalEdit');
             const deleteButton = document.getElementById('dashboardEventModalDelete');
+            const eventTypeLabel = button.dataset.subtype
+                ? `${button.dataset.type || 'Event'} - ${button.dataset.subtype}`
+                : (button.dataset.type || 'Event');
+            const eventDetails = parseDashboardEventDetails(button.dataset.details);
+            const eventExtraDetailsHtml = renderDashboardEventExtraDetails(eventDetails);
 
             title.textContent = button.dataset.title || 'Event Details';
             editButton.setAttribute('href', button.dataset.editUrl || '#');
             deleteButton.setAttribute('onclick', `closeDashboardEventModal(); openDashboardDeleteModal('${button.dataset.deleteUrl}')`);
 
             body.innerHTML = `
-                <div class="dashboard-event-modal-detail"><strong>Type:</strong> ${button.dataset.type || 'Event'}</div>
+                <div class="dashboard-event-modal-detail"><strong>Type:</strong> ${eventTypeLabel}</div>
                 <div class="dashboard-event-modal-detail"><strong>Assigned:</strong> ${button.dataset.assigned || 'Unassigned'}</div>
                 <div class="dashboard-event-modal-detail"><strong>Time:</strong> ${button.dataset.start || 'N/A'} - ${button.dataset.end || 'N/A'}</div>
                 <div class="dashboard-event-modal-detail"><strong>Status:</strong> ${button.dataset.status || 'N/A'}</div>
                 <div class="dashboard-event-modal-detail"><strong>Priority:</strong> ${button.dataset.priority || 'N/A'}</div>
                 ${button.dataset.location ? `<div class="dashboard-event-modal-detail"><strong>Location:</strong> ${button.dataset.location}</div>` : ''}
                 ${button.dataset.description ? `<div class="dashboard-event-modal-detail"><strong>Description:</strong> ${button.dataset.description}</div>` : ''}
+                ${eventExtraDetailsHtml}
             `;
 
             modal.style.display = 'flex';

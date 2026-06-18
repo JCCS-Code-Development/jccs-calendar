@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventType;
 use App\Models\User;
 use App\Http\Requests\StoreEventRequest;
+use App\Http\Requests\UpdateEventRequest;
 use Carbon\Carbon;
 
 class EventController extends Controller
@@ -277,6 +278,7 @@ class EventController extends Controller
         $validated = $request->validated();
         unset($validated['reminder_date']);
 
+        $validated = $this->normalizeEventDetails($validated);
         $validated = $this->normalizeEventDateTimes($validated);
 
         Event::create([
@@ -298,18 +300,51 @@ class EventController extends Controller
         ]);
     }
 
-    public function update(StoreEventRequest $request, Event $event)
+    public function update(UpdateEventRequest $request, Event $event)
     {
         abort_unless(auth()->user()?->canManageEvents(), 403);
 
         $validated = $request->validated();
         unset($validated['reminder_date']);
 
+        $validated = $this->normalizeEventDetails($validated);
         $validated = $this->normalizeEventDateTimes($validated);
 
         $event->update($validated);
 
         return redirect()->route('events.index');
+    }
+
+    private function normalizeEventDetails(array $validated): array
+    {
+        $details = $validated['details'] ?? [];
+
+        if (! is_array($details)) {
+            $details = [];
+        }
+
+        if (isset($details['items']) && is_array($details['items'])) {
+            $details['items'] = collect($details['items'])
+                ->filter(fn ($item) => ! empty($item['name']) || ! empty($item['quantity']))
+                ->map(fn ($item) => [
+                    'name' => $item['name'] ?? null,
+                    'quantity' => $item['quantity'] ?? null,
+                ])
+                ->values()
+                ->all();
+        }
+
+        $validated['details'] = collect($details)
+            ->filter(function ($value) {
+                if (is_array($value)) {
+                    return ! empty($value);
+                }
+
+                return $value !== null && $value !== '';
+            })
+            ->toArray();
+
+        return $validated;
     }
 
     private function normalizeEventDateTimes(array $validated): array

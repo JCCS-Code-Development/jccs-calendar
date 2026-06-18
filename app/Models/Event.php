@@ -9,6 +9,10 @@ class Event extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'details' => 'array',
+    ];
+
     public function assignedUser()
     {
         return $this->belongsTo(User::class, 'assigned_user_id');
