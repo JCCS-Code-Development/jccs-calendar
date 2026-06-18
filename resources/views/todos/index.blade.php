@@ -902,9 +902,9 @@
                                                                                     @method('PATCH')
                                                                                     <input type="checkbox"
                                                                                            class="todo-check-input"
-                                                                                           aria-label="Mark {{ $event->title }} as completed"
+                                                                                           aria-label="{{ $isCompletedTodo ? 'Undo done' : 'Mark done' }} for {{ $event->title }}"
+                                                                                           title="{{ $isCompletedTodo ? 'Undo done' : 'Mark done' }}"
                                                                                            @checked($isCompletedTodo)
-                                                                                           @disabled($isCompletedTodo)
                                                                                            onchange="this.form.submit()">
                                                                                 </form>
                                                                             @endif
