@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/vm3xrrup9tqw/public_html/calendar
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -Rf dist/. $DEPLOYPATH/

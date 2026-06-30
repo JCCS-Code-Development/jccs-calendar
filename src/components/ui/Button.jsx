@@ -1,10 +1,10 @@
 import Spinner from './Spinner'
 
 const variants = {
-  primary:   'bg-brand-500 text-white hover:bg-brand-400 active:bg-brand-700 disabled:bg-gray-300',
+  primary:   'bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700 shadow-sm shadow-brand-500/30 disabled:bg-gray-300 disabled:shadow-none',
   secondary: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100 disabled:bg-gray-50 disabled:text-gray-400',
   danger:    'bg-red-600 text-white hover:bg-red-500 active:bg-red-700 disabled:bg-gray-300',
-  ghost:     'bg-transparent text-brand-500 hover:bg-brand-100 active:bg-brand-100 disabled:text-gray-400',
+  ghost:     'bg-transparent text-brand-500 hover:bg-brand-50 active:bg-brand-100 disabled:text-gray-400',
 }
 
 const sizes = {

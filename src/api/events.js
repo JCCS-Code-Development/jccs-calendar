@@ -29,3 +29,6 @@ export const markDone = (id) =>
 
 export const getEventTypes = () =>
   client.get('/event-types').then((r) => r.data)
+
+export const getExternalCalendar = (url) =>
+  client.get('/external-calendar', { params: { url } }).then((r) => r.data)

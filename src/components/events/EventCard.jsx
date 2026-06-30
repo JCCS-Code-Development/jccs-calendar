@@ -1,14 +1,19 @@
 import { useNavigate } from 'react-router-dom'
 import Badge from '../ui/Badge'
+import AddToCalendar from './AddToCalendar'
 import { formatDateTime, formatTime } from '../../utils/format'
 import { useAuth } from '../../hooks/useAuth'
+import { useAuthStore } from '../../store/authStore'
 import { markDone } from '../../api/events'
 
 const PRIORITY_DOT = { High: 'bg-red-500', Normal: 'bg-gray-400', Low: 'bg-blue-400' }
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL
+
 export default function EventCard({ event, onRefresh, color }) {
   const navigate = useNavigate()
   const { canManageEvents } = useAuth()
+  const token = useAuthStore((s) => s.token)
 
   const handleMarkDone = async (e) => {
     e.stopPropagation()
@@ -64,16 +69,18 @@ export default function EventCard({ event, onRefresh, color }) {
         )}
       </div>
 
-      {canManageEvents && (
-        <div className="px-4 py-2 border-t border-gray-50 flex justify-end" onClick={(e) => e.stopPropagation()}>
+      <div className="px-4 py-2 border-t border-gray-50 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+        <AddToCalendar event={event} apiBase={API_BASE} token={token} />
+
+        {canManageEvents && (
           <button
             onClick={handleMarkDone}
             className={`text-xs font-medium px-3 py-1 rounded-lg transition-colors ${isDone ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}
           >
             {isDone ? 'Mark Scheduled' : '✓ Mark Done'}
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

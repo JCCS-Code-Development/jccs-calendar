@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export default function OfflineBanner() {
+  const { t } = useTranslation()
   const [offline, setOffline] = useState(!navigator.onLine)
 
   useEffect(() => {
@@ -15,7 +17,7 @@ export default function OfflineBanner() {
 
   return (
     <div className="bg-amber-500 text-white text-center text-sm py-1.5 px-4 font-medium">
-      You're offline — showing cached data
+      {t('offline.banner')}
     </div>
   )
 }

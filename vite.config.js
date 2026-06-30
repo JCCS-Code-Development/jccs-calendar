@@ -8,8 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+      },
       manifest: {
         name: 'JCCS Calendar',
         short_name: 'JCCS Cal',
@@ -26,22 +31,7 @@ export default defineConfig({
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
         ],
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /\/api\/(events|calendar-events|my-events|todos|event-types|users|roles)/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-reads-v1',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 200, maxAgeSeconds: 300 },
-              cacheableResponse: { statuses: [200] },
-            },
-          },
-        ],
-      },
-      devOptions: { enabled: true },
+      devOptions: { enabled: true, type: 'module' },
     }),
   ],
 })
