@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventType;
+use App\Services\PushNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -133,6 +134,11 @@ class EventApiController extends Controller
 
         $event->load(['eventType', 'assignedUser.role']);
 
+        // Notify assigned user (skip if the creator is the assignee)
+        if ($event->assigned_user_id && $event->assigned_user_id !== auth()->id()) {
+            app(PushNotificationService::class)->notifyAssignedUser($event, 'assigned to you');
+        }
+
         return response()->json($this->formatEvent($event), 201);
     }
 
@@ -154,9 +160,19 @@ class EventApiController extends Controller
             'details'         => ['nullable', 'array'],
         ]);
 
+        $previousAssignee = $event->assigned_user_id;
         $validated = $this->normalizeDateTimes($validated);
         $event->update($validated);
         $event->load(['eventType', 'assignedUser.role']);
+
+        // Notify assigned user when assignment or datetime changes
+        $assigneeChanged = $previousAssignee !== $event->assigned_user_id;
+        if ($event->assigned_user_id && ($assigneeChanged || isset($validated['start_datetime']))) {
+            $action = $assigneeChanged ? 'assigned to you' : 'updated';
+            if ($event->assigned_user_id !== auth()->id()) {
+                app(PushNotificationService::class)->notifyAssignedUser($event, $action);
+            }
+        }
 
         return response()->json($this->formatEvent($event));
     }

@@ -1,12 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CalendarExportController;
 use App\Http\Controllers\Api\EventApiController;
-use App\Http\Controllers\Api\UserApiController;
+use App\Http\Controllers\Api\PushController;
 use App\Http\Controllers\Api\RoleApiController;
+use App\Http\Controllers\Api\UserApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
+
+// Public VAPID key (needed by frontend before auth)
+Route::get('/push/key', [PushController::class, 'publicKey']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -34,4 +39,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Roles
     Route::get('/roles', [RoleApiController::class, 'index']);
+
+    // Push notifications
+    Route::post('/push/subscribe', [PushController::class, 'subscribe']);
+    Route::post('/push/unsubscribe', [PushController::class, 'unsubscribe']);
+
+    // Calendar export (iCal feed + single event)
+    Route::get('/calendar.ics', [CalendarExportController::class, 'feed']);
+    Route::get('/events/{event}/export.ics', [CalendarExportController::class, 'single']);
 });
