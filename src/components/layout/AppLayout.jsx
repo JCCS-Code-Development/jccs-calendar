@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import OfflineBanner from '../OfflineBanner'
 import NotificationToggle from '../NotificationToggle'
 import { useAuth } from '../../hooks/useAuth'
-import { logout as logoutAPI } from '../../api/auth'
+import { logout as fieldclockLogout } from '../../api/fieldclockAuth'
 import { useAuthStore } from '../../store/authStore'
 
 const CalendarIcon = () => (
@@ -36,6 +36,13 @@ const TimelineIcon = () => (
     <line x1="3" y1="10" x2="15" y2="10" strokeLinecap="round"/>
     <line x1="3" y1="14" x2="18" y2="14" strokeLinecap="round"/>
     <line x1="3" y1="18" x2="11" y2="18" strokeLinecap="round"/>
+  </svg>
+)
+const ProductionIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+    <path strokeLinecap="round" d="M8 14h2m4 0h2M8 17h2" />
   </svg>
 )
 const CheckIcon = () => (
@@ -116,10 +123,10 @@ export default function AppLayout() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { user, canManageUsers, canViewAllEvents, canManageEvents } = useAuth()
-  const { logout } = useAuthStore()
+  const { logout, refreshToken } = useAuthStore()
 
   const handleLogout = async () => {
-    try { await logoutAPI() } catch {}
+    try { await fieldclockLogout(refreshToken) } catch {}
     logout()
     navigate('/login', { replace: true })
   }
@@ -131,6 +138,7 @@ export default function AppLayout() {
     { to: '/events',    icon: <ListIcon />,      label: t('nav.allEvents'),            show: canViewAllEvents },
     { to: '/my-events', icon: <MyEventsIcon />,  label: t('nav.myEvents'),             show: true },
     { to: '/jobs',      icon: <TimelineIcon />,  label: t('nav.timelines'),            show: true },
+    { to: '/production', icon: <ProductionIcon />, label: t('nav.production'),         show: true },
     { to: '/todos',     icon: <CheckIcon />,     label: t('nav.todos'),                show: canManageEvents },
     { to: '/users',     icon: <UsersIcon />,     label: t('nav.users'),                show: canManageUsers },
   ].filter((i) => i.show)

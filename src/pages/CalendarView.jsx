@@ -7,6 +7,7 @@ import {
 } from 'date-fns'
 import { getCalendarEvents, getExternalCalendar } from '../api/events'
 import { useAuth } from '../hooks/useAuth'
+import { useAuthStore } from '../store/authStore'
 import Spinner from '../components/ui/Spinner'
 import WeekView from '../components/calendar/WeekView'
 
@@ -209,6 +210,7 @@ function OutlookModal({ onClose, onSave, current }) {
 export default function CalendarView() {
   const navigate = useNavigate()
   const { canManageEvents } = useAuth()
+  const token = useAuthStore((s) => s.token)
 
   const [view,   setView]   = useState('week')   // 'week' | 'month'
   const [anchor, setAnchor] = useState(new Date())
@@ -289,7 +291,7 @@ export default function CalendarView() {
 
           {/* Subscribe iCal */}
           <a
-            href={`webcal://${new URL(API_BASE).host}/api/calendar.ics`}
+            href={`webcal://${new URL(API_BASE).host}/api/calendar.ics?token=${token}`}
             title="Subscribe in Apple Calendar / Outlook"
             className="flex items-center gap-1.5 border border-gray-200 text-gray-600 hover:text-brand-500 hover:border-brand-300 px-3 py-2 rounded-xl text-sm font-medium transition-colors"
           >

@@ -15,3 +15,12 @@ export const deleteJob = (id) => client.delete(`/jobs/${id}`).then((r) => r.data
 
 // Sync existing jobs to FieldClock (admin only)
 export const syncToFieldclock = () => client.post('/jobs/sync-fieldclock').then((r) => r.data)
+
+// Job photo (Carpentry Production Calendar)
+export const uploadJobPhoto = (jobId, file) => {
+  const formData = new FormData()
+  formData.append('job_id', jobId)
+  formData.append('image', file)
+  return client.post('/jobs/photo', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data)
+}
+export const deleteJobPhoto = (jobId) => client.delete(`/jobs/photo?job_id=${jobId}`).then((r) => r.data)

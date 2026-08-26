@@ -19,23 +19,22 @@ registerRoute(
   })
 )
 
-// Push notification received
+// Push notification received. The backend sends every push with an empty
+// payload (api/push/push-helper.php — no RFC 8291 encryption implemented
+// server-side), so there's never event-specific data to read here; this
+// shows one fixed notification and always deep-links to My Events rather
+// than a specific event. See push-helper.php's docblock for the trade-off.
 self.addEventListener('push', (event) => {
-  if (!event.data) return
-  let data = {}
-  try { data = event.data.json() } catch {}
-
-  const title   = data.title ?? 'JCCS Calendar'
   const options = {
-    body:  data.body ?? '',
+    body:  'You have a calendar update.',
     icon:  '/favicon.svg',
     badge: '/favicon.svg',
     vibrate: [200, 100, 200],
-    data:  { url: data.url ?? '/' },
-    actions: [{ action: 'open', title: 'View Event' }],
+    data:  { url: '/my-events' },
+    actions: [{ action: 'open', title: 'View Events' }],
   }
 
-  event.waitUntil(self.registration.showNotification(title, options))
+  event.waitUntil(self.registration.showNotification('JCCS Calendar', options))
 })
 
 // Notification click — focus existing window or open new tab

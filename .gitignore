@@ -8,11 +8,31 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+dev-dist
 dist-ssr
 *.local
-.env
-.env.*
+.env.local
+
+# dist/ IS committed (not gitignored) — the .cpanel.yml deploy step copies
+# it as-is with no server-side build step, matching every sibling app. Run
+# `npm run build` and commit the result before pushing any src/ change.
+
+# .env / .env.production ARE committed — they only hold public API base
+# URLs, no secrets. Only per-developer local overrides are ignored above.
+
+# Real backend secrets — never committed, see api/config/config.example.php
+api/config/config.php
+
+# Local-only mocks of FieldClock's login — let the real Login page work
+# against throwaway test accounts without hitting production. Never
+# deployed; api/auth/verify.php (the real Calendar endpoint) is unaffected.
+api/auth/login.php
+api/auth/refresh.php
+api/auth/logout.php
+
+# Uploaded job photos — the directory + .htaccess stay tracked, uploads don't.
+api/uploads/jobs/*
+!api/uploads/jobs/.gitkeep
 
 # Editor directories and files
 .vscode/*

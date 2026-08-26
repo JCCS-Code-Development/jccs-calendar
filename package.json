@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "php -S localhost:8787 -t api api/router.php",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"

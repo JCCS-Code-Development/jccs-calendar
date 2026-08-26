@@ -54,7 +54,7 @@ export default function Users() {
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">FieldClock ID</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -66,7 +66,7 @@ export default function Users() {
                     {u.name}
                     {u.id === me?.id && <span className="ml-2 text-xs text-brand-500">(you)</span>}
                   </td>
-                  <td className="px-5 py-3.5 text-gray-500">{u.email}</td>
+                  <td className="px-5 py-3.5 text-gray-500">{u.id}</td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[u.role] ?? 'bg-gray-100 text-gray-600'}`}>
                       {u.role}

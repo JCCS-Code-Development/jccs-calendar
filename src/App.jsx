@@ -13,6 +13,7 @@ import Users from './pages/users/Users'
 import UserForm from './pages/users/UserForm'
 import JobTimelines from './pages/jobs/JobTimelines'
 import JobForm from './pages/jobs/JobForm'
+import ProductionCalendar from './pages/production/ProductionCalendar'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/"          element={<CalendarView />} />
           <Route path="/my-events" element={<MyEvents />} />
           <Route path="/jobs"      element={<JobTimelines />} />
+          <Route path="/production" element={<ProductionCalendar />} />
 
           {/* Admin + Office */}
           <Route element={<RoleRoute allowedRoles={['Admin', 'Office']} />}>

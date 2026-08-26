@@ -38,6 +38,50 @@ export function groupEventsByUserAndDate(events) {
   return groups
 }
 
+// ── Carpentry Production Calendar ───────────────────────────────────────────
+
+// Recommended production start = scheduled due date minus the carpentry
+// production lead time. Always derived, never stored (see api/schema.sql's
+// comment on jobs.lead_time_days) — recompute whenever projected_end or
+// lead_time_days changes rather than persisting a start date that could drift.
+export function getRecommendedStart(job) {
+  if (!job.projected_end || !job.lead_time_days) return null
+  const due = parseISO(job.projected_end.slice(0, 10))
+  const start = new Date(due)
+  start.setDate(start.getDate() - job.lead_time_days)
+  return start
+}
+
+// 'completed' | 'overdue' | 'due_soon' | 'upcoming' — drives ProductionEntryCard's badge.
+export function getProductionStatus(job) {
+  if (job.status === 'Completed') return 'completed'
+  if (!job.projected_end) return 'upcoming'
+
+  const due = parseISO(job.projected_end.slice(0, 10))
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  due.setHours(0, 0, 0, 0)
+
+  if (due < today) return 'overdue'
+
+  // "Due soon" once inside the recommended production window, so crews see
+  // it as soon as production should be starting — falls back to a flat
+  // 3-day threshold when no lead time is set.
+  const soonThreshold = job.lead_time_days
+    ? new Date(due).setDate(due.getDate() - job.lead_time_days)
+    : new Date(due).setDate(due.getDate() - 3)
+  if (today.getTime() >= soonThreshold) return 'due_soon'
+
+  return 'upcoming'
+}
+
+export const PRODUCTION_STATUS_LABELS = {
+  completed: 'Completed',
+  overdue:   'Overdue',
+  due_soon:  'Due Soon',
+  upcoming:  'Upcoming',
+}
+
 export const DATE_RANGES = [
   { value: 'today_tomorrow', label: 'Today & Tomorrow' },
   { value: 'today', label: 'Today' },

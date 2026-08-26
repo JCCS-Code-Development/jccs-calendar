@@ -1,0 +1,40 @@
+# Clean-URL routing for the flat-file API (production/Apache). See router.php
+# for the equivalent used by the local PHP dev server, which ignores
+# .htaccess entirely — keep the two route tables in sync.
+RewriteEngine On
+RewriteBase /api/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^events/([0-9]+)/mark-done$ events/mark_done.php?id=$1 [QSA,L]
+RewriteRule ^events/([0-9]+)/export\.ics$ events/export_ics.php?id=$1 [QSA,L]
+RewriteRule ^events/([0-9]+)$ events/item.php?id=$1 [QSA,L]
+RewriteRule ^events$ events/index.php [QSA,L]
+RewriteRule ^my-events$ events/my.php [QSA,L]
+RewriteRule ^todos$ events/todos.php [QSA,L]
+RewriteRule ^calendar-events$ events/calendar.php [QSA,L]
+RewriteRule ^event-types$ event-types/index.php [QSA,L]
+RewriteRule ^external-calendar$ calendar/external.php [QSA,L]
+RewriteRule ^calendar\.ics$ calendar/feed.php [QSA,L]
+
+RewriteRule ^users/([0-9]+)$ users/item.php?id=$1 [QSA,L]
+RewriteRule ^users$ users/index.php [QSA,L]
+RewriteRule ^roles$ roles/index.php [QSA,L]
+
+RewriteRule ^clients/([0-9]+)$ clients/item.php?id=$1 [QSA,L]
+RewriteRule ^clients$ clients/index.php [QSA,L]
+
+RewriteRule ^jobs/sync-fieldclock$ jobs/sync_fieldclock.php [QSA,L]
+RewriteRule ^jobs/photo$ jobs/photo.php [QSA,L]
+RewriteRule ^jobs/([0-9]+)$ jobs/item.php?id=$1 [QSA,L]
+RewriteRule ^jobs$ jobs/index.php [QSA,L]
+
+RewriteRule ^push/key$ push/key.php [QSA,L]
+RewriteRule ^push/subscribe$ push/subscribe.php [QSA,L]
+RewriteRule ^push/unsubscribe$ push/unsubscribe.php [QSA,L]
+
+RewriteRule ^auth/verify$ auth/verify.php [QSA,L]
+RewriteRule ^auth/login$ auth/login.php [QSA,L]
+RewriteRule ^auth/refresh$ auth/refresh.php [QSA,L]
+RewriteRule ^auth/logout$ auth/logout.php [QSA,L]

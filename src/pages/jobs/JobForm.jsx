@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getJob, createJob, updateJob, deleteJob, getClients, createClient } from '../../api/jobs'
+import { getJob, createJob, updateJob, deleteJob, getClients, createClient, uploadJobPhoto, deleteJobPhoto } from '../../api/jobs'
 import { getUsers } from '../../api/users'
 
 const STATUS_OPTIONS = ['Active', 'On Hold', 'Completed', 'Cancelled']
@@ -33,7 +33,16 @@ export default function JobForm() {
     projected_end:   '',
     status:          'Active',
     worker_ids:      [],
+    lead_time_days:  '',
   })
+
+  // Carpentry Production Calendar: reference photo. A job must exist before
+  // a photo can be attached (the upload endpoint needs a job_id), so a
+  // photo picked while creating is uploaded right after the job is saved.
+  const [photoFile, setPhotoFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
+  const [photoUrl, setPhotoUrl] = useState(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   useEffect(() => {
     Promise.all([getClients(), getUsers()]).then(([c, u]) => {
@@ -55,12 +64,30 @@ export default function JobForm() {
         projected_end:   job.projected_end?.slice(0, 10) ?? '',
         status:          job.status,
         worker_ids:      job.workers.map((w) => w.id),
+        lead_time_days:  job.lead_time_days ?? '',
       })
+      setPhotoUrl(job.photo_url ?? null)
       setLoading(false)
     })
   }, [id, isEdit])
 
   const set = (field, value) => setForm((f) => ({ ...f, [field]: value }))
+
+  const handlePhotoSelect = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
+  const handlePhotoRemove = async () => {
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    if (isEdit && photoUrl) {
+      try { await deleteJobPhoto(id) } catch { /* best effort */ }
+      setPhotoUrl(null)
+    }
+  }
 
   const toggleWorker = (uid) => {
     setForm((f) => ({
@@ -93,8 +120,17 @@ export default function JobForm() {
 
     setSaving(true); setError('')
     try {
-      const payload = { ...form, client_id: Number(form.client_id) }
-      isEdit ? await updateJob(id, payload) : await createJob(payload)
+      const payload = {
+        ...form,
+        client_id: Number(form.client_id),
+        lead_time_days: form.lead_time_days === '' ? null : Number(form.lead_time_days),
+      }
+      const saved = isEdit ? await updateJob(id, payload) : await createJob(payload)
+      if (photoFile) {
+        setUploadingPhoto(true)
+        try { await uploadJobPhoto(saved.id, photoFile) } catch { /* job itself saved fine; photo can be retried from edit */ }
+        setUploadingPhoto(false)
+      }
       navigate('/jobs')
     } catch (err) {
       setError(err?.response?.data?.message ?? 'Could not save job.')
@@ -236,6 +272,44 @@ export default function JobForm() {
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
             />
           </div>
+        </div>
+
+        {/* Carpentry production lead time — drives the recommended start date on the Production Calendar */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+            Carpentry Production Lead Time <span className="font-normal text-gray-400">(days, optional)</span>
+          </label>
+          <input
+            type="number"
+            min="0"
+            placeholder="e.g. 10"
+            value={form.lead_time_days}
+            onChange={(e) => set('lead_time_days', e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+          />
+        </div>
+
+        {/* Project photo — shown on the Production Calendar */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+            Project Photo <span className="font-normal text-gray-400">(optional)</span>
+          </label>
+          {(photoPreview || photoUrl) ? (
+            <div className="flex items-center gap-3">
+              <img src={photoPreview ?? photoUrl} alt="" className="w-20 h-20 rounded-xl object-cover border border-gray-200" />
+              <button type="button" onClick={handlePhotoRemove} className="text-xs text-red-500 hover:text-red-700 font-medium">
+                Remove photo
+              </button>
+            </div>
+          ) : (
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handlePhotoSelect}
+              className="w-full text-sm text-gray-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-brand-50 file:text-brand-600 file:text-xs file:font-semibold hover:file:bg-brand-100"
+            />
+          )}
+          {uploadingPhoto && <p className="text-xs text-gray-400 mt-1">Uploading photo…</p>}
         </div>
 
         {/* Status */}

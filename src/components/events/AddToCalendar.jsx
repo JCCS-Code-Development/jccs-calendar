@@ -74,7 +74,7 @@ export default function AddToCalendar({ event, apiBase, token }) {
     {
       label: 'Apple / iCal (.ics)',
       icon: '🍎',
-      href: `${apiBase}/events/${event.id}/export.ics`,
+      href: icsDownloadUrl(event, apiBase, token),
       external: false,
       download: true,
     },
@@ -113,7 +113,7 @@ export default function AddToCalendar({ event, apiBase, token }) {
           ))}
           <div className="border-t border-gray-100 mt-1 pt-1">
             <a
-              href={`${apiBase}/calendar.ics`}
+              href={`${apiBase}/calendar.ics?token=${token}`}
               download="jccs-calendar.ics"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors"

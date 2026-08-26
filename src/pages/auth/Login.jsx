@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
-import { login } from '../../api/auth'
+import { login as fieldclockLogin } from '../../api/fieldclockAuth'
+import { verify } from '../../api/auth'
 import { useAuthStore } from '../../store/authStore'
 
 function SwirlBackground() {
@@ -18,72 +19,72 @@ function SwirlBackground() {
       <defs>
         <linearGradient id="s1" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#3b82f6" stopOpacity="0" />
-          <stop offset="50%" stopColor="#60a5fa" stopOpacity="0.35" />
+          <stop offset="50%" stopColor="#60a5fa" stopOpacity="0.32" />
           <stop offset="100%" stopColor="#93c5fd" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="s2" x1="100%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#1d4ed8" stopOpacity="0" />
-          <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.28" />
+          <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.26" />
           <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="s3" x1="0%" y1="100%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#2563eb" stopOpacity="0" />
-          <stop offset="40%" stopColor="#60a5fa" stopOpacity="0.22" />
+          <stop offset="40%" stopColor="#60a5fa" stopOpacity="0.20" />
           <stop offset="100%" stopColor="#bfdbfe" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="s4" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.16" />
           <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      {/* Large background sweep — top-left */}
+      {/* Sweep 1 — top-left diagonal, wide ribbon */}
       <path
-        d="M-80 -40 C 60 80, 300 20, 420 200 C 540 380, 200 460, 340 600 C 480 740, 700 580, 860 620"
+        d="M-100 -60 C 80 60, 320 -10, 440 180 C 560 370, 210 440, 360 590 C 510 740, 720 570, 880 610"
         fill="none"
         stroke="url(#s1)"
-        strokeWidth="120"
+        strokeWidth="46"
         strokeLinecap="round"
       />
-      {/* Mid sweep — top-right descending */}
+      {/* Sweep 2 — top-right descending, offset well away from sweep 1 */}
       <path
-        d="M 900 -60 C 720 100, 580 -20, 460 160 C 340 340, 600 380, 500 520 C 400 660, 160 560, 80 680"
+        d="M 920 -80 C 740 80, 600 -40, 480 150 C 360 340, 620 370, 520 510 C 420 650, 180 550, 100 670"
         fill="none"
         stroke="url(#s2)"
-        strokeWidth="90"
+        strokeWidth="34"
         strokeLinecap="round"
       />
-      {/* Thin accent — bottom-left rising */}
+      {/* Sweep 3 — bottom-left rising, tighter ribbon */}
       <path
-        d="M -60 620 C 100 500, 240 560, 360 420 C 480 280, 320 200, 500 100 C 680 0, 760 80, 860 -40"
+        d="M -80 640 C 80 520, 220 580, 350 440 C 480 300, 330 210, 510 110 C 690 10, 770 90, 880 -60"
         fill="none"
         stroke="url(#s3)"
-        strokeWidth="55"
+        strokeWidth="22"
         strokeLinecap="round"
       />
-      {/* Fine highlight — centre */}
+      {/* Sweep 4 — centre diagonal, fine accent */}
       <path
-        d="M 200 -20 C 260 140, 160 260, 320 340 C 480 420, 560 300, 620 460 C 680 620, 580 680, 700 740"
+        d="M 180 -30 C 250 130, 155 250, 310 340 C 465 430, 555 310, 615 470 C 675 630, 570 690, 690 750"
         fill="none"
         stroke="url(#s4)"
-        strokeWidth="38"
+        strokeWidth="14"
         strokeLinecap="round"
       />
-      {/* Very thin bright edge line */}
+      {/* Hair-line edge accents */}
       <path
-        d="M 0 300 C 120 260, 200 320, 340 280 C 480 240, 520 160, 680 200 C 840 240, 820 340, 950 300"
+        d="M 0 290 C 130 255, 210 315, 360 272 C 510 229, 540 148, 700 192 C 860 236, 840 332, 960 292"
         fill="none"
         stroke="#60a5fa"
         strokeWidth="1.5"
-        strokeOpacity="0.18"
+        strokeOpacity="0.15"
         strokeLinecap="round"
       />
       <path
-        d="M 0 380 C 140 340, 260 400, 400 360 C 540 320, 580 240, 740 260 C 900 280, 880 360, 960 340"
+        d="M 0 390 C 150 348, 270 408, 420 366 C 570 324, 600 242, 760 262 C 920 282, 900 368, 970 348"
         fill="none"
         stroke="#93c5fd"
         strokeWidth="1"
-        strokeOpacity="0.12"
+        strokeOpacity="0.10"
         strokeLinecap="round"
       />
     </svg>
@@ -120,11 +121,24 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
-      const data = await login(email.trim(), password)
-      storeLogin(data.user, data.token)
+      // Two steps, since Calendar has no login of its own: authenticate
+      // against FieldClock, then resolve the resulting token to a
+      // Calendar-specific role via /auth/verify. Stash the token first
+      // (updateToken, not login) so verify()'s request can carry it —
+      // storeLogin only finalizes the session once we know the role.
+      const { token, refreshToken } = await fieldclockLogin(email.trim(), password)
+      useAuthStore.getState().updateToken(token, refreshToken)
+      const user = await verify()
+      storeLogin(user, token, refreshToken)
       navigate('/', { replace: true })
     } catch (err) {
-      setError(err?.response?.data?.message ?? t('auth.invalidCreds'))
+      useAuthStore.getState().logout()
+      const status = err?.response?.status
+      if (status === 403) {
+        setError('Your account is not set up for Calendar yet. Contact your administrator.')
+      } else {
+        setError(err?.response?.data?.error ?? t('auth.invalidCreds'))
+      }
     } finally {
       setLoading(false)
     }
@@ -140,10 +154,13 @@ export default function Login() {
           <img
             src="/jccs-logo.jpg"
             alt="JCCS Services"
-            className="h-14 mx-auto mb-5"
+            className="h-14 mx-auto mb-4"
             style={{ filter: 'invert(1) brightness(10)' }}
           />
-          <p className="text-brand-100/70 text-sm">{t('auth.signInToContinue')}</p>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight mb-1">
+            JCCS Calendar
+          </h1>
+          <p className="text-brand-100/60 text-sm">{t('auth.signInToContinue')}</p>
         </div>
 
         <form

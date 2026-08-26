@@ -1,10 +1,5 @@
 import client from './client'
 
-export const login = (email, password) =>
-  client.post('/auth/login', { email, password }).then((r) => r.data)
-
-export const logout = () =>
-  client.post('/auth/logout').then((r) => r.data)
-
-export const getMe = () =>
-  client.get('/user').then((r) => r.data)
+// Resolves a FieldClock-issued JWT to this user's Calendar-specific role.
+// Returns 403 if the user hasn't been provisioned for Calendar yet.
+export const verify = () => client.get('/auth/verify').then((r) => r.data)

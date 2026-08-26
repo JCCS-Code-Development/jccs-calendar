@@ -4,8 +4,13 @@ import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import Button from '../../components/ui/Button'
 import { getUser, createUser, updateUser, getRoles } from '../../api/users'
+import { listEmployees } from '../../api/fieldclockAuth'
 import { useAuth } from '../../hooks/useAuth'
 
+// There's no local signup — a Calendar "user" is an existing FieldClock
+// account with a Calendar role attached (see api/users/index.php). On
+// create, pick who from FieldClock's employee list; on edit, the identity
+// (fieldclock_user_id) is fixed, only name/role can change.
 export default function UserForm() {
   const navigate = useNavigate()
   const { id } = useParams()
@@ -16,13 +21,18 @@ export default function UserForm() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [roles, setRoles] = useState([])
-  const [form, setForm] = useState({ name: '', email: '', role_id: '', password: '' })
+  const [employees, setEmployees] = useState([])
+  const [employeesFailed, setEmployeesFailed] = useState(false)
+  const [form, setForm] = useState({ fieldclock_user_id: '', name: '', role_id: '' })
 
   useEffect(() => {
     getRoles().then(setRoles)
+    if (!isEdit) {
+      listEmployees().then((data) => setEmployees(data.employees ?? [])).catch(() => setEmployeesFailed(true))
+    }
     if (isEdit) {
       getUser(id).then((u) => {
-        setForm({ name: u.name, email: u.email, role_id: String(u.role_id ?? ''), password: '' })
+        setForm({ fieldclock_user_id: String(u.id), name: u.name, role_id: String(u.role_id ?? '') })
         setLoading(false)
       }).catch(() => setLoading(false))
     }
@@ -30,20 +40,21 @@ export default function UserForm() {
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }))
 
+  const handleEmployeePick = (employeeId) => {
+    const emp = employees.find((e) => String(e.id) === employeeId)
+    setForm((f) => ({ ...f, fieldclock_user_id: employeeId, name: emp?.name ?? f.name }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
     setError('')
     try {
-      const payload = { ...form }
-      if (isEdit && !payload.password) delete payload.password
-      if (isEdit) await updateUser(id, payload)
-      else await createUser(payload)
+      if (isEdit) await updateUser(id, { name: form.name, role_id: form.role_id })
+      else await createUser({ fieldclock_user_id: Number(form.fieldclock_user_id), name: form.name, role_id: form.role_id })
       navigate('/users')
     } catch (err) {
-      const msgs = err?.response?.data?.errors
-      if (msgs) setError(Object.values(msgs).flat().join(' '))
-      else setError(err?.response?.data?.message ?? 'Failed to save.')
+      setError(err?.response?.data?.error ?? 'Failed to save.')
     } finally {
       setSaving(false)
     }
@@ -68,23 +79,37 @@ export default function UserForm() {
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
         )}
 
+        {!isEdit && !employeesFailed && (
+          <Select
+            label="FieldClock Employee"
+            value={form.fieldclock_user_id}
+            onChange={(e) => handleEmployeePick(e.target.value)}
+            required
+          >
+            <option value="">-- Select Employee --</option>
+            {employees.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+          </Select>
+        )}
+        {!isEdit && employeesFailed && (
+          <Input
+            label="FieldClock Employee ID"
+            type="number"
+            value={form.fieldclock_user_id}
+            onChange={(e) => set('fieldclock_user_id', e.target.value)}
+            required
+            placeholder="Their FieldClock user id"
+          />
+        )}
+        {isEdit && (
+          <Input label="FieldClock Employee ID" value={form.fieldclock_user_id} disabled />
+        )}
+
         <Input label="Full Name" value={form.name} onChange={(e) => set('name', e.target.value)} required placeholder="John Doe" />
-        <Input label="Email Address" type="email" value={form.email} onChange={(e) => set('email', e.target.value)} required placeholder="john@example.com" />
 
         <Select label="Role" value={form.role_id} onChange={(e) => set('role_id', e.target.value)} required>
           <option value="">-- Select Role --</option>
           {roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
         </Select>
-
-        <Input
-          label={isEdit ? 'New Password (leave blank to keep)' : 'Password'}
-          type="password"
-          value={form.password}
-          onChange={(e) => set('password', e.target.value)}
-          required={!isEdit}
-          placeholder={isEdit ? 'Leave blank to keep current' : 'Min. 8 characters'}
-          autoComplete="new-password"
-        />
 
         <div className="flex gap-3 pt-2">
           <Button type="submit" loading={saving} size="lg" className="flex-1">
