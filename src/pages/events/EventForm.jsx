@@ -136,7 +136,7 @@ export default function EventForm() {
         priority: e.priority ?? 'Normal',
         location: e.location ?? '',
         description: e.description ?? '',
-        is_all_day_todo: false,
+        is_all_day_todo: e.is_all_day ?? false,
         all_day_date: '',
         details,
       })
@@ -167,6 +167,7 @@ export default function EventForm() {
           ? `${form.all_day_date ?? form.start_datetime?.slice(0, 10)} 00:00:00`
           : form.start_datetime,
         end_datetime: isAllDay ? null : form.end_datetime || null,
+        is_all_day: isAllDay,
         status: form.status,
         priority: form.priority,
         location: form.location || null,

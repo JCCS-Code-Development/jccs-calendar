@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import Badge from '../ui/Badge'
 import AddToCalendar from './AddToCalendar'
-import { formatDateTime, formatTime } from '../../utils/format'
+import { formatDateTime, formatDate, formatTime } from '../../utils/format'
 import { useAuth } from '../../hooks/useAuth'
 import { useAuthStore } from '../../store/authStore'
 import { markDone } from '../../api/events'
@@ -36,8 +36,14 @@ export default function EventCard({ event, onRefresh, color }) {
               {event.title}
             </p>
             <p className="text-xs text-gray-500 mt-0.5">
-              {formatDateTime(event.start_datetime)}
-              {event.end_datetime && ` – ${formatTime(event.end_datetime)}`}
+              {event.is_all_day ? (
+                `${formatDate(event.start_datetime)} · Any time`
+              ) : (
+                <>
+                  {formatDateTime(event.start_datetime)}
+                  {event.end_datetime && ` – ${formatTime(event.end_datetime)}`}
+                </>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">

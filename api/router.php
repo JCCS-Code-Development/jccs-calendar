@@ -46,6 +46,15 @@ $routes = [
     '#^/auth/login$#'   => ['auth/login.php', null],
     '#^/auth/refresh$#' => ['auth/refresh.php', null],
     '#^/auth/logout$#'  => ['auth/logout.php', null],
+
+    // Local dev only: VITE_FIELDCLOCK_API_BASE_URL points at this same
+    // local server for convenience, so src/api/fieldclockAuth.js's calls
+    // to FieldClock's real .php-suffixed paths need to land somewhere too
+    // — aliased to the same mocks above. Production never takes this path
+    // (VITE_FIELDCLOCK_API_BASE_URL there is the real fieldclock domain).
+    '#^/auth/login\.php$#'   => ['auth/login.php', null],
+    '#^/auth/refresh\.php$#' => ['auth/refresh.php', null],
+    '#^/auth/logout\.php$#'  => ['auth/logout.php', null],
 ];
 
 foreach ($routes as $pattern => [$file, $param]) {
