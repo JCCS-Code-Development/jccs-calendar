@@ -39,10 +39,10 @@ function jobsOnDay(jobs, day) {
 const STATUS_DOT = { completed: 'bg-green-500', overdue: 'bg-red-500', due_soon: 'bg-amber-500', upcoming: 'bg-blue-500' }
 
 function ChevLeft() {
-  return <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+  return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
 }
 function ChevRight() {
-  return <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+  return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
 }
 
 // Month grid — same visual pattern as CalendarView's MonthView, but entries
@@ -171,13 +171,14 @@ export default function ProductionCalendar() {
       </div>
 
       {/* Status filter */}
-      <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5 mb-4 w-fit">
+      <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 mb-4 w-fit max-w-full overflow-x-auto">
         {['all', 'overdue', 'due_soon', 'upcoming', 'completed'].map((s) => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
-            className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${statusFilter === s ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-semibold rounded-lg whitespace-nowrap transition-colors ${statusFilter === s ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
           >
+            {s !== 'all' && <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[s]}`} />}
             {s === 'all' ? 'All' : PRODUCTION_STATUS_LABELS[s]}
           </button>
         ))}
@@ -185,11 +186,11 @@ export default function ProductionCalendar() {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 gap-3 flex-wrap">
-          <div className="flex items-center gap-1">
-            <button onClick={prev} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500"><ChevLeft /></button>
-            <button onClick={today} className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">Today</button>
-            <button onClick={next} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500"><ChevRight /></button>
-            <h2 className="text-sm font-bold text-gray-900 ml-1 whitespace-nowrap">{headLabel}</h2>
+          <div className="flex items-center gap-1.5">
+            <button onClick={prev} aria-label="Previous" className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"><ChevLeft /></button>
+            <button onClick={today} className="px-3.5 py-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors">Today</button>
+            <button onClick={next} aria-label="Next" className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"><ChevRight /></button>
+            <h2 className="text-base font-bold text-gray-900 ml-2 whitespace-nowrap">{headLabel}</h2>
           </div>
           <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
             {[['week', 'Week'], ['month', 'Month']].map(([v, label]) => (
@@ -212,11 +213,18 @@ export default function ProductionCalendar() {
             <button onClick={load} className="text-sm text-brand-500 font-semibold hover:underline">Retry</button>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-3 text-gray-400">
-            <svg className="w-12 h-12 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="flex flex-col items-center justify-center h-64 gap-3 px-6 text-center">
+            <svg className="w-14 h-14 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            <p className="text-sm font-medium">No projects scheduled for this range.</p>
+            <div>
+              <p className="text-base font-semibold text-gray-600">Nothing scheduled here</p>
+              <p className="text-sm text-gray-400 mt-1">
+                {statusFilter === 'all'
+                  ? 'No projects have a completion date in this range. Try another month.'
+                  : `No ${PRODUCTION_STATUS_LABELS[statusFilter].toLowerCase()} projects in this range — try “All” or another month.`}
+              </p>
+            </div>
           </div>
         ) : view === 'week' ? (
           <WeekStrip anchor={anchor} jobs={filtered} onSelect={setSelected} />

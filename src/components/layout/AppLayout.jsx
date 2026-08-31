@@ -83,14 +83,14 @@ function NavItem({ to, icon, label, end = false, onClick }) {
 
 function SidebarLogo() {
   return (
-    <div className="px-5 py-5 border-b border-brand-700/60">
+    <div className="px-5 py-5 border-b border-brand-700/60 flex flex-col items-center text-center">
       <img
         src="/jccs-logo.jpg"
         alt="JCCS Services"
         className="h-12 w-auto"
         style={{ filter: 'invert(1) brightness(10)' }}
       />
-      <p className="text-brand-300 text-sm font-bold mt-2 tracking-wide uppercase">Calendar</p>
+      <p className="text-brand-300 text-xs font-bold mt-2 tracking-widest uppercase">Calendar</p>
     </div>
   )
 }
@@ -146,8 +146,9 @@ export default function AppLayout() {
   const SidebarContent = ({ onNavClick }) => (
     <>
       <SidebarLogo />
-      <div className="px-5 py-2 border-b border-brand-700/40">
-        <p className="text-brand-100/90 text-sm font-semibold truncate">{user?.name}</p>
+      <div className="px-5 py-2.5 border-b border-brand-700/40">
+        <p className="text-brand-100 text-sm font-semibold truncate">Welcome, {user?.name?.split(' ')[0]}!</p>
+        <p className="text-brand-400/60 text-xs">{user?.role}</p>
       </div>
       <nav className="flex-1 py-3 overflow-y-auto">
         {navItems.map((item) => (
@@ -184,8 +185,9 @@ export default function AppLayout() {
               <SidebarLogo />
               <button onClick={close} className="text-brand-100/60 hover:text-white p-1 text-xl ml-2">✕</button>
             </div>
-            <div className="px-5 py-2 border-b border-brand-700/40">
-              <p className="text-brand-100/90 text-sm font-semibold truncate">{user?.name}</p>
+            <div className="px-5 py-2.5 border-b border-brand-700/40">
+              <p className="text-brand-100 text-sm font-semibold truncate">Welcome, {user?.name?.split(' ')[0]}!</p>
+              <p className="text-brand-400/60 text-xs">{user?.role}</p>
             </div>
             <nav className="flex-1 py-3 overflow-y-auto">
               {navItems.map((item) => (

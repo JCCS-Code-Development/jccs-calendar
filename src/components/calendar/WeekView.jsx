@@ -45,7 +45,11 @@ export default function WeekView({ anchor, events, navigate, getColor }) {
   const timedEvents  = events.filter((e) => !isAllDay(e))
 
   return (
-    <div className="flex flex-col">
+    <div ref={scrollRef} className="overflow-y-auto" style={{ maxHeight: '60vh' }}>
+      {/* Header group lives inside the same scroll container as the grid
+          below, so every column border lines up exactly; sticky keeps it
+          pinned while the hours scroll. */}
+      <div className="sticky top-0 z-20 bg-white">
       {/* Day headers */}
       <div className="grid border-b border-gray-100" style={{ gridTemplateColumns: '48px repeat(7, 1fr)' }}>
         <div className="border-r border-gray-100" />
@@ -90,10 +94,10 @@ export default function WeekView({ anchor, events, navigate, getColor }) {
           })}
         </div>
       )}
+      </div>
 
       {/* Time grid */}
-      <div ref={scrollRef} className="overflow-y-auto" style={{ maxHeight: '60vh' }}>
-        <div className="relative grid" style={{ gridTemplateColumns: '48px repeat(7, 1fr)', height: totalH }}>
+      <div className="relative grid" style={{ gridTemplateColumns: '48px repeat(7, 1fr)', height: totalH }}>
           {/* Hour labels */}
           <div className="relative border-r border-gray-100">
             {hours.map((h) => (
@@ -162,6 +166,5 @@ export default function WeekView({ anchor, events, navigate, getColor }) {
           })}
         </div>
       </div>
-    </div>
   )
 }
