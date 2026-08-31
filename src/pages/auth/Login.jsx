@@ -7,90 +7,6 @@ import { login as fieldclockLogin } from '../../api/fieldclockAuth'
 import { verify } from '../../api/auth'
 import { useAuthStore } from '../../store/authStore'
 
-function SwirlBackground() {
-  return (
-    <svg
-      className="absolute inset-0 w-full h-full"
-      viewBox="0 0 800 600"
-      preserveAspectRatio="xMidYMid slice"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id="s1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0" />
-          <stop offset="50%" stopColor="#60a5fa" stopOpacity="0.32" />
-          <stop offset="100%" stopColor="#93c5fd" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="s2" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#1d4ed8" stopOpacity="0" />
-          <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.26" />
-          <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="s3" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#2563eb" stopOpacity="0" />
-          <stop offset="40%" stopColor="#60a5fa" stopOpacity="0.20" />
-          <stop offset="100%" stopColor="#bfdbfe" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="s4" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.16" />
-          <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-
-      {/* Sweep 1 — top-left diagonal, wide ribbon */}
-      <path
-        d="M-100 -60 C 80 60, 320 -10, 440 180 C 560 370, 210 440, 360 590 C 510 740, 720 570, 880 610"
-        fill="none"
-        stroke="url(#s1)"
-        strokeWidth="46"
-        strokeLinecap="round"
-      />
-      {/* Sweep 2 — top-right descending, offset well away from sweep 1 */}
-      <path
-        d="M 920 -80 C 740 80, 600 -40, 480 150 C 360 340, 620 370, 520 510 C 420 650, 180 550, 100 670"
-        fill="none"
-        stroke="url(#s2)"
-        strokeWidth="34"
-        strokeLinecap="round"
-      />
-      {/* Sweep 3 — bottom-left rising, tighter ribbon */}
-      <path
-        d="M -80 640 C 80 520, 220 580, 350 440 C 480 300, 330 210, 510 110 C 690 10, 770 90, 880 -60"
-        fill="none"
-        stroke="url(#s3)"
-        strokeWidth="22"
-        strokeLinecap="round"
-      />
-      {/* Sweep 4 — centre diagonal, fine accent */}
-      <path
-        d="M 180 -30 C 250 130, 155 250, 310 340 C 465 430, 555 310, 615 470 C 675 630, 570 690, 690 750"
-        fill="none"
-        stroke="url(#s4)"
-        strokeWidth="14"
-        strokeLinecap="round"
-      />
-      {/* Hair-line edge accents */}
-      <path
-        d="M 0 290 C 130 255, 210 315, 360 272 C 510 229, 540 148, 700 192 C 860 236, 840 332, 960 292"
-        fill="none"
-        stroke="#60a5fa"
-        strokeWidth="1.5"
-        strokeOpacity="0.15"
-        strokeLinecap="round"
-      />
-      <path
-        d="M 0 390 C 150 348, 270 408, 420 366 C 570 324, 600 242, 760 262 C 920 282, 900 368, 970 348"
-        fill="none"
-        stroke="#93c5fd"
-        strokeWidth="1"
-        strokeOpacity="0.10"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
 function LangToggleLogin() {
   const { i18n } = useTranslation()
   const current = i18n.language
@@ -145,8 +61,7 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-svh flex flex-col items-center justify-center bg-brand-900 px-6 overflow-hidden">
-      <SwirlBackground />
+    <div className="relative min-h-svh flex flex-col items-center justify-center bg-brand-900 px-6">
       <LangToggleLogin />
 
       <div className="relative z-10 w-full max-w-sm">
