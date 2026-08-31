@@ -4,14 +4,16 @@ import { initReactI18next } from 'react-i18next'
 const en = {
   // Nav
   nav: {
-    calendar:   'Calendar',
-    allEvents:  'All Events',
-    myEvents:   'My Events',
-    timelines:  'Job Timelines',
-    production: 'Production Calendar',
-    todos:      'To-Do List',
-    users:      'Users',
-    signOut:    'Sign Out',
+    calendar:     'Calendar',
+    jobDeadlines: 'Job Deadlines',
+    mySchedule:   'My Schedule',
+    allEvents:    'All Events',
+    myEvents:     'My Events',
+    timelines:    'Job Timelines',
+    production:   'Production Calendar',
+    todos:        'To-Do List',
+    users:        'Users',
+    signOut:      'Sign Out',
   },
   // Common
   common: {
@@ -62,6 +64,8 @@ const en = {
   // Calendar
   calendar: {
     title:          'Calendar',
+    apptTitle:      'Appointments & Reminders',
+    apptSubtitle:   'Meetings, site visits, reminders and to-dos',
     connectOutlook: 'Connect Outlook',
     outlookUrl:     'Outlook ICS URL',
     outlookHelp:    'Paste the ICS/iCal link from your Outlook calendar.',
@@ -115,6 +119,10 @@ const en = {
   jobs: {
     title:          'Job Timelines',
     subtitle:       'Project Gantt chart by client',
+    hubTitle:       'Job Deadlines',
+    hubSubtitle:    'Scheduled completions and production timelines',
+    tabDeadlines:   'Deadlines',
+    tabTimeline:    'Timeline',
     newJob:         '+ New Job',
     editJob:        'Edit Job',
     createJob:      'Create Job',
@@ -168,14 +176,16 @@ const en = {
 
 const es = {
   nav: {
-    calendar:   'Calendario',
-    allEvents:  'Todos los Eventos',
-    myEvents:   'Mis Eventos',
-    timelines:  'Línea de Trabajos',
-    production: 'Calendario de Producción',
-    todos:      'Lista de Tareas',
-    users:      'Usuarios',
-    signOut:    'Cerrar Sesión',
+    calendar:     'Calendario',
+    jobDeadlines: 'Fechas de Entrega',
+    mySchedule:   'Mi Agenda',
+    allEvents:    'Todos los Eventos',
+    myEvents:     'Mis Eventos',
+    timelines:    'Línea de Trabajos',
+    production:   'Calendario de Producción',
+    todos:        'Lista de Tareas',
+    users:        'Usuarios',
+    signOut:      'Cerrar Sesión',
   },
   common: {
     save:       'Guardar',
@@ -222,6 +232,8 @@ const es = {
   },
   calendar: {
     title:          'Calendario',
+    apptTitle:      'Citas y Recordatorios',
+    apptSubtitle:   'Reuniones, visitas, recordatorios y tareas',
     connectOutlook: 'Conectar Outlook',
     outlookUrl:     'URL de Outlook ICS',
     outlookHelp:    'Pega el enlace ICS/iCal de tu calendario de Outlook.',
@@ -272,6 +284,10 @@ const es = {
   jobs: {
     title:          'Línea de Trabajos',
     subtitle:       'Diagrama de Gantt por cliente',
+    hubTitle:       'Fechas de Entrega',
+    hubSubtitle:    'Entregas programadas y líneas de producción',
+    tabDeadlines:   'Entregas',
+    tabTimeline:    'Cronograma',
     newJob:         '+ Nuevo Trabajo',
     editJob:        'Editar Trabajo',
     createJob:      'Crear Trabajo',

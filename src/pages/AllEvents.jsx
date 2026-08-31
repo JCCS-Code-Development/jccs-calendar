@@ -34,12 +34,14 @@ function ChevRight() {
   return <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
 }
 
-export default function AllEvents() {
+export default function AllEvents({ embedded = false }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { canManageEvents } = useAuth()
 
-  const [view,       setView]       = useState('week')
+  // Embedded inside the Calendar page's "List" tab — that page already owns
+  // the week/month grids, so here we only ever show the grouped list.
+  const [view,       setView]       = useState(embedded ? 'list' : 'week')
   const [anchor,     setAnchor]     = useState(new Date())
   const [events,     setEvents]     = useState([])
   const [eventTypes, setEventTypes] = useState([])
@@ -96,35 +98,37 @@ export default function AllEvents() {
 
   return (
     <div>
-      {/* Page header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <div>
-          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{t('events.allEvents')}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{events.length} {t('nav.allEvents').toLowerCase()}</p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* View toggle */}
-          <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
-            {[['week', t('common.week')], ['list', t('common.list')]].map(([v, label]) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${view === v ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-              >
-                {label}
-              </button>
-            ))}
+      {/* Page header — hidden when embedded in the Calendar page */}
+      {!embedded && (
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{t('events.allEvents')}</h1>
+            <p className="text-sm text-gray-500 mt-0.5">{events.length} {t('nav.allEvents').toLowerCase()}</p>
           </div>
-          {canManageEvents && (
-            <button
-              onClick={() => navigate('/events/create')}
-              className="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/30"
-            >
-              {t('events.createEvent')}
-            </button>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* View toggle */}
+            <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
+              {[['week', t('common.week')], ['list', t('common.list')]].map(([v, label]) => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${view === v ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {canManageEvents && (
+              <button
+                onClick={() => navigate('/events/create')}
+                className="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/30"
+              >
+                {t('events.createEvent')}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Calendar card (week view) */}
       {view === 'week' && (

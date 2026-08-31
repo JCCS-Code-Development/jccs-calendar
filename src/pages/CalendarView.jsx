@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   addDays, addMonths, subMonths, addWeeks, subWeeks,
@@ -10,6 +11,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useAuthStore } from '../store/authStore'
 import Spinner from '../components/ui/Spinner'
 import WeekView from '../components/calendar/WeekView'
+import AllEvents from './AllEvents'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -45,10 +47,6 @@ function eventsOnDay(events, day) {
     const dayEnd   = addDays(dayStart, 1)
     return start < dayEnd && end >= dayStart
   })
-}
-
-function minutesFromMidnight(date) {
-  return getHours(date) * 60 + getMinutes(date)
 }
 
 // ── sub-components ────────────────────────────────────────────────────────────
@@ -209,10 +207,11 @@ function OutlookModal({ onClose, onSave, current }) {
 
 export default function CalendarView() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { canManageEvents } = useAuth()
   const token = useAuthStore((s) => s.token)
 
-  const [view,   setView]   = useState('week')   // 'week' | 'month'
+  const [view,   setView]   = useState('week')   // 'week' | 'month' | 'list'
   const [anchor, setAnchor] = useState(new Date())
   const [events, setEvents] = useState([])
   const [outlookEvents, setOutlookEvents] = useState([])
@@ -270,8 +269,8 @@ export default function CalendarView() {
       {/* Page header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">Company Calendar</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Schedule overview</p>
+          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{t('calendar.apptTitle')}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{t('calendar.apptSubtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/* Outlook connect */}
@@ -316,23 +315,25 @@ export default function CalendarView() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Toolbar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 gap-3 flex-wrap">
-          {/* Nav */}
-          <div className="flex items-center gap-1">
-            <button onClick={prev} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
-              <ChevLeft />
-            </button>
-            <button onClick={today} className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
-              Today
-            </button>
-            <button onClick={next} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
-              <ChevRight />
-            </button>
-            <h2 className="text-sm font-bold text-gray-900 ml-1 whitespace-nowrap">{headLabel}</h2>
-          </div>
+          {/* Nav — only meaningful for the calendar grids */}
+          {view === 'list' ? <div /> : (
+            <div className="flex items-center gap-1">
+              <button onClick={prev} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
+                <ChevLeft />
+              </button>
+              <button onClick={today} className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                {t('common.today')}
+              </button>
+              <button onClick={next} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
+                <ChevRight />
+              </button>
+              <h2 className="text-sm font-bold text-gray-900 ml-1 whitespace-nowrap">{headLabel}</h2>
+            </div>
+          )}
 
           {/* View toggle */}
           <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
-            {[['week', 'Week'], ['month', 'Month']].map(([v, label]) => (
+            {[['week', t('common.week')], ['month', t('common.month')], ['list', t('common.list')]].map(([v, label]) => (
               <button
                 key={v}
                 onClick={() => setView(v)}
@@ -352,13 +353,17 @@ export default function CalendarView() {
           </div>
         ) : view === 'week' ? (
           <WeekView anchor={anchor} events={allEvents} navigate={navigate} />
-        ) : (
+        ) : view === 'month' ? (
           <MonthView month={anchor} events={allEvents} navigate={navigate} />
+        ) : (
+          <div className="p-4">
+            <AllEvents embedded />
+          </div>
         )}
       </div>
 
       {/* Legend */}
-      {!loading && legendUsers.length > 0 && (
+      {!loading && view !== 'list' && legendUsers.length > 0 && (
         <div className="mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Legend</p>
           <div className="flex flex-wrap gap-3">

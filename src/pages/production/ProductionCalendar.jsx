@@ -119,7 +119,7 @@ function WeekStrip({ anchor, jobs, onSelect }) {
   )
 }
 
-export default function ProductionCalendar() {
+export default function ProductionCalendar({ embedded = false }) {
   const navigate = useNavigate()
   const { canManageEvents } = useAuth()
 
@@ -155,20 +155,22 @@ export default function ProductionCalendar() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <div>
-          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">Carpentry Production Calendar</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Scheduled completions and recommended production start dates</p>
+      {!embedded && (
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">Carpentry Production Calendar</h1>
+            <p className="text-sm text-gray-500 mt-0.5">Scheduled completions and recommended production start dates</p>
+          </div>
+          {canManageEvents && (
+            <button
+              onClick={() => navigate('/jobs/create')}
+              className="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/30"
+            >
+              + New Project
+            </button>
+          )}
         </div>
-        {canManageEvents && (
-          <button
-            onClick={() => navigate('/jobs/create')}
-            className="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/30"
-          >
-            + New Project
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Status filter */}
       <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 mb-4 w-fit max-w-full overflow-x-auto">

@@ -89,7 +89,7 @@ const RANGE_OPTIONS = [
   { label: '1 yr', months: 12 },
 ]
 
-export default function JobTimelines() {
+export default function JobTimelines({ embedded = false }) {
   const navigate    = useNavigate()
   const { t } = useTranslation()
   const { canManageEvents } = useAuth()
@@ -162,11 +162,13 @@ export default function JobTimelines() {
   return (
     <div className="flex flex-col gap-4">
       {/* Page header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{t('jobs.title')}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{t('jobs.subtitle')}</p>
-        </div>
+      <div className={`flex flex-wrap items-center gap-3 ${embedded ? 'justify-end' : 'justify-between'}`}>
+        {!embedded && (
+          <div>
+            <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{t('jobs.title')}</h1>
+            <p className="text-sm text-gray-500 mt-0.5">{t('jobs.subtitle')}</p>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2">
           {/* Status filter */}
           <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5">
@@ -194,12 +196,14 @@ export default function JobTimelines() {
                 </svg>
                 {syncing ? t('common.syncing') : t('common.syncFieldclock')}
               </button>
-              <button
-                onClick={() => navigate('/jobs/create')}
-                className="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/30"
-              >
-                {t('jobs.newJob')}
-              </button>
+              {!embedded && (
+                <button
+                  onClick={() => navigate('/jobs/create')}
+                  className="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/30"
+                >
+                  {t('jobs.newJob')}
+                </button>
+              )}
             </>
           )}
         </div>

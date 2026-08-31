@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './router/ProtectedRoute'
 import RoleRoute from './router/RoleRoute'
 import AppLayout from './components/layout/AppLayout'
+import { useAuth } from './hooks/useAuth'
 
 import Login from './pages/auth/Login'
 import CalendarView from './pages/CalendarView'
@@ -11,9 +12,15 @@ import Todos from './pages/Todos'
 import EventForm from './pages/events/EventForm'
 import Users from './pages/users/Users'
 import UserForm from './pages/users/UserForm'
-import JobTimelines from './pages/jobs/JobTimelines'
+import JobsHub from './pages/jobs/JobsHub'
 import JobForm from './pages/jobs/JobForm'
-import ProductionCalendar from './pages/production/ProductionCalendar'
+
+// Landing page depends on role: office/admin get the company calendar,
+// field users (Lead/Crew) only ever work from their own schedule.
+function Home() {
+  const { canManageEvents } = useAuth()
+  return canManageEvents ? <CalendarView /> : <Navigate to="/my-events" replace />
+}
 
 export default function App() {
   return (
@@ -23,13 +30,13 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           {/* All authenticated users */}
-          <Route path="/"          element={<CalendarView />} />
+          <Route path="/"          element={<Home />} />
           <Route path="/my-events" element={<MyEvents />} />
-          <Route path="/jobs"      element={<JobTimelines />} />
-          <Route path="/production" element={<ProductionCalendar />} />
 
           {/* Admin + Office */}
           <Route element={<RoleRoute allowedRoles={['Admin', 'Office']} />}>
+            <Route path="/jobs"            element={<JobsHub />} />
+            <Route path="/production"      element={<JobsHub />} />
             <Route path="/events"          element={<AllEvents />} />
             <Route path="/todos"           element={<Todos />} />
             <Route path="/events/create"   element={<EventForm />} />
