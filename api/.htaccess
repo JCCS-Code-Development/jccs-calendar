@@ -4,8 +4,14 @@
 RewriteEngine On
 RewriteBase /api/
 
+# Stop mod_dir from 301-redirecting /api/jobs -> /api/jobs/ before the rules
+# below can route it — every route name here collides with a subfolder.
+DirectorySlash Off
+
+# Real files (uploaded photos, etc.) serve as-is. NOTE: no !-d guard —
+# route names deliberately match subfolder names (jobs/, events/, …), so a
+# directory check here would skip every one of them.
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
 
 RewriteRule ^events/([0-9]+)/mark-done$ events/mark_done.php?id=$1 [QSA,L]
 RewriteRule ^events/([0-9]+)/export\.ics$ events/export_ics.php?id=$1 [QSA,L]
