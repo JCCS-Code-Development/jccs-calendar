@@ -1,0 +1,25 @@
+# SPA routing — serve index.html for any path that isn't a real file,
+# directory, or the PHP API, so client-side routes (/login, /events/…, etc.)
+# survive a hard reload or direct navigation.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Never rewrite the API — hand /api/* straight to PHP.
+  RewriteRule ^api/ - [L]
+
+  # Real files and directories serve as-is.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else → the app shell.
+  RewriteRule ^ /index.html [L]
+</IfModule>
+
+# Keep the shell and service worker fresh; hashed assets are safe to cache hard.
+<IfModule mod_headers.c>
+  <FilesMatch "(sw\.js|registerSW\.js|index\.html|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
