@@ -110,14 +110,14 @@ export default function Login() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { login: storeLogin } = useAuthStore()
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email.trim()) { setError(t('auth.email') + ' required'); return }
+    if (!identifier.trim()) { setError(t('auth.identifierRequired')); return }
     setLoading(true)
     setError('')
     try {
@@ -126,7 +126,7 @@ export default function Login() {
       // Calendar-specific role via /auth/verify. Stash the token first
       // (updateToken, not login) so verify()'s request can carry it —
       // storeLogin only finalizes the session once we know the role.
-      const { token, refreshToken } = await fieldclockLogin(email.trim(), password)
+      const { token, refreshToken } = await fieldclockLogin(identifier.trim(), password)
       useAuthStore.getState().updateToken(token, refreshToken)
       const user = await verify()
       storeLogin(user, token, refreshToken)
@@ -168,13 +168,13 @@ export default function Login() {
           className="bg-white/95 backdrop-blur-sm rounded-2xl p-7 shadow-2xl shadow-black/40 flex flex-col gap-4 border border-white/10"
         >
           <Input
-            label={t('auth.email')}
-            type="email"
+            label={t('auth.identifier')}
+            type="text"
             inputMode="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
+            placeholder={t('auth.identifierPlaceholder')}
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            autoComplete="username"
           />
           <Input
             label={t('auth.password')}
