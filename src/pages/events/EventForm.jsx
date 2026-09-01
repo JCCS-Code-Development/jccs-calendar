@@ -8,6 +8,24 @@ import { getEvent, createEvent, updateEvent, deleteEvent, getEventTypes } from '
 import { getUsers } from '../../api/users'
 import { useAuth } from '../../hooks/useAuth'
 
+// Centered popup over the calendar with a dimmed backdrop. Click the
+// backdrop or press Esc to close (→ back to wherever you came from).
+function ModalShell({ onClose, children }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:p-8"
+      onClick={onClose}
+    >
+      <div
+        className="my-auto w-full max-w-2xl rounded-2xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
 const EVENT_CATEGORY_ORDER = [
   'Reminder', 'Site Visit', 'Meeting', 'Communication',
   'Supplies', 'Logistics', 'Estimate/Invoice', 'Payment',
@@ -147,6 +165,20 @@ export default function EventForm() {
     }).catch(() => setLoading(false))
   }, [id, isEdit])
 
+  const close = () => navigate(-1)
+
+  // Modal behaviour: lock background scroll and close on Esc.
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e) => { if (e.key === 'Escape') navigate(-1) }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [navigate])
+
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }))
   const setDetail = (key, val) => setForm((f) => ({ ...f, details: { ...f.details, [key]: val } }))
 
@@ -204,23 +236,31 @@ export default function EventForm() {
     catch { setDeleting(false) }
   }
 
-  if (loading) return <div className="flex justify-center py-16 text-gray-400">{t('f.loading')}</div>
-  if (!canManageEvents) return <div className="text-center py-16 text-gray-400">{t('f.accessDenied')}</div>
+  if (loading) return (
+    <ModalShell onClose={close}>
+      <div className="flex justify-center py-16 text-gray-400">{t('f.loading')}</div>
+    </ModalShell>
+  )
+  if (!canManageEvents) return (
+    <ModalShell onClose={close}>
+      <div className="text-center py-16 text-gray-400">{t('f.accessDenied')}</div>
+    </ModalShell>
+  )
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600 p-1">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">
+    <ModalShell onClose={close}>
+      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-6 py-4">
+        <h1 className="text-lg font-extrabold text-gray-900 tracking-tight">
           {isEdit ? t('f.editEventTitle') : t('f.createEventTitle')}
         </h1>
+        <button onClick={close} aria-label={t('f.cancel')} className="text-gray-400 hover:text-gray-600 p-1 -mr-1">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="max-h-[calc(100vh-11rem)] overflow-y-auto px-6 py-5 space-y-5">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
             {error}
@@ -441,7 +481,7 @@ export default function EventForm() {
           <Button type="submit" loading={saving} size="lg" className="flex-1">
             {isEdit ? t('f.saveChanges') : t('f.createEventBtn')}
           </Button>
-          <Button variant="secondary" size="lg" onClick={() => navigate(-1)}>
+          <Button variant="secondary" size="lg" onClick={close}>
             {t('f.cancel')}
           </Button>
           {isEdit && (
@@ -451,6 +491,6 @@ export default function EventForm() {
           )}
         </div>
       </form>
-    </div>
+    </ModalShell>
   )
 }

@@ -1,5 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { setDefaultOptions } from 'date-fns'
+import { enUS, es as esDate } from 'date-fns/locale'
 
 const en = {
   // Nav
@@ -69,6 +71,9 @@ const en = {
     apptSubtitle:   'Meetings, site visits, reminders and to-dos',
     filterByPerson: 'Filter by person',
     none:           'None',
+    outlookConnected: 'Outlook connected',
+    subscribe:      'Subscribe',
+    subscribeTitle: 'Subscribe in Apple Calendar / Outlook',
     connectOutlook: 'Connect Outlook',
     outlookUrl:     'Outlook ICS URL',
     outlookHelp:    'Paste the ICS/iCal link from your Outlook calendar.',
@@ -389,6 +394,9 @@ const es = {
     apptSubtitle:   'Reuniones, visitas, recordatorios y tareas',
     filterByPerson: 'Filtrar por persona',
     none:           'Ninguno',
+    outlookConnected: 'Outlook conectado',
+    subscribe:      'Suscribirse',
+    subscribeTitle: 'Suscribir en Apple Calendar / Outlook',
     connectOutlook: 'Conectar Outlook',
     outlookUrl:     'URL de Outlook ICS',
     outlookHelp:    'Pega el enlace ICS/iCal de tu calendario de Outlook.',
@@ -645,5 +653,12 @@ i18n.use(initReactI18next).init({
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
 })
+
+// Localise every date-fns format() call app-wide by language. Week always
+// starts Sunday regardless of locale so the calendar grid stays consistent.
+const applyDateLocale = (lng) =>
+  setDefaultOptions({ locale: lng === 'es' ? esDate : enUS, weekStartsOn: 0 })
+applyDateLocale(i18n.language)
+i18n.on('languageChanged', applyDateLocale)
 
 export default i18n

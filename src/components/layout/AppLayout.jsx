@@ -68,6 +68,7 @@ function NavItem({ to, icon, label, badge, end = false, onClick }) {
 }
 
 function SidebarLogo() {
+  const { t } = useTranslation()
   return (
     <div className="px-5 py-5 border-b border-brand-700/60 flex flex-col items-center text-center">
       <img
@@ -76,7 +77,7 @@ function SidebarLogo() {
         className="h-12 w-auto"
         style={{ filter: 'invert(1) brightness(10)' }}
       />
-      <p className="text-brand-300 text-xs font-bold mt-2 tracking-widest uppercase">Calendar</p>
+      <p className="text-brand-300 text-xs font-bold mt-2 tracking-widest uppercase">{t('nav.calendar')}</p>
     </div>
   )
 }

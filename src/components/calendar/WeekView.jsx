@@ -4,7 +4,6 @@ import {
   parseISO, getHours, getMinutes,
 } from 'date-fns'
 
-const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const HOUR_START = 6
 const HOUR_END   = 22
 const HOUR_PX    = 56
@@ -57,7 +56,7 @@ export default function WeekView({ anchor, events, navigate, getColor }) {
           const today = isToday(day)
           return (
             <div key={i} className={`py-2 text-center border-r border-gray-100 last:border-r-0 ${today ? 'bg-brand-50' : ''}`}>
-              <p className="text-[10px] font-medium text-gray-400 uppercase">{DAYS_SHORT[i]}</p>
+              <p className="text-[10px] font-medium text-gray-400 uppercase">{format(day, 'EEE')}</p>
               <div className={`w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold mx-auto mt-0.5 ${today ? 'bg-brand-500 text-white' : 'text-gray-700'}`}>
                 {format(day, 'd')}
               </div>

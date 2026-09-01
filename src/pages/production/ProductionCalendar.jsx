@@ -13,7 +13,6 @@ import ProductionEntryCard from '../../components/production/ProductionEntryCard
 import ProductionDetailModal from '../../components/production/ProductionDetailModal'
 import { getProductionStatus, PRODUCTION_STATUS_LABELS } from '../../utils/format'
 
-const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function dueDate(job) {
   return job.projected_end ? parseISO(job.projected_end.slice(0, 10)) : null
@@ -55,8 +54,8 @@ function MonthGrid({ month, jobs, onSelect }) {
     <div className="overflow-x-auto">
       <div className="min-w-[480px]">
         <div className="grid grid-cols-7 border-b border-gray-100">
-          {DAYS_SHORT.map((d) => (
-            <div key={d} className="py-2 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">{d}</div>
+          {days.slice(0, 7).map((d) => (
+            <div key={d.toISOString()} className="py-2 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">{format(d, 'EEE')}</div>
           ))}
         </div>
         <div className="grid grid-cols-7" style={{ minHeight: '60vh' }}>

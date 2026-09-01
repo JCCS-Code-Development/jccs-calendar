@@ -14,8 +14,6 @@ import WeekView from '../components/calendar/WeekView'
 import AllEvents from './AllEvents'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL
-const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const DAYS_FULL  = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const OUTLOOK_URL_KEY = 'jccs_outlook_ical_url'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -75,11 +73,11 @@ function MonthView({ month, events, navigate }) {
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[480px]">
-        {/* Day name headers */}
+        {/* Day name headers — localised, derived from the first grid row */}
         <div className="grid grid-cols-7 border-b border-gray-100">
-          {DAYS_SHORT.map((d) => (
-            <div key={d} className="py-2 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              {d}
+          {days.slice(0, 7).map((d) => (
+            <div key={d.toISOString()} className="py-2 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              {format(d, 'EEE')}
             </div>
           ))}
         </div>
@@ -282,7 +280,7 @@ export default function CalendarView() {
 
   const toggleLegend = (id) => setHidden((h) => {
     const next = new Set(h)
-    next.has(id) ? next.delete(id) : next.add(id)
+    if (next.has(id)) next.delete(id); else next.add(id)
     return next
   })
   const showAllLegend = () => setHidden(new Set())
@@ -324,19 +322,19 @@ export default function CalendarView() {
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
               <path d="M7 6C7 4.34315 8.34315 3 10 3H18C19.6569 3 21 4.34315 21 6V18C21 19.6569 19.6569 21 18 21H10C8.34315 21 7 19.6569 7 18V15H9V18C9 18.5523 9.44772 19 10 19H18C18.5523 19 19 18.5523 19 18V6C19 5.44772 18.5523 5 18 5H10C9.44772 5 9 5.44772 9 6V9H7V6Z"/><path d="M3 12L7 8V11H15V13H7V16L3 12Z"/>
             </svg>
-            {outlookUrl ? 'Outlook connected' : 'Connect Outlook'}
+            {outlookUrl ? t('calendar.outlookConnected') : t('calendar.connectOutlook')}
           </button>
 
           {/* Subscribe iCal */}
           <a
             href={`webcal://${new URL(API_BASE).host}/api/calendar.ics?token=${token}`}
-            title="Subscribe in Apple Calendar / Outlook"
+            title={t('calendar.subscribeTitle')}
             className="flex items-center gap-1.5 border border-gray-200 text-gray-600 hover:text-brand-500 hover:border-brand-300 px-3 py-2 rounded-xl text-sm font-medium transition-colors"
           >
             <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
-            Subscribe
+            {t('calendar.subscribe')}
           </a>
 
           {canManageEvents && (
@@ -344,7 +342,7 @@ export default function CalendarView() {
               onClick={() => navigate('/events/create')}
               className="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/30"
             >
-              + Create Event
+              {t('events.createEvent')}
             </button>
           )}
         </div>
