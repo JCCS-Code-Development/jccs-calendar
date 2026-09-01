@@ -215,6 +215,7 @@ export default function CalendarView() {
   const [anchor, setAnchor] = useState(new Date())
   const [events, setEvents] = useState([])
   const [outlookEvents, setOutlookEvents] = useState([])
+  const [hidden, setHidden] = useState(() => new Set())  // legend ids toggled off
   const [loading, setLoading] = useState(true)
   const [showOutlookModal, setShowOutlookModal] = useState(false)
   const [outlookUrl, setOutlookUrl] = useState(() => localStorage.getItem(OUTLOOK_URL_KEY) ?? '')
@@ -250,6 +251,44 @@ export default function CalendarView() {
 
   const allEvents = [...events, ...outlookEvents]
 
+  // Legend / per-person filter, built from whoever actually has events in the
+  // loaded range. Each JCCS event already carries a per-user `color` from the
+  // API (userColor(assigned_user_id)); reuse it so dots match the calendar.
+  const legend = (() => {
+    const byId = new Map()
+    let hasUnassigned = false
+    for (const e of events) {
+      if (e.assigned_user?.id != null) {
+        if (!byId.has(e.assigned_user.id)) {
+          byId.set(e.assigned_user.id, {
+            id: e.assigned_user.id,
+            name: e.assigned_user.name ?? `#${e.assigned_user.id}`,
+            color: e.color ?? '#64748b',
+          })
+        }
+      } else {
+        hasUnassigned = true
+      }
+    }
+    const list = [...byId.values()].sort((a, b) => a.name.localeCompare(b.name))
+    if (hasUnassigned) list.push({ id: 'unassigned', name: t('events.unassigned'), color: '#94a3b8' })
+    if (outlookEvents.length > 0) list.push({ id: 'outlook', name: 'Outlook', color: '#0078d4' })
+    return list
+  })()
+
+  const toggleLegend = (id) => setHidden((h) => {
+    const next = new Set(h)
+    next.has(id) ? next.delete(id) : next.add(id)
+    return next
+  })
+  const showAllLegend = () => setHidden(new Set())
+  const hideAllLegend = () => setHidden(new Set(legend.map((l) => l.id)))
+
+  const visibleEvents = allEvents.filter((ev) => {
+    if (ev.source === 'outlook') return !hidden.has('outlook')
+    return !hidden.has(ev.assigned_user?.id ?? 'unassigned')
+  })
+
   const isWeek  = view === 'week'
   const prev    = () => isWeek ? setAnchor((a) => subWeeks(a, 1))  : setAnchor((a) => subMonths(a, 1))
   const next    = () => isWeek ? setAnchor((a) => addWeeks(a, 1))  : setAnchor((a) => addMonths(a, 1))
@@ -258,11 +297,6 @@ export default function CalendarView() {
   const headLabel = isWeek
     ? (() => { const s = startOfWeek(anchor); const e = endOfWeek(anchor); return `${format(s, 'MMM d')} – ${isSameMonth(s, e) ? format(e, 'd, yyyy') : format(e, 'MMM d, yyyy')}` })()
     : format(anchor, 'MMMM yyyy')
-
-  const legendUsers = [
-    ...[...new Map(events.filter((e) => e.color).map((e) => [e.assigned_user_name ?? e.assigned_user, { name: e.assigned_user_name ?? e.assigned_user, color: e.color ?? e.event_type_color }])).values()],
-    ...(outlookEvents.length > 0 ? [{ name: 'Outlook', color: '#0078d4' }] : []),
-  ]
 
   return (
     <div>
@@ -352,9 +386,9 @@ export default function CalendarView() {
             <Spinner size="lg" className="text-brand-500" />
           </div>
         ) : view === 'week' ? (
-          <WeekView anchor={anchor} events={allEvents} navigate={navigate} />
+          <WeekView anchor={anchor} events={visibleEvents} navigate={navigate} />
         ) : view === 'month' ? (
-          <MonthView month={anchor} events={allEvents} navigate={navigate} />
+          <MonthView month={anchor} events={visibleEvents} navigate={navigate} />
         ) : (
           <div className="p-4">
             <AllEvents embedded />
@@ -362,17 +396,33 @@ export default function CalendarView() {
         )}
       </div>
 
-      {/* Legend */}
-      {!loading && view !== 'list' && legendUsers.length > 0 && (
+      {/* Legend / per-person filter */}
+      {!loading && view !== 'list' && legend.length > 0 && (
         <div className="mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Legend</p>
-          <div className="flex flex-wrap gap-3">
-            {legendUsers.map((u) => (
-              <div key={u.name} className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: u.color }} />
-                <span className="text-xs text-gray-600">{u.name}</span>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('calendar.filterByPerson')}</p>
+            <div className="flex items-center gap-2 text-xs font-semibold">
+              <button onClick={showAllLegend} className="text-brand-500 hover:text-brand-600">{t('common.all')}</button>
+              <span className="text-gray-300">·</span>
+              <button onClick={hideAllLegend} className="text-gray-400 hover:text-gray-600">{t('calendar.none')}</button>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {legend.map((u) => {
+              const off = hidden.has(u.id)
+              return (
+                <button
+                  key={u.id}
+                  onClick={() => toggleLegend(u.id)}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    off ? 'border-gray-200 bg-gray-50 text-gray-400' : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: off ? '#cbd5e1' : u.color }} />
+                  <span className={off ? 'line-through' : ''}>{u.name}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
