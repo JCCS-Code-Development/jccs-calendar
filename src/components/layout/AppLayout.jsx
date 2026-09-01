@@ -42,7 +42,7 @@ const MenuIcon = () => (
   </svg>
 )
 
-function NavItem({ to, icon, label, end = false, onClick }) {
+function NavItem({ to, icon, label, badge, end = false, onClick }) {
   return (
     <NavLink
       to={to}
@@ -58,6 +58,11 @@ function NavItem({ to, icon, label, end = false, onClick }) {
     >
       {icon}
       {label}
+      {badge && (
+        <span className="ml-auto rounded-full bg-amber-400/90 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+          {badge}
+        </span>
+      )}
     </NavLink>
   )
 }
@@ -123,7 +128,7 @@ export default function AppLayout() {
       ]
     : [
         { to: '/',          icon: <CalendarIcon />,   label: t('nav.calendar'), end: true },
-        { to: '/jobs',      icon: <ProductionIcon />, label: t('nav.jobDeadlines') },
+        { to: '/jobs',      icon: <ProductionIcon />, label: t('nav.jobDeadlines'), badge: t('nav.soon') },
         { to: '/my-events', icon: <MyEventsIcon />,   label: t('nav.mySchedule') },
         ...(canManageUsers ? [{ to: '/users', icon: <UsersIcon />, label: t('nav.users') }] : []),
       ]
