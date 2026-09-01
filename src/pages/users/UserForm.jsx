@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import Button from '../../components/ui/Button'
@@ -14,6 +15,7 @@ import EmployeeCombobox from '../../components/users/EmployeeCombobox'
 // (fieldclock_user_id) is fixed, only name/role can change.
 export default function UserForm() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { id } = useParams()
   const isEdit = Boolean(id)
   const { canManageUsers } = useAuth()
@@ -50,14 +52,14 @@ export default function UserForm() {
       else await createUser({ fieldclock_user_id: Number(form.fieldclock_user_id), name: form.name, role_id: form.role_id })
       navigate('/users')
     } catch (err) {
-      setError(err?.response?.data?.error ?? 'Failed to save.')
+      setError(err?.response?.data?.error ?? t('f.saveFailed'))
     } finally {
       setSaving(false)
     }
   }
 
-  if (!canManageUsers) return <div className="text-center py-16 text-gray-400">Access denied.</div>
-  if (loading) return <div className="flex justify-center py-16 text-gray-400">Loading...</div>
+  if (!canManageUsers) return <div className="text-center py-16 text-gray-400">{t('f.accessDenied')}</div>
+  if (loading) return <div className="flex justify-center py-16 text-gray-400">{t('f.loading')}</div>
 
   return (
     <div className="max-w-lg mx-auto">
@@ -67,7 +69,7 @@ export default function UserForm() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{isEdit ? 'Edit User' : 'Add User'}</h1>
+        <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{isEdit ? t('f.editUserTitle') : t('f.addUserTitle')}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
@@ -91,30 +93,30 @@ export default function UserForm() {
         )}
         {!isEdit && employeesFailed && (
           <Input
-            label="FieldClock Employee ID"
+            label={t('f.fieldclockEmployeeId')}
             type="number"
             value={form.fieldclock_user_id}
             onChange={(e) => set('fieldclock_user_id', e.target.value)}
             required
-            placeholder="Their FieldClock user id"
+            placeholder={t('f.fieldclockIdPlaceholder')}
           />
         )}
         {isEdit && (
-          <Input label="FieldClock Employee ID" value={form.fieldclock_user_id} disabled />
+          <Input label={t('f.fieldclockEmployeeId')} value={form.fieldclock_user_id} disabled />
         )}
 
-        <Input label="Full Name" value={form.name} onChange={(e) => set('name', e.target.value)} required placeholder="John Doe" />
+        <Input label={t('f.fullName')} value={form.name} onChange={(e) => set('name', e.target.value)} required placeholder={t('f.fullNamePlaceholder')} />
 
-        <Select label="Role" value={form.role_id} onChange={(e) => set('role_id', e.target.value)} required>
-          <option value="">-- Select Role --</option>
+        <Select label={t('users.role')} value={form.role_id} onChange={(e) => set('role_id', e.target.value)} required>
+          <option value="">{t('f.selectRole')}</option>
           {roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
         </Select>
 
         <div className="flex gap-3 pt-2">
           <Button type="submit" loading={saving} size="lg" className="flex-1">
-            {isEdit ? 'Save Changes' : 'Create User'}
+            {isEdit ? t('f.saveChanges') : t('f.createUserBtn')}
           </Button>
-          <Button variant="secondary" size="lg" onClick={() => navigate(-1)}>Cancel</Button>
+          <Button variant="secondary" size="lg" onClick={() => navigate(-1)}>{t('f.cancel')}</Button>
         </div>
       </form>
     </div>

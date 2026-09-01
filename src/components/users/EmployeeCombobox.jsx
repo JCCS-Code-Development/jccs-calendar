@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 
 // Type-ahead picker for FieldClock employees. Type any part of a name (or
 // space-separated fragments like "jo do") and the list narrows to matches,
@@ -23,9 +24,11 @@ export default function EmployeeCombobox({
   employees,
   value,
   onSelect,
-  label = 'FieldClock Employee',
+  label,
   required = false,
 }) {
+  const { t } = useTranslation()
+  const fieldLabel = label ?? t('f.fieldclockEmployee')
   const selected = employees.find((e) => String(e.id) === String(value)) ?? null
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -73,7 +76,7 @@ export default function EmployeeCombobox({
 
   return (
     <div className="flex flex-col gap-1" ref={wrapRef}>
-      {label && <label className="text-sm font-medium text-gray-700">{label}</label>}
+      {fieldLabel && <label className="text-sm font-medium text-gray-700">{fieldLabel}</label>}
 
       <div className="relative">
         <input
@@ -83,7 +86,7 @@ export default function EmployeeCombobox({
           autoComplete="off"
           required={required && !value}
           className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-9 text-base outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          placeholder="Start typing a name…"
+          placeholder={t('f.startTypingName')}
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true); setActive(0); if (value) onSelect(null) }}
           onFocus={() => setOpen(true)}
@@ -95,7 +98,7 @@ export default function EmployeeCombobox({
           <button
             type="button"
             onClick={clear}
-            aria-label="Clear"
+            aria-label={t('f.clear')}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -111,7 +114,7 @@ export default function EmployeeCombobox({
         {open && (
           <ul className="absolute z-20 mt-1 w-full max-h-64 overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg py-1">
             {results.length === 0 ? (
-              <li className="px-4 py-2.5 text-sm text-gray-400">No matching employees</li>
+              <li className="px-4 py-2.5 text-sm text-gray-400">{t('f.noMatchingEmployees')}</li>
             ) : (
               results.map((emp, i) => (
                 <li key={emp.id}>

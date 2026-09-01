@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getTodos, getEventTypes } from '../api/events'
 import { getUsers } from '../api/users'
 import { useAuth } from '../hooks/useAuth'
@@ -9,6 +10,7 @@ import Spinner from '../components/ui/Spinner'
 
 export default function Todos() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { canManageEvents } = useAuth()
   const [events, setEvents] = useState([])
   const [eventTypes, setEventTypes] = useState([])
@@ -40,15 +42,15 @@ export default function Todos() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">To-Do List</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{pending.length} pending · {done.length} completed</p>
+          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{t('f.todoListTitle')}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{t('f.todoSummary', { pending: pending.length, done: done.length })}</p>
         </div>
         {canManageEvents && (
           <button
             onClick={() => navigate('/events/create')}
             className="bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-400 transition-colors"
           >
-            + Create Event
+            {t('events.createEvent')}
           </button>
         )}
       </div>
@@ -61,13 +63,13 @@ export default function Todos() {
         </div>
       ) : events.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-base">No events found for this range.</p>
+          <p className="text-base">{t('events.noEvents')}</p>
         </div>
       ) : (
         <div className="space-y-6">
           {pending.length > 0 && (
             <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Pending</h3>
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{t('todos.pending')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {pending.map((e) => (
                   <EventCard key={e.id} event={e} color={e.color} onRefresh={load} />
@@ -77,7 +79,7 @@ export default function Todos() {
           )}
           {done.length > 0 && (
             <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Completed</h3>
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{t('todos.completed')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {done.map((e) => (
                   <EventCard key={e.id} event={e} color={e.color} onRefresh={load} />

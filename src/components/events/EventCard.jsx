@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Badge from '../ui/Badge'
 import AddToCalendar from './AddToCalendar'
 import { formatDateTime, formatDate, formatTime } from '../../utils/format'
@@ -12,6 +13,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL
 
 export default function EventCard({ event, onRefresh, color }) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { canManageEvents } = useAuth()
   const token = useAuthStore((s) => s.token)
 
@@ -37,7 +39,7 @@ export default function EventCard({ event, onRefresh, color }) {
             </p>
             <p className="text-xs text-gray-500 mt-0.5">
               {event.is_all_day ? (
-                `${formatDate(event.start_datetime)} · Any time`
+                `${formatDate(event.start_datetime)} · ${t('f.anyTime')}`
               ) : (
                 <>
                   {formatDateTime(event.start_datetime)}
@@ -83,7 +85,7 @@ export default function EventCard({ event, onRefresh, color }) {
             onClick={handleMarkDone}
             className={`text-xs font-medium px-3 py-1 rounded-lg transition-colors ${isDone ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}
           >
-            {isDone ? 'Mark Scheduled' : '✓ Mark Done'}
+            {isDone ? t('f.markScheduled') : t('f.markDone')}
           </button>
         )}
       </div>

@@ -16,9 +16,9 @@ export default function NotificationToggle() {
 
   if (blocked) {
     return (
-      <div title="Notifications blocked in browser settings" className="flex items-center gap-1.5 text-xs text-brand-100/50 px-2 py-1">
+      <div title={t('f.notificationsBlockedTitle')} className="flex items-center gap-1.5 text-xs text-brand-100/50 px-2 py-1">
         <BellIcon active={false} />
-        <span className="hidden sm:inline">Blocked</span>
+        <span className="hidden sm:inline">{t('f.blocked')}</span>
       </div>
     )
   }
@@ -27,7 +27,7 @@ export default function NotificationToggle() {
     <button
       onClick={subscribed ? disable : enable}
       disabled={loading}
-      title={subscribed ? 'Disable push notifications' : 'Enable push notifications'}
+      title={subscribed ? t('f.disablePush') : t('f.enablePush')}
       className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-lg transition-colors disabled:opacity-50 ${
         subscribed
           ? 'text-brand-400 bg-brand-700 hover:bg-brand-700/80'

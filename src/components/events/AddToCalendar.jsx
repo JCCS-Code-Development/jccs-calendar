@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { format, parseISO, addHours } from 'date-fns'
 
 const CalIcon = () => (
@@ -49,6 +50,7 @@ function icsDownloadUrl(event, apiBase, token) {
 }
 
 export default function AddToCalendar({ event, apiBase, token }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -85,10 +87,10 @@ export default function AddToCalendar({ event, apiBase, token }) {
       <button
         onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
         className="flex items-center gap-1 text-xs text-gray-500 hover:text-brand-500 transition-colors px-2 py-1 rounded-lg hover:bg-brand-50"
-        title="Add to personal calendar"
+        title={t('f.addToPersonalCalendar')}
       >
         <CalIcon />
-        <span>Add to calendar</span>
+        <span>{t('f.addToCalendar')}</span>
       </button>
 
       {open && (
@@ -96,7 +98,7 @@ export default function AddToCalendar({ event, apiBase, token }) {
           className="absolute bottom-full mb-1 right-0 z-50 bg-white rounded-xl shadow-xl border border-gray-100 min-w-[200px] py-1 overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
-          <p className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Add to calendar</p>
+          <p className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('f.addToCalendar')}</p>
           {options.map((opt) => (
             <a
               key={opt.label}
@@ -119,7 +121,7 @@ export default function AddToCalendar({ event, apiBase, token }) {
               className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors"
             >
               <span>📡</span>
-              Subscribe (full feed)
+              {t('f.subscribeFullFeed')}
             </a>
           </div>
         </div>

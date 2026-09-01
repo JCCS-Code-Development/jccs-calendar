@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import Button from '../../components/ui/Button'
@@ -76,6 +77,7 @@ function isReminderType(typeName) {
 
 export default function EventForm() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { id } = useParams()
   const isEdit = Boolean(id)
   const { canManageEvents } = useAuth()
@@ -181,7 +183,7 @@ export default function EventForm() {
     } catch (err) {
       const msgs = err?.response?.data?.errors
       if (msgs) setError(Object.values(msgs).flat().join(' '))
-      else setError(err?.response?.data?.message ?? 'Failed to save. Please try again.')
+      else setError(err?.response?.data?.message ?? t('f.saveFailed'))
     } finally {
       setSaving(false)
     }
@@ -196,14 +198,14 @@ export default function EventForm() {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Delete this event?')) return
+    if (!window.confirm(t('f.deleteEventConfirm'))) return
     setDeleting(true)
     try { await deleteEvent(id); navigate('/events') }
     catch { setDeleting(false) }
   }
 
-  if (loading) return <div className="flex justify-center py-16 text-gray-400">Loading...</div>
-  if (!canManageEvents) return <div className="text-center py-16 text-gray-400">Access denied.</div>
+  if (loading) return <div className="flex justify-center py-16 text-gray-400">{t('f.loading')}</div>
+  if (!canManageEvents) return <div className="text-center py-16 text-gray-400">{t('f.accessDenied')}</div>
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -214,7 +216,7 @@ export default function EventForm() {
           </svg>
         </button>
         <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">
-          {isEdit ? 'Edit Event' : 'Create Event'}
+          {isEdit ? t('f.editEventTitle') : t('f.createEventTitle')}
         </h1>
       </div>
 
@@ -226,60 +228,60 @@ export default function EventForm() {
         )}
 
         {/* Event Type */}
-        <Select label="Event Type" value={form.event_type_id} onChange={handleTypeChange} required>
-          <option value="">-- Select Event Type --</option>
-          {eventTypes.map((t) => (
-            <option key={t.id} value={t.id}>{t.name}</option>
+        <Select label={t('events.type')} value={form.event_type_id} onChange={handleTypeChange} required>
+          <option value="">{t('f.selectEventType')}</option>
+          {eventTypes.map((et) => (
+            <option key={et.id} value={et.id}>{et.name}</option>
           ))}
         </Select>
 
         {/* Subtype */}
         {subtypes.length > 0 && (
-          <Select label="Event Sub-Type" value={form.event_subtype} onChange={(e) => set('event_subtype', e.target.value)} required>
-            <option value="">-- Select Sub-Type --</option>
+          <Select label={t('f.eventSubType')} value={form.event_subtype} onChange={(e) => set('event_subtype', e.target.value)} required>
+            <option value="">{t('f.selectSubType')}</option>
             {subtypes.map((s) => <option key={s} value={s}>{s}</option>)}
           </Select>
         )}
 
         {/* Title */}
-        <Input label="Title" value={form.title} onChange={(e) => set('title', e.target.value)} required placeholder="Event title" />
+        <Input label={t('events.title')} value={form.title} onChange={(e) => set('title', e.target.value)} required placeholder={t('f.eventTitlePlaceholder')} />
 
         {/* Dynamic Details */}
         {detailFields.length > 0 && (
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Required Details</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t('f.requiredDetails')}</p>
 
             {detailFields.includes('engineer') && (
-              <Input label="Engineer" value={form.details.engineer ?? ''} onChange={(e) => setDetail('engineer', e.target.value)} required />
+              <Input label={t('f.engineer')} value={form.details.engineer ?? ''} onChange={(e) => setDetail('engineer', e.target.value)} required />
             )}
             {detailFields.includes('participants') && (
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Participants</label>
+                <label className="text-sm font-medium text-gray-700">{t('f.participants')}</label>
                 <textarea
                   rows={3}
                   value={form.details.participants ?? ''}
                   onChange={(e) => setDetail('participants', e.target.value)}
-                  placeholder="One participant per line"
+                  placeholder={t('f.participantsPlaceholder')}
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   required
                 />
               </div>
             )}
             {detailFields.includes('person') && (
-              <Input label="Person" value={form.details.person ?? ''} onChange={(e) => setDetail('person', e.target.value)} required />
+              <Input label={t('f.person')} value={form.details.person ?? ''} onChange={(e) => setDetail('person', e.target.value)} required />
             )}
             {detailFields.includes('company') && (
-              <Input label="Company" value={form.details.company ?? ''} onChange={(e) => setDetail('company', e.target.value)} required />
+              <Input label={t('f.company')} value={form.details.company ?? ''} onChange={(e) => setDetail('company', e.target.value)} required />
             )}
             {detailFields.includes('items') && (
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-2">Items &amp; Quantities</label>
+                <label className="text-sm font-medium text-gray-700 block mb-2">{t('f.itemsQuantities')}</label>
                 <div className="space-y-2">
                   {supplyItems.map((item, i) => (
                     <div key={i} className="flex gap-2 items-center">
                       <input
                         className="flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500"
-                        placeholder="Item name"
+                        placeholder={t('f.itemName')}
                         value={item.name}
                         onChange={(e) => {
                           const next = [...supplyItems]; next[i] = { ...next[i], name: e.target.value }; setSupplyItems(next)
@@ -310,63 +312,63 @@ export default function EventForm() {
                 <button type="button" onClick={() => setSupplyItems([...supplyItems, { ...BLANK_ITEM }])}
                   className="mt-2 text-sm text-brand-500 font-medium hover:text-brand-400"
                 >
-                  + Add item
+                  {t('f.addItem')}
                 </button>
               </div>
             )}
             {detailFields.includes('workers') && (
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Worker(s)</label>
+                <label className="text-sm font-medium text-gray-700">{t('f.workersLabel')}</label>
                 <textarea rows={3} value={form.details.workers ?? ''} onChange={(e) => setDetail('workers', e.target.value)}
-                  placeholder="One worker per line" className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" required />
+                  placeholder={t('f.workerPerLine')} className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" required />
               </div>
             )}
             {detailFields.includes('team_workers') && (
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Worker(s)</label>
+                <label className="text-sm font-medium text-gray-700">{t('f.workersLabel')}</label>
                 <textarea rows={3} value={form.details.team_workers ?? ''} onChange={(e) => setDetail('team_workers', e.target.value)}
-                  placeholder="One worker per line" className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" required />
+                  placeholder={t('f.workerPerLine')} className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" required />
               </div>
             )}
             {detailFields.includes('project') && (
-              <Input label="Project" value={form.details.project ?? ''} onChange={(e) => setDetail('project', e.target.value)} required />
+              <Input label={t('f.project')} value={form.details.project ?? ''} onChange={(e) => setDetail('project', e.target.value)} required />
             )}
             {detailFields.includes('estimated_due_date') && (
-              <Input label="Estimated Due Date" type="date" value={form.details.estimated_due_date ?? ''} onChange={(e) => setDetail('estimated_due_date', e.target.value)} />
+              <Input label={t('f.estimatedDueDate')} type="date" value={form.details.estimated_due_date ?? ''} onChange={(e) => setDetail('estimated_due_date', e.target.value)} />
             )}
             {detailFields.includes('logistics_location') && (
-              <Input label="Location" value={form.details.logistics_location ?? ''} onChange={(e) => setDetail('logistics_location', e.target.value)} required />
+              <Input label={t('f.location')} value={form.details.logistics_location ?? ''} onChange={(e) => setDetail('logistics_location', e.target.value)} required />
             )}
             {detailFields.includes('invoice_or_estimate') && (
               <>
-                <Select label="Invoice or Estimate" value={form.details.invoice_or_estimate ?? ''} onChange={(e) => setDetail('invoice_or_estimate', e.target.value)} required>
-                  <option value="">-- Select --</option>
-                  <option>Invoice</option>
-                  <option>Estimate</option>
+                <Select label={t('f.invoiceOrEstimate')} value={form.details.invoice_or_estimate ?? ''} onChange={(e) => setDetail('invoice_or_estimate', e.target.value)} required>
+                  <option value="">{t('f.selectDash')}</option>
+                  <option value="Invoice">{t('f.invoice')}</option>
+                  <option value="Estimate">{t('f.estimateWord')}</option>
                 </Select>
-                <Input label="Number" value={form.details.number ?? ''} onChange={(e) => setDetail('number', e.target.value)} required />
-                <Input label="Name" value={form.details.name ?? ''} onChange={(e) => setDetail('name', e.target.value)} required />
+                <Input label={t('f.number')} value={form.details.number ?? ''} onChange={(e) => setDetail('number', e.target.value)} required />
+                <Input label={t('f.name')} value={form.details.name ?? ''} onChange={(e) => setDetail('name', e.target.value)} required />
               </>
             )}
             {detailFields.includes('payment_amount') && (
               <>
                 <div className="grid grid-cols-2 gap-4">
-                  <Input label="Payment Amount" type="number" min="0" step="0.01" placeholder="0.00"
+                  <Input label={t('f.paymentAmount')} type="number" min="0" step="0.01" placeholder="0.00"
                     value={form.details.payment_amount ?? ''} onChange={(e) => setDetail('payment_amount', e.target.value)} required />
-                  <Input label="Payment Date / Due Date" type="date"
+                  <Input label={t('f.paymentDate')} type="date"
                     value={form.details.payment_date ?? ''} onChange={(e) => setDetail('payment_date', e.target.value)} required />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Input label="Invoice / Estimate #" value={form.details.payment_document_number ?? ''} onChange={(e) => setDetail('payment_document_number', e.target.value)} required />
-                  <Input label="Project / Client Name" value={form.details.payment_name ?? ''} onChange={(e) => setDetail('payment_name', e.target.value)} required />
+                  <Input label={t('f.invoiceEstimateNo')} value={form.details.payment_document_number ?? ''} onChange={(e) => setDetail('payment_document_number', e.target.value)} required />
+                  <Input label={t('f.projectClientName')} value={form.details.payment_name ?? ''} onChange={(e) => setDetail('payment_name', e.target.value)} required />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Select label="Payment Method" value={form.details.payment_method ?? ''} onChange={(e) => setDetail('payment_method', e.target.value)} required>
-                    <option value="">-- Select --</option>
+                  <Select label={t('f.paymentMethod')} value={form.details.payment_method ?? ''} onChange={(e) => setDetail('payment_method', e.target.value)} required>
+                    <option value="">{t('f.selectDash')}</option>
                     {['Cash','Check','Card','ACH / Bank Transfer','Other'].map((m) => <option key={m}>{m}</option>)}
                   </Select>
-                  <Select label="Payment Status" value={form.details.payment_status ?? ''} onChange={(e) => setDetail('payment_status', e.target.value)} required>
-                    <option value="">-- Select --</option>
+                  <Select label={t('f.paymentStatus')} value={form.details.payment_status ?? ''} onChange={(e) => setDetail('payment_status', e.target.value)} required>
+                    <option value="">{t('f.selectDash')}</option>
                     {['Pending','Requested','Received','Deposited'].map((s) => <option key={s}>{s}</option>)}
                   </Select>
                 </div>
@@ -376,8 +378,8 @@ export default function EventForm() {
         )}
 
         {/* Assigned To */}
-        <Select label="Assigned To" value={form.assigned_user_id} onChange={(e) => set('assigned_user_id', e.target.value)}>
-          <option value="">-- Unassigned --</option>
+        <Select label={t('f.assignedTo')} value={form.assigned_user_id} onChange={(e) => set('assigned_user_id', e.target.value)}>
+          <option value="">{t('f.unassignedDash')}</option>
           {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
         </Select>
 
@@ -391,45 +393,45 @@ export default function EventForm() {
               className="mt-0.5 rounded border-gray-300 accent-brand-500"
             />
             <span className="text-sm text-gray-800">
-              <span className="font-medium">Any time during the day / To-do item</span>
-              <span className="block text-gray-500 mt-0.5">Use when the item doesn't need an exact time. It will appear in the To-Do List.</span>
+              <span className="font-medium">{t('f.allDayTodo')}</span>
+              <span className="block text-gray-500 mt-0.5">{t('f.allDayTodoHint')}</span>
             </span>
           </label>
         )}
 
         {/* Date fields */}
         {isReminder ? (
-          <Input label="Reminder Date" type="date" value={form.all_day_date} onChange={(e) => set('all_day_date', e.target.value)} required />
+          <Input label={t('f.reminderDate')} type="date" value={form.all_day_date} onChange={(e) => set('all_day_date', e.target.value)} required />
         ) : isAllDay ? (
-          <Input label="To-Do Date" type="date" value={form.all_day_date} onChange={(e) => set('all_day_date', e.target.value)} required />
+          <Input label={t('f.todoDate')} type="date" value={form.all_day_date} onChange={(e) => set('all_day_date', e.target.value)} required />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label="Start Date/Time" type="datetime-local" value={form.start_datetime} onChange={(e) => set('start_datetime', e.target.value)} required />
-            <Input label="End Date/Time" type="datetime-local" value={form.end_datetime} onChange={(e) => set('end_datetime', e.target.value)} />
+            <Input label={t('f.startDateTime')} type="datetime-local" value={form.start_datetime} onChange={(e) => set('start_datetime', e.target.value)} required />
+            <Input label={t('f.endDateTime')} type="datetime-local" value={form.end_datetime} onChange={(e) => set('end_datetime', e.target.value)} />
           </div>
         )}
 
         {/* Status & Priority */}
         <div className="grid grid-cols-2 gap-4">
-          <Select label="Status" value={form.status} onChange={(e) => set('status', e.target.value)}>
+          <Select label={t('f.status')} value={form.status} onChange={(e) => set('status', e.target.value)}>
             {['Scheduled','Pending','Confirmed','In Progress','Completed','Cancelled','Rescheduled'].map((s) => <option key={s}>{s}</option>)}
           </Select>
-          <Select label="Priority" value={form.priority} onChange={(e) => set('priority', e.target.value)}>
+          <Select label={t('f.priority')} value={form.priority} onChange={(e) => set('priority', e.target.value)}>
             {['Normal','Low','High','Urgent'].map((p) => <option key={p}>{p}</option>)}
           </Select>
         </div>
 
         {/* Location */}
-        <Input label="Location / Facility" value={form.location} onChange={(e) => set('location', e.target.value)} placeholder="Optional" />
+        <Input label={t('f.locationFacility')} value={form.location} onChange={(e) => set('location', e.target.value)} placeholder={t('f.optional')} />
 
         {/* Description */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">Description / Internal Notes</label>
+          <label className="text-sm font-medium text-gray-700">{t('f.descriptionNotes')}</label>
           <textarea
             rows={4}
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
-            placeholder="Optional notes..."
+            placeholder={t('f.optionalNotes')}
             className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
         </div>
@@ -437,14 +439,14 @@ export default function EventForm() {
         {/* Actions */}
         <div className="flex gap-3 pt-2">
           <Button type="submit" loading={saving} size="lg" className="flex-1">
-            {isEdit ? 'Save Changes' : 'Create Event'}
+            {isEdit ? t('f.saveChanges') : t('f.createEventBtn')}
           </Button>
           <Button variant="secondary" size="lg" onClick={() => navigate(-1)}>
-            Cancel
+            {t('f.cancel')}
           </Button>
           {isEdit && (
             <Button variant="danger" size="lg" loading={deleting} onClick={handleDelete}>
-              Delete
+              {t('f.delete')}
             </Button>
           )}
         </div>

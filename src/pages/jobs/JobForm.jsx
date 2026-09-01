@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getJob, createJob, updateJob, deleteJob, getClients, createClient, uploadJobPhoto, deleteJobPhoto } from '../../api/jobs'
 import { getUsers } from '../../api/users'
 
@@ -8,6 +9,7 @@ const STATUS_OPTIONS = ['Active', 'On Hold', 'Completed', 'Cancelled']
 export default function JobForm() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const isEdit = Boolean(id)
 
   const [clients, setClients] = useState([])
@@ -107,16 +109,16 @@ export default function JobForm() {
       set('client_id', c.id)
       setNewClientName('')
       setShowNewClient(false)
-    } catch { setError('Could not create client.') }
+    } catch { setError(t('f.couldNotCreateClient')) }
     setAddingClient(false)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.client_id) { setError('Select a client.'); return }
-    if (!form.title.trim()) { setError('Enter a job title.'); return }
-    if (!form.projected_start || !form.projected_end) { setError('Both dates are required.'); return }
-    if (form.projected_end < form.projected_start) { setError('End date must be after start date.'); return }
+    if (!form.client_id) { setError(t('f.selectAClient')); return }
+    if (!form.title.trim()) { setError(t('f.enterJobTitle')); return }
+    if (!form.projected_start || !form.projected_end) { setError(t('f.bothDatesRequired')); return }
+    if (form.projected_end < form.projected_start) { setError(t('f.endAfterStart')); return }
 
     setSaving(true); setError('')
     try {
@@ -133,19 +135,19 @@ export default function JobForm() {
       }
       navigate('/jobs')
     } catch (err) {
-      setError(err?.response?.data?.message ?? 'Could not save job.')
+      setError(err?.response?.data?.message ?? t('f.couldNotSaveJob'))
     } finally { setSaving(false) }
   }
 
   const handleDelete = async () => {
     setDeleting(true)
     try { await deleteJob(id); navigate('/jobs') }
-    catch { setError('Could not delete job.') }
+    catch { setError(t('f.couldNotDeleteJob')) }
     setDeleting(false)
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64 text-gray-400">Loading…</div>
+    <div className="flex items-center justify-center h-64 text-gray-400">{t('f.loading')}</div>
   )
 
   return (
@@ -156,21 +158,21 @@ export default function JobForm() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="text-xl font-extrabold text-gray-900">{isEdit ? 'Edit Job' : 'New Job'}</h1>
+        <h1 className="text-xl font-extrabold text-gray-900">{isEdit ? t('f.editJobTitle') : t('f.newJobTitle')}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
 
         {/* Client */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Company / Client *</label>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('f.companyClient')} *</label>
           <div className="flex gap-2">
             <select
               value={form.client_id}
               onChange={(e) => set('client_id', e.target.value)}
               className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
             >
-              <option value="">Select client…</option>
+              <option value="">{t('f.selectClient')}</option>
               {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <button
@@ -178,14 +180,14 @@ export default function JobForm() {
               onClick={() => setShowNewClient((v) => !v)}
               className="px-3 py-2 text-xs font-semibold text-brand-600 border border-brand-200 rounded-xl hover:bg-brand-50 transition-colors whitespace-nowrap"
             >
-              + New client
+              {t('f.newClientBtn')}
             </button>
           </div>
           {showNewClient && (
             <div className="flex gap-2 mt-2">
               <input
                 type="text"
-                placeholder="Company name"
+                placeholder={t('f.companyNamePlaceholder')}
                 value={newClientName}
                 onChange={(e) => setNewClientName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddClient())}
@@ -197,7 +199,7 @@ export default function JobForm() {
                 disabled={addingClient}
                 className="px-4 py-2 bg-brand-500 text-white text-sm font-semibold rounded-xl hover:bg-brand-600 disabled:opacity-50 transition-colors"
               >
-                {addingClient ? '…' : 'Add'}
+                {addingClient ? '…' : t('f.add')}
               </button>
             </div>
           )}
@@ -205,10 +207,10 @@ export default function JobForm() {
 
         {/* Title */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Job Title *</label>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('f.jobTitleLabel')} *</label>
           <input
             type="text"
-            placeholder="e.g. Bathroom Renovation"
+            placeholder={t('f.jobTitlePlaceholder')}
             value={form.title}
             onChange={(e) => set('title', e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
@@ -217,10 +219,10 @@ export default function JobForm() {
 
         {/* Estimate / Invoice # */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Estimate / Invoice #</label>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('f.estInvoiceNo')}</label>
           <input
             type="text"
-            placeholder="e.g. EST-2024-001"
+            placeholder={t('f.estInvoicePlaceholder')}
             value={form.estimate_number}
             onChange={(e) => set('estimate_number', e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
@@ -229,10 +231,10 @@ export default function JobForm() {
 
         {/* Address */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Job Address</label>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('f.jobAddress')}</label>
           <input
             type="text"
-            placeholder="123 Main St, Miami, FL"
+            placeholder={t('f.addressPlaceholder')}
             value={form.address}
             onChange={(e) => set('address', e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
@@ -241,10 +243,10 @@ export default function JobForm() {
 
         {/* Scope */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Scope of Work</label>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('f.scopeOfWork')}</label>
           <textarea
             rows={3}
-            placeholder="Brief description of work to be done…"
+            placeholder={t('f.scopePlaceholder')}
             value={form.scope}
             onChange={(e) => set('scope', e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none"
@@ -254,7 +256,7 @@ export default function JobForm() {
         {/* Dates */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Projected Start *</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('f.projectedStart')} *</label>
             <input
               type="date"
               value={form.projected_start}
@@ -263,7 +265,7 @@ export default function JobForm() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Projected End *</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('f.projectedEnd')} *</label>
             <input
               type="date"
               value={form.projected_end}
@@ -277,12 +279,12 @@ export default function JobForm() {
         {/* Carpentry production lead time — drives the recommended start date on the Production Calendar */}
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-            Carpentry Production Lead Time <span className="font-normal text-gray-400">(days, optional)</span>
+            {t('f.leadTime')} <span className="font-normal text-gray-400">{t('f.leadTimeHint')}</span>
           </label>
           <input
             type="number"
             min="0"
-            placeholder="e.g. 10"
+            placeholder={t('f.leadTimePlaceholder')}
             value={form.lead_time_days}
             onChange={(e) => set('lead_time_days', e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
@@ -292,13 +294,13 @@ export default function JobForm() {
         {/* Project photo — shown on the Production Calendar */}
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-            Project Photo <span className="font-normal text-gray-400">(optional)</span>
+            {t('f.projectPhoto')} <span className="font-normal text-gray-400">{t('f.optionalParen')}</span>
           </label>
           {(photoPreview || photoUrl) ? (
             <div className="flex items-center gap-3">
               <img src={photoPreview ?? photoUrl} alt="" className="w-20 h-20 rounded-xl object-cover border border-gray-200" />
               <button type="button" onClick={handlePhotoRemove} className="text-xs text-red-500 hover:text-red-700 font-medium">
-                Remove photo
+                {t('f.removePhoto')}
               </button>
             </div>
           ) : (
@@ -309,12 +311,12 @@ export default function JobForm() {
               className="w-full text-sm text-gray-600 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-brand-50 file:text-brand-600 file:text-xs file:font-semibold hover:file:bg-brand-100"
             />
           )}
-          {uploadingPhoto && <p className="text-xs text-gray-400 mt-1">Uploading photo…</p>}
+          {uploadingPhoto && <p className="text-xs text-gray-400 mt-1">{t('f.uploadingPhoto')}</p>}
         </div>
 
         {/* Status */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Status</label>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('f.status')}</label>
           <div className="flex flex-wrap gap-2">
             {STATUS_OPTIONS.map((s) => (
               <button
@@ -337,7 +339,7 @@ export default function JobForm() {
         {users.length > 0 && (
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-2">
-              Workers <span className="font-normal text-gray-400">(optional)</span>
+              {t('f.workers')} <span className="font-normal text-gray-400">{t('f.optionalParen')}</span>
             </label>
             <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
               {users.map((u) => {
@@ -374,28 +376,28 @@ export default function JobForm() {
               onClick={() => setConfirmDelete(true)}
               className="text-xs text-red-500 hover:text-red-700 font-medium"
             >
-              Delete job
+              {t('f.deleteJobLink')}
             </button>
           )}
           {confirmDelete && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-red-600 font-medium">Sure?</span>
+              <span className="text-xs text-red-600 font-medium">{t('f.sure')}</span>
               <button type="button" onClick={handleDelete} disabled={deleting} className="text-xs text-red-600 font-bold hover:underline">
-                {deleting ? '…' : 'Yes, delete'}
+                {deleting ? '…' : t('f.yesDelete')}
               </button>
-              <button type="button" onClick={() => setConfirmDelete(false)} className="text-xs text-gray-500">Cancel</button>
+              <button type="button" onClick={() => setConfirmDelete(false)} className="text-xs text-gray-500">{t('f.cancel')}</button>
             </div>
           )}
           <div className="flex gap-3 ml-auto">
             <button type="button" onClick={() => navigate('/jobs')} className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">
-              Cancel
+              {t('f.cancel')}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="px-5 py-2 bg-brand-500 text-white text-sm font-semibold rounded-xl hover:bg-brand-600 disabled:opacity-50 shadow-sm shadow-brand-500/30 transition-colors"
             >
-              {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Job'}
+              {saving ? t('f.saving') : isEdit ? t('f.saveChanges') : t('f.createJobBtn')}
             </button>
           </div>
         </div>

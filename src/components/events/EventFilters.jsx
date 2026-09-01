@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import Select from '../ui/Select'
 import { DATE_RANGES } from '../../utils/format'
 
 export default function EventFilters({ filters, onChange, eventTypes, users, showUserFilter = false }) {
+  const { t } = useTranslation()
   const set = (key, val) => onChange({ ...filters, [key]: val })
 
   return (
@@ -21,7 +23,7 @@ export default function EventFilters({ filters, onChange, eventTypes, users, sho
         onChange={(e) => set('event_type_id', e.target.value || undefined)}
         className="w-40"
       >
-        <option value="">All Types</option>
+        <option value="">{t('f.allTypes')}</option>
         {eventTypes.map((t) => (
           <option key={t.id} value={t.id}>{t.name}</option>
         ))}
@@ -32,7 +34,7 @@ export default function EventFilters({ filters, onChange, eventTypes, users, sho
         onChange={(e) => set('status', e.target.value || undefined)}
         className="w-36"
       >
-        <option value="">All Statuses</option>
+        <option value="">{t('f.allStatuses')}</option>
         {['Scheduled', 'Completed', 'Cancelled', 'In Progress'].map((s) => (
           <option key={s} value={s}>{s}</option>
         ))}
@@ -44,7 +46,7 @@ export default function EventFilters({ filters, onChange, eventTypes, users, sho
           onChange={(e) => set('assigned_user_id', e.target.value || undefined)}
           className="w-40"
         >
-          <option value="">All Users</option>
+          <option value="">{t('f.allUsers')}</option>
           {users.map((u) => (
             <option key={u.id} value={u.id}>{u.name}</option>
           ))}

@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getUsers, deleteUser } from '../../api/users'
 import { useAuth } from '../../hooks/useAuth'
-import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
-import Badge from '../../components/ui/Badge'
 import Spinner from '../../components/ui/Spinner'
 
 const ROLE_COLORS = {
@@ -16,6 +15,7 @@ const ROLE_COLORS = {
 
 export default function Users() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { user: me, canManageUsers } = useAuth()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -29,21 +29,21 @@ export default function Users() {
   useEffect(() => { load() }, [])
 
   const handleDelete = async (u) => {
-    if (!window.confirm(`Delete ${u.name}?`)) return
+    if (!window.confirm(t('f.deleteUserConfirm', { name: u.name }))) return
     await deleteUser(u.id).catch(() => {})
     load()
   }
 
-  if (!canManageUsers) return <div className="text-center py-16 text-gray-400">Access denied.</div>
+  if (!canManageUsers) return <div className="text-center py-16 text-gray-400">{t('f.accessDenied')}</div>
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">Users</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{users.length} accounts</p>
+          <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">{t('f.usersTitle')}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{t('f.accountsCount', { count: users.length })}</p>
         </div>
-        <Button onClick={() => navigate('/users/create')}>+ Add User</Button>
+        <Button onClick={() => navigate('/users/create')}>{t('f.addUserBtn')}</Button>
       </div>
 
       {loading ? (
@@ -53,10 +53,10 @@ export default function Users() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">FieldClock ID</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('f.colName')}</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('f.colFieldclockId')}</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('f.colRole')}</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('f.colActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -64,7 +64,7 @@ export default function Users() {
                 <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-gray-900">
                     {u.name}
-                    {u.id === me?.id && <span className="ml-2 text-xs text-brand-500">(you)</span>}
+                    {u.id === me?.id && <span className="ml-2 text-xs text-brand-500">{t('f.you')}</span>}
                   </td>
                   <td className="px-5 py-3.5 text-gray-500">{u.id}</td>
                   <td className="px-5 py-3.5">
@@ -74,9 +74,9 @@ export default function Users() {
                   </td>
                   <td className="px-5 py-3.5 text-right">
                     <div className="flex gap-2 justify-end">
-                      <Button variant="ghost" size="sm" onClick={() => navigate(`/users/${u.id}/edit`)}>Edit</Button>
+                      <Button variant="ghost" size="sm" onClick={() => navigate(`/users/${u.id}/edit`)}>{t('f.edit')}</Button>
                       {u.id !== me?.id && (
-                        <Button variant="danger" size="sm" onClick={() => handleDelete(u)}>Delete</Button>
+                        <Button variant="danger" size="sm" onClick={() => handleDelete(u)}>{t('f.delete')}</Button>
                       )}
                     </div>
                   </td>
