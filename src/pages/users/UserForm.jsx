@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button'
 import { getUser, createUser, updateUser, getRoles } from '../../api/users'
 import { listEmployees } from '../../api/fieldclockAuth'
 import { useAuth } from '../../hooks/useAuth'
+import EmployeeCombobox from '../../components/users/EmployeeCombobox'
 
 // There's no local signup — a Calendar "user" is an existing FieldClock
 // account with a Calendar role attached (see api/users/index.php). On
@@ -39,11 +40,6 @@ export default function UserForm() {
   }, [id, isEdit])
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }))
-
-  const handleEmployeePick = (employeeId) => {
-    const emp = employees.find((e) => String(e.id) === employeeId)
-    setForm((f) => ({ ...f, fieldclock_user_id: employeeId, name: emp?.name ?? f.name }))
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -80,15 +76,18 @@ export default function UserForm() {
         )}
 
         {!isEdit && !employeesFailed && (
-          <Select
-            label="FieldClock Employee"
+          <EmployeeCombobox
+            employees={employees}
             value={form.fieldclock_user_id}
-            onChange={(e) => handleEmployeePick(e.target.value)}
+            onSelect={(emp) =>
+              setForm((f) => ({
+                ...f,
+                fieldclock_user_id: emp ? String(emp.id) : '',
+                name: emp?.name ?? f.name,
+              }))
+            }
             required
-          >
-            <option value="">-- Select Employee --</option>
-            {employees.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-          </Select>
+          />
         )}
         {!isEdit && employeesFailed && (
           <Input
