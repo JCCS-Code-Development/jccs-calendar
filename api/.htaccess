@@ -22,6 +22,7 @@ RewriteRule ^todos$ events/todos.php [QSA,L]
 RewriteRule ^calendar-events$ events/calendar.php [QSA,L]
 RewriteRule ^event-types$ event-types/index.php [QSA,L]
 RewriteRule ^external-calendar$ calendar/external.php [QSA,L]
+RewriteRule ^linked-outlook$ calendar/linked_outlook.php [QSA,L]
 RewriteRule ^calendar\.ics$ calendar/feed.php [QSA,L]
 
 RewriteRule ^users/([0-9]+)$ users/item.php?id=$1 [QSA,L]

@@ -6,7 +6,7 @@ import {
   addDays, addMonths, subMonths, addWeeks, subWeeks,
   isSameMonth, isToday, parseISO, startOfDay,
 } from 'date-fns'
-import { getCalendarEvents, getExternalCalendar } from '../api/events'
+import { getCalendarEvents, getExternalCalendar, getLinkedOutlookEvents } from '../api/events'
 import { useAuth } from '../hooks/useAuth'
 import { useAuthStore } from '../store/authStore'
 import Spinner from '../components/ui/Spinner'
@@ -214,7 +214,8 @@ export default function CalendarView() {
   const [view,   setView]   = useState('week')   // 'week' | 'month' | 'list'
   const [anchor, setAnchor] = useState(new Date())
   const [events, setEvents] = useState([])
-  const [outlookEvents, setOutlookEvents] = useState([])
+  const [outlookEvents, setOutlookEvents] = useState([])       // per-browser "Connect Outlook" overlay
+  const [linkedOutlook, setLinkedOutlook] = useState([])        // per-person team feeds (server-side)
   const [hidden, setHidden] = useState(() => new Set())  // legend ids toggled off
   const [loading, setLoading] = useState(true)
   const [showOutlookModal, setShowOutlookModal] = useState(false)
@@ -227,6 +228,9 @@ export default function CalendarView() {
       setEvents(data)
     } catch {}
     setLoading(false)
+    // Linked Outlook feeds can be slow (N remote fetches) — load them after
+    // the grid is already up rather than blocking it.
+    getLinkedOutlookEvents().then(setLinkedOutlook).catch(() => setLinkedOutlook([]))
   }, [])
 
   const loadOutlook = useCallback(async (url) => {
@@ -249,7 +253,7 @@ export default function CalendarView() {
     setShowOutlookModal(false)
   }
 
-  const allEvents = [...events, ...outlookEvents]
+  const allEvents = [...events, ...linkedOutlook, ...outlookEvents]
 
   // Legend / per-person filter, built from whoever actually has events in the
   // loaded range. Each JCCS event already carries a per-user `color` from the
@@ -257,7 +261,7 @@ export default function CalendarView() {
   const legend = (() => {
     const byId = new Map()
     let hasUnassigned = false
-    for (const e of events) {
+    for (const e of [...events, ...linkedOutlook]) {
       if (e.assigned_user?.id != null) {
         if (!byId.has(e.assigned_user.id)) {
           byId.set(e.assigned_user.id, {
@@ -266,7 +270,7 @@ export default function CalendarView() {
             color: e.color ?? '#64748b',
           })
         }
-      } else {
+      } else if (e.source !== 'outlook') {
         hasUnassigned = true
       }
     }
@@ -285,8 +289,9 @@ export default function CalendarView() {
   const hideAllLegend = () => setHidden(new Set(legend.map((l) => l.id)))
 
   const visibleEvents = allEvents.filter((ev) => {
-    if (ev.source === 'outlook') return !hidden.has('outlook')
-    return !hidden.has(ev.assigned_user?.id ?? 'unassigned')
+    if (ev.assigned_user?.id != null) return !hidden.has(ev.assigned_user.id)
+    if (ev.source === 'outlook') return !hidden.has('outlook')  // legacy per-browser overlay
+    return !hidden.has('unassigned')
   })
 
   const isWeek  = view === 'week'

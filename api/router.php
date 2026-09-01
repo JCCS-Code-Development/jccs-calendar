@@ -24,6 +24,7 @@ $routes = [
     '#^/calendar-events$#'        => ['events/calendar.php', null],
     '#^/event-types$#'            => ['event-types/index.php', null],
     '#^/external-calendar$#'      => ['calendar/external.php', null],
+    '#^/linked-outlook$#'         => ['calendar/linked_outlook.php', null],
     '#^/calendar\.ics$#'          => ['calendar/feed.php', null],
 
     '#^/users/(\d+)$#' => ['users/item.php', 'id'],

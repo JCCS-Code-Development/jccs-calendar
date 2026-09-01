@@ -15,9 +15,16 @@ CREATE TABLE `calendar_user_roles` (
   `name`               VARCHAR(150) NOT NULL,
   `role`               ENUM('Admin','Office','Lead','Crew') NOT NULL DEFAULT 'Crew',
   `is_active`          TINYINT(1) NOT NULL DEFAULT 1,
+  -- Optional per-person Outlook "publish calendar" .ics link. When set, that
+  -- person's Outlook events are overlaid (read-only) on the home calendar in
+  -- their colour. Managed on the Users page (Admin only).
+  `outlook_ics_url`    VARCHAR(1024) NULL,
   `created_at`         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`fieldclock_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Existing installs: ALTER TABLE calendar_user_roles
+--   ADD COLUMN outlook_ics_url VARCHAR(1024) NULL AFTER is_active;
 
 CREATE TABLE `event_types` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,

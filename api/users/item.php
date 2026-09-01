@@ -12,7 +12,13 @@ require_once __DIR__ . '/../middleware/validate.php';
 const ITEM_CALENDAR_ROLES = ['Admin', 'Office', 'Lead', 'Crew'];
 
 function formatUserItem(array $row): array {
-    return ['id' => (int)$row['fieldclock_user_id'], 'name' => $row['name'], 'role' => $row['role'], 'role_id' => $row['role']];
+    return [
+        'id'              => (int)$row['fieldclock_user_id'],
+        'name'            => $row['name'],
+        'role'            => $row['role'],
+        'role_id'         => $row['role'],
+        'outlook_ics_url' => $row['outlook_ics_url'] ?? null,
+    ];
 }
 
 $auth = requireAuth();
@@ -43,6 +49,15 @@ if ($method === 'GET') {
         }
         $set[] = 'role = ?';
         $params[] = $role;
+    }
+    if (array_key_exists('outlook_ics_url', $body)) {
+        $outlookUrl = trim((string)$body['outlook_ics_url']);
+        if ($outlookUrl !== '' && !preg_match('#^https?://#i', $outlookUrl)) {
+            http_response_code(422);
+            exit(json_encode(['error' => 'Outlook link must be an http(s) URL.']));
+        }
+        $set[] = 'outlook_ics_url = ?';
+        $params[] = $outlookUrl !== '' ? $outlookUrl : null;
     }
     if ($set) {
         $params[] = $id;

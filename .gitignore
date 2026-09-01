@@ -34,6 +34,9 @@ api/auth/logout.php
 api/uploads/jobs/*
 !api/uploads/jobs/.gitkeep
 
+# Server-side ICS fetch cache (created at runtime by _ics_parse.php)
+api/cache/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

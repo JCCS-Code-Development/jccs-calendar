@@ -32,3 +32,7 @@ export const getEventTypes = () =>
 
 export const getExternalCalendar = (url) =>
   client.get('/external-calendar', { params: { url } }).then((r) => r.data)
+
+// Every Calendar user's linked Outlook feed, merged and tagged per person.
+export const getLinkedOutlookEvents = () =>
+  client.get('/linked-outlook').then((r) => r.data)

@@ -19,10 +19,11 @@ const CALENDAR_ROLES = ['Admin', 'Office', 'Lead', 'Crew'];
 // role name itself (e.g. "Admin"), not a foreign key into a roles table.
 function formatUser(array $row): array {
     return [
-        'id'      => (int)$row['fieldclock_user_id'],
-        'name'    => $row['name'],
-        'role'    => $row['role'],
-        'role_id' => $row['role'],
+        'id'              => (int)$row['fieldclock_user_id'],
+        'name'            => $row['name'],
+        'role'            => $row['role'],
+        'role_id'         => $row['role'],
+        'outlook_ics_url' => $row['outlook_ics_url'] ?? null,
     ];
 }
 
@@ -46,11 +47,17 @@ if ($method === 'GET') {
         exit(json_encode(['error' => 'Invalid role.']));
     }
 
+    $outlookUrl = isset($body['outlook_ics_url']) ? trim((string)$body['outlook_ics_url']) : '';
+    if ($outlookUrl !== '' && !preg_match('#^https?://#i', $outlookUrl)) {
+        http_response_code(422);
+        exit(json_encode(['error' => 'Outlook link must be an http(s) URL.']));
+    }
+
     $pdo->prepare(
-        'INSERT INTO calendar_user_roles (fieldclock_user_id, name, role, is_active)
-         VALUES (?, ?, ?, 1)
-         ON DUPLICATE KEY UPDATE name = VALUES(name), role = VALUES(role), is_active = 1'
-    )->execute([$fieldclockUserId, sanitizeString($body['name']), $role]);
+        'INSERT INTO calendar_user_roles (fieldclock_user_id, name, role, is_active, outlook_ics_url)
+         VALUES (?, ?, ?, 1, ?)
+         ON DUPLICATE KEY UPDATE name = VALUES(name), role = VALUES(role), is_active = 1, outlook_ics_url = VALUES(outlook_ics_url)'
+    )->execute([$fieldclockUserId, sanitizeString($body['name']), $role, $outlookUrl !== '' ? $outlookUrl : null]);
 
     $stmt = $pdo->prepare('SELECT * FROM calendar_user_roles WHERE fieldclock_user_id = ?');
     $stmt->execute([$fieldclockUserId]);

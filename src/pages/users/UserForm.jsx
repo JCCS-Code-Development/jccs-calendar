@@ -26,7 +26,7 @@ export default function UserForm() {
   const [roles, setRoles] = useState([])
   const [employees, setEmployees] = useState([])
   const [employeesFailed, setEmployeesFailed] = useState(false)
-  const [form, setForm] = useState({ fieldclock_user_id: '', name: '', role_id: '' })
+  const [form, setForm] = useState({ fieldclock_user_id: '', name: '', role_id: '', outlook_ics_url: '' })
 
   useEffect(() => {
     getRoles().then(setRoles)
@@ -35,7 +35,12 @@ export default function UserForm() {
     }
     if (isEdit) {
       getUser(id).then((u) => {
-        setForm({ fieldclock_user_id: String(u.id), name: u.name, role_id: String(u.role_id ?? '') })
+        setForm({
+          fieldclock_user_id: String(u.id),
+          name: u.name,
+          role_id: String(u.role_id ?? ''),
+          outlook_ics_url: u.outlook_ics_url ?? '',
+        })
         setLoading(false)
       }).catch(() => setLoading(false))
     }
@@ -48,8 +53,9 @@ export default function UserForm() {
     setSaving(true)
     setError('')
     try {
-      if (isEdit) await updateUser(id, { name: form.name, role_id: form.role_id })
-      else await createUser({ fieldclock_user_id: Number(form.fieldclock_user_id), name: form.name, role_id: form.role_id })
+      const outlook = form.outlook_ics_url.trim()
+      if (isEdit) await updateUser(id, { name: form.name, role_id: form.role_id, outlook_ics_url: outlook })
+      else await createUser({ fieldclock_user_id: Number(form.fieldclock_user_id), name: form.name, role_id: form.role_id, outlook_ics_url: outlook })
       navigate('/users')
     } catch (err) {
       setError(err?.response?.data?.error ?? t('f.saveFailed'))
@@ -111,6 +117,15 @@ export default function UserForm() {
           <option value="">{t('f.selectRole')}</option>
           {roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
         </Select>
+
+        <Input
+          label={t('f.outlookIcsUrl')}
+          type="url"
+          value={form.outlook_ics_url}
+          onChange={(e) => set('outlook_ics_url', e.target.value)}
+          placeholder="https://outlook.office365.com/owa/calendar/…/calendar.ics"
+          helperText={t('f.outlookIcsHelp')}
+        />
 
         <div className="flex gap-3 pt-2">
           <Button type="submit" loading={saving} size="lg" className="flex-1">
