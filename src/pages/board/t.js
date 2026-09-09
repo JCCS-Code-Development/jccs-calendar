@@ -43,6 +43,10 @@ export const T = {
   exitFullscreen: 'Salir de pantalla completa',
   editMode: 'Modo Edición',
   exitEditMode: 'Salir de Modo Edición',
+  restNow: 'Reposo',
+
+  // Pantalla de reposo (protector de pantalla)
+  idleHint: 'Toca la pantalla para ver el tablero',
 
   // Tarjetas de trabajo
   clientTBD: 'Cliente por definir',

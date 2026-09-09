@@ -11,9 +11,12 @@ import ScheduledCard from './cards/ScheduledCard'
 import AppointmentTimeline from './AppointmentTimeline'
 import PinGate from './edit/PinGate'
 import EditPanel from './edit/EditPanel'
+import IdleScreen from './IdleScreen'
 import { T } from './t'
 
 const POLL_MS = 30000
+// Minutos sin ninguna interacción antes de mostrar la pantalla de reposo.
+const IDLE_MS = 4 * 60 * 1000
 
 const syncFmt = new Intl.DateTimeFormat('es-US', {
   timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true,
@@ -26,6 +29,7 @@ export default function OpsBoard() {
   const [firstError, setFirstError] = useState(false)
   const [online, setOnline] = useState(() => navigator.onLine)
   const [pinOpen, setPinOpen] = useState(false)
+  const [idle, setIdle] = useState(false)
 
   const { editMode, enterEditMode, exitEditMode } = useBoardStore()
   const abortRef = useRef(null)
@@ -71,6 +75,32 @@ export default function OpsBoard() {
     window.addEventListener('offline', down)
     return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down) }
   }, [load])
+
+  // Pantalla de reposo: aparece tras IDLE_MS sin interacción; cualquier
+  // toque/tecla/movimiento la cierra. Se desactiva en Modo Edición.
+  useEffect(() => {
+    let timer
+    const arm = () => {
+      clearTimeout(timer)
+      if (!editMode) timer = setTimeout(() => setIdle(true), IDLE_MS)
+    }
+    const wake = () => {
+      setIdle((was) => {
+        if (was) load()          // al despertar, refresca de inmediato
+        return false
+      })
+      arm()
+    }
+    const events = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']
+    events.forEach((e) => window.addEventListener(e, wake, { passive: true }))
+    arm()
+    return () => {
+      clearTimeout(timer)
+      events.forEach((e) => window.removeEventListener(e, wake))
+    }
+  }, [editMode, load])
+
+  const showIdle = idle && !editMode && !pinOpen
 
   const awaiting = data?.awaiting ?? []
   const scheduled = data?.scheduled ?? []
@@ -129,6 +159,7 @@ export default function OpsBoard() {
         editMode={editMode}
         onEnterEdit={() => setPinOpen(true)}
         onExitEdit={exitEditMode}
+        onRest={() => requestAnimationFrame(() => setIdle(true))}
       />
 
       {pinOpen && (
@@ -139,6 +170,8 @@ export default function OpsBoard() {
       )}
 
       {editMode && <EditPanel onChanged={load} onClose={exitEditMode} />}
+
+      {showIdle && <IdleScreen />}
     </div>
   )
 }

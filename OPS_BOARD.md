@@ -39,8 +39,13 @@ Route: **`/board`** (public, read-only). Editing is gated by a shared PIN.
   highlighted.
 - **Overflow** — each column measures how many cards fit and **rotates through pages**
   (dots + "Page 2 / 3") every 12 s rather than shrinking text.
-- **Footer** — last successful sync time, online/offline indicator, **Full screen**
-  button, **Edit Mode** button.
+- **Footer** — last successful sync time, online/offline indicator, **Reposo**
+  (idle screen now), **Full screen**, **Edit Mode**.
+- **Idle screen** — after 4 minutes with no touch/key/pointer activity (or the
+  **Reposo** button), a full-screen JCCS logo + large clock + date takes over,
+  with a slow drift to avoid TV burn-in. Any interaction dismisses it and the
+  board refreshes immediately; polling never stops underneath. Suppressed while
+  Edit Mode is open. Timeout is `IDLE_MS` at the top of `OpsBoard.jsx`.
 - **Continuous update** — polls `/api/ops-board` every **30 s**, re-renders in place
   (no flash). On failure it keeps the last good data on screen and shows an amber
   *"Can't reach the server — showing the last update from HH:MM"* banner; recovers
@@ -91,6 +96,7 @@ src/pages/board/BoardFooter.jsx             sync time / online / fullscreen / Ed
 src/pages/board/BoardColumn.jsx             generic column + measured page-rotation
 src/pages/board/PersonnelBar.jsx            "on the clock" + "at the shops"
 src/pages/board/AppointmentTimeline.jsx     vertical day timeline for column 3
+src/pages/board/IdleScreen.jsx              logo-only screensaver (idle / Reposo)
 src/pages/board/useCrewDrop.js              drag-and-drop crew wiring
 src/pages/board/board.css                   all board styling (scoped, theme-explicit)
 src/pages/board/t.js                         every visible board string (Spanish)
