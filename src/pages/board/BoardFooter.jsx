@@ -6,7 +6,7 @@ const syncFmt = new Intl.DateTimeFormat('es-US', {
   timeZone: TZ, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true,
 })
 
-export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, onExitEdit, onRest }) {
+export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, onExitEdit, onRest, onExit }) {
   const [isFs, setIsFs] = useState(() => !!document.fullscreenElement)
 
   useEffect(() => {
@@ -23,6 +23,11 @@ export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, o
   return (
     <footer className="ops-footer">
       <div className="ops-footer__group">
+        {onExit && (
+          <button className="ops-btn" onClick={onExit} title={`${T.exitToApp} (Esc)`}>
+            ← {T.exitToApp}
+          </button>
+        )}
         <span>
           {T.lastUpdated}{' '}
           <b>{lastSync ? syncFmt.format(lastSync) : '—'}</b>

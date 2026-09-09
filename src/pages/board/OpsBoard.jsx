@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './board.css'
 import { getBoard } from '../../api/board'
 import { useBoardStore } from '../../store/boardStore'
+import { useAuthStore } from '../../store/authStore'
 import BoardHeader from './BoardHeader'
 import BoardFooter from './BoardFooter'
 import BoardColumn from './BoardColumn'
@@ -32,6 +34,12 @@ export default function OpsBoard() {
   const [idle, setIdle] = useState(false)
 
   const { editMode, enterEditMode, exitEditMode } = useBoardStore()
+  // Only shown/available when the board was opened from inside the app (i.e.
+  // there's a logged-in session). On the unattended TV there's no session,
+  // so there's no visible way off the board.
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const navigate = useNavigate()
+  const exitBoard = useCallback(() => navigate('/'), [navigate])
   const abortRef = useRef(null)
 
   const load = useCallback(async () => {
@@ -102,6 +110,17 @@ export default function OpsBoard() {
 
   const showIdle = idle && !editMode && !pinOpen
 
+  // Esc leaves the board — only for an in-app session, and not while a modal
+  // (Edit Mode / PIN) is handling its own Esc.
+  useEffect(() => {
+    if (!isAuthenticated) return
+    const onKey = (e) => {
+      if (e.key === 'Escape' && !editMode && !pinOpen) exitBoard()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isAuthenticated, editMode, pinOpen, exitBoard])
+
   const awaiting = data?.awaiting ?? []
   const scheduled = data?.scheduled ?? []
   const appointments = data?.appointments ?? []
@@ -160,6 +179,7 @@ export default function OpsBoard() {
         onEnterEdit={() => setPinOpen(true)}
         onExitEdit={exitEditMode}
         onRest={() => requestAnimationFrame(() => setIdle(true))}
+        onExit={isAuthenticated ? exitBoard : null}
       />
 
       {pinOpen && (

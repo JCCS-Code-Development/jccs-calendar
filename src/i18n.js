@@ -16,6 +16,7 @@ const en = {
     production:   'Production Calendar',
     todos:        'To-Do List',
     users:        'Users',
+    opsBoard:     'Operations Board',
     signOut:      'Sign Out',
   },
   // Common
@@ -343,6 +344,7 @@ const es = {
     production:   'Calendario de Producción',
     todos:        'Lista de Tareas',
     users:        'Usuarios',
+    opsBoard:     'Tablero de Operaciones',
     signOut:      'Cerrar Sesión',
   },
   common: {

@@ -31,6 +31,13 @@ const ProductionIcon = () => (
     <path strokeLinecap="round" d="M8 14h2m4 0h2M8 17h2" />
   </svg>
 )
+const BoardIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <rect x="2" y="4" width="20" height="14" rx="2" />
+    <line x1="9" y1="8" x2="9" y2="14" /><line x1="15" y1="8" x2="15" y2="14" />
+    <line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="18" x2="12" y2="21" />
+  </svg>
+)
 const LogoutIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
@@ -130,6 +137,7 @@ export default function AppLayout() {
     : [
         { to: '/',          icon: <CalendarIcon />,   label: t('nav.calendar'), end: true },
         { to: '/jobs',      icon: <ProductionIcon />, label: t('nav.jobDeadlines'), badge: t('nav.soon') },
+        { to: '/board',     icon: <BoardIcon />,      label: t('nav.opsBoard') },
         { to: '/my-events', icon: <MyEventsIcon />,   label: t('nav.mySchedule') },
         ...(canManageUsers ? [{ to: '/users', icon: <UsersIcon />, label: t('nav.users') }] : []),
       ]

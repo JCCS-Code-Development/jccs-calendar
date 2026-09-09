@@ -44,6 +44,7 @@ export const T = {
   editMode: 'Modo Edición',
   exitEditMode: 'Salir de Modo Edición',
   restNow: 'Reposo',
+  exitToApp: 'Volver a la app',
 
   // Pantalla de reposo (protector de pantalla)
   idleHint: 'Toca la pantalla para ver el tablero',

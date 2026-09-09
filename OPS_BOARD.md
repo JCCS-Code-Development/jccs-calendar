@@ -7,6 +7,14 @@ Route: **`/board`** (public, read-only). Editing is gated by a shared PIN.
 
 ## 1. What was built
 
+### Getting in and out
+- The TV opens `…/board` directly (public, no login) and stays there — no
+  visible way off it.
+- Inside the calendar app, Admin/Office get an **Operations Board** item in the
+  sidebar. Opened that way there's a **← Volver a la app** button in the footer
+  (and **Esc**) that returns to the app. That control only appears when there's
+  a logged-in session, so it never shows on the kiosk.
+
 ### Board (Display Mode — public, no login)
 - **Header** — JCCS logo (left, kept in proportion), "Office Operations Board" (centre),
   live date + clock (right). Clock ticks every second with no page reload and is fixed to
