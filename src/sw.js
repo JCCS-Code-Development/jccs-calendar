@@ -11,6 +11,10 @@ cleanupOutdatedCaches()
 
 // API read caching
 registerRoute(
+  // NOTE: /ops-board is intentionally NOT cached here. The board keeps its
+  // last good payload in React state across failed polls and shows an
+  // explicit "stale / offline" banner; a silently SW-cached 200 would mask
+  // that. See src/pages/board/OpsBoard.jsx.
   ({ url }) => /\/api\/(events|calendar-events|my-events|todos|event-types|users|roles)/.test(url.pathname),
   new NetworkFirst({
     cacheName: 'api-reads-v1',

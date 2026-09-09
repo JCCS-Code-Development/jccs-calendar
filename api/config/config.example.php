@@ -19,6 +19,12 @@ define('JWT_SECRET', 'COPY_FROM_FIELDCLOCK_CONFIG_PHP');
 // App
 define('FRONTEND_ORIGIN', 'https://calendar.jccs-services.com');
 
+// Office Operations Board — shared PIN that unlocks Edit Mode on the board.
+// The board itself (the read-only TV view) needs no login; every board write
+// endpoint checks this value against the request's X-Board-Pin header.
+// Pick something short the office can type on a TV remote / touch screen.
+define('OPS_BOARD_PIN', 'CHANGE_ME');
+
 // The API's own public base URL — used to build absolute URLs for uploaded
 // job photos (api/uploads/jobs/...). No trailing slash.
 define('APP_URL', 'https://calendar.jccs-services.com/api');
@@ -26,6 +32,13 @@ define('APP_URL', 'https://calendar.jccs-services.com/api');
 // Cross-app: FieldClock's API base, used by services/fieldclock_client.php
 // for the Jobs "Sync from FieldClock" action.
 define('FIELDCLOCK_API_URL', 'https://fieldclock.jccs-services.com/api');
+
+// Token the Operations Board's "Clocked In Now" widget sends to FieldClock's
+// read-only api/timeclock/board-active.php. Generate one
+// (php -r "echo bin2hex(random_bytes(24));") and paste the SAME value into
+// FieldClock's config.php as OPS_BOARD_TOKEN. Leave as CHANGE_ME to disable
+// the widget (the board just omits it).
+define('FIELDCLOCK_BOARD_TOKEN', 'CHANGE_ME');
 
 // Web Push (generate with: php api/push/generate-vapid.php)
 define('VAPID_PUBLIC_KEY', 'GENERATE_ME');

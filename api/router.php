@@ -15,6 +15,16 @@ if ($uri !== '/' && is_file($asFile)) {
 }
 
 $routes = [
+    // Office Operations Board — GET /ops-board is public; the rest are PIN-gated.
+    '#^/ops-board$#'                      => ['ops-board/index.php', null],
+    '#^/ops-board/verify-pin$#'           => ['ops-board/verify_pin.php', null],
+    '#^/ops-board/refs$#'                 => ['ops-board/refs.php', null],
+    '#^/ops-board/jobs$#'                 => ['ops-board/jobs.php', null],
+    '#^/ops-board/jobs/(\d+)/crew$#'      => ['ops-board/job_crew.php', 'id'],
+    '#^/ops-board/jobs/(\d+)$#'           => ['ops-board/job_item.php', 'id'],
+    '#^/ops-board/appointments$#'         => ['ops-board/appointments.php', null],
+    '#^/ops-board/appointments/(\d+)$#'   => ['ops-board/appointment_item.php', 'id'],
+
     '#^/events/(\d+)/mark-done$#' => ['events/mark_done.php', 'id'],
     '#^/events/(\d+)/export\.ics$#' => ['events/export_ics.php', 'id'],
     '#^/events/(\d+)$#'           => ['events/item.php', 'id'],

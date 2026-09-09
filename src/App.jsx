@@ -14,6 +14,7 @@ import Users from './pages/users/Users'
 import UserForm from './pages/users/UserForm'
 import JobsHub from './pages/jobs/JobsHub'
 import JobForm from './pages/jobs/JobForm'
+import OpsBoard from './pages/board/OpsBoard'
 
 // Landing page depends on role: office/admin get the company calendar,
 // field users (Lead/Crew) only ever work from their own schedule.
@@ -26,6 +27,10 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+
+      {/* Office Operations Board — full-screen TV view, public (read-only).
+          Edit Mode inside it is gated by a shared PIN, not a login. */}
+      <Route path="/board" element={<OpsBoard />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
