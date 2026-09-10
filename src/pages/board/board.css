@@ -3,6 +3,10 @@
    text never drops below a comfortable reading size from across the room. */
 
 .ops-board {
+  /* "only light" forces the board's own palette even under an OS/TV dark
+     setting or Chrome's Auto Dark for Web Contents. */
+  color-scheme: only light;
+
   --ops-base: clamp(16px, 1.25vw, 22px);
   --ops-gap: clamp(8px, 0.9vw, 20px);
   --ops-radius: clamp(10px, 0.9vw, 18px);

@@ -18,6 +18,8 @@
     -webkit-tap-highlight-color: transparent;
     /* App-wide base size — every rem-based utility scales from here. */
     font-size: 17px;
+    /* Opt out of Google TV / Android Chrome "Auto Dark" auto-tinting. */
+    color-scheme: light;
   }
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
