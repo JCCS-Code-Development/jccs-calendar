@@ -50,6 +50,36 @@ usort($scheduled, function ($a, $b) {
     return strcmp($ka, $kb);
 });
 
+// ── Cross-app: pull canonical project + live status by Estimate # ─────────
+$estimateNums = [];
+foreach ([$awaiting, $scheduled] as $list) {
+    foreach ($list as $j) {
+        if (preg_match('/^\d{4}$/', (string) $j['estimate_number'])) $estimateNums[$j['estimate_number']] = true;
+    }
+}
+$estimateNums = array_keys($estimateNums);
+$projects  = boardFetchProjects($estimateNums);           // from Inventory
+$summaries = boardFetchProjectSummaries($estimateNums);   // from Projects app
+
+$attach = function (array &$list) use ($projects, $summaries) {
+    foreach ($list as &$j) {
+        $n = (string) $j['estimate_number'];
+        $p = $projects[$n] ?? null;
+        $s = $summaries[$n] ?? null;
+        $j['project']         = $p;
+        $j['project_summary'] = $s;
+        $j['links'] = preg_match('/^\d{4}$/', $n)
+            ? [
+                'inventory' => 'https://inventory.jccs-services.com/projects',
+                'projects'  => 'https://projects.jccs-services.com/projects/' . $n,
+              ]
+            : null;
+    }
+    unset($j);
+};
+$attach($awaiting);
+$attach($scheduled);
+
 // ── Appointments → column 3 ────────────────────────────────────────────────
 $stmt = $pdo->prepare(
     BOARD_APPT_SELECT .

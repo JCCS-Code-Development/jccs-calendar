@@ -43,13 +43,70 @@ function boardAudit(PDO $pdo, string $action, string $entityType, ?int $entityId
     ]);
 }
 
+// ── Cross-app service token ────────────────────────────────────────────────
+// One shared secret for the token-gated board endpoints on FieldClock,
+// Inventory and Projects. OPS_BOARD_TOKEN is the canonical name; if only the
+// original FIELDCLOCK_BOARD_TOKEN is set we fall back to it so existing
+// installs keep working.
+function boardServiceToken(): string {
+    if (defined('OPS_BOARD_TOKEN') && OPS_BOARD_TOKEN !== '' && OPS_BOARD_TOKEN !== 'CHANGE_ME') {
+        return (string) OPS_BOARD_TOKEN;
+    }
+    if (defined('FIELDCLOCK_BOARD_TOKEN') && FIELDCLOCK_BOARD_TOKEN !== '' && FIELDCLOCK_BOARD_TOKEN !== 'CHANGE_ME') {
+        return (string) FIELDCLOCK_BOARD_TOKEN;
+    }
+    return '';
+}
+
+// Small best-effort GET returning [status, data]. Never throws.
+function boardServiceGet(?string $base, string $path): array {
+    $token = boardServiceToken();
+    if ($token === '')             return ['status' => 'disabled', 'data' => null];
+    if (!$base || $base === '')    return ['status' => 'no_url', 'data' => null];
+
+    $url = rtrim($base, '/') . $path;
+    $ch  = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 4,
+        CURLOPT_CONNECTTIMEOUT => 3,
+        CURLOPT_HTTPHEADER     => ['X-Board-Token: ' . $token],
+    ]);
+    $body = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $cerr = curl_errno($ch) ? curl_error($ch) : null;
+
+    if ($body === false || $cerr !== null) return ['status' => 'curl:' . ($cerr ?: 'unknown'), 'data' => null];
+    if ($code !== 200)                     return ['status' => 'http_' . $code, 'data' => null];
+    $data = json_decode($body, true);
+    return ['status' => is_array($data) ? 'ok' : 'bad_response', 'data' => is_array($data) ? $data : null];
+}
+
+// Inventory: canonical project name/client/status by 4-digit number.
+function boardFetchProjects(array $numbers): array {
+    $numbers = array_values(array_filter($numbers, fn($n) => preg_match('/^\d{4}$/', (string) $n)));
+    if (!$numbers) return [];
+    $base = defined('INVENTORY_API_URL') ? INVENTORY_API_URL : null;
+    $res  = boardServiceGet($base, '/projects/board-lookup.php?numbers=' . implode(',', $numbers));
+    return $res['status'] === 'ok' ? (array) ($res['data']['projects'] ?? []) : [];
+}
+
+// Projects app: live status (last daily log, open punch items, current phase).
+function boardFetchProjectSummaries(array $numbers): array {
+    $numbers = array_values(array_filter($numbers, fn($n) => preg_match('/^\d{4}$/', (string) $n)));
+    if (!$numbers) return [];
+    $base = defined('PROJECTS_API_URL') ? PROJECTS_API_URL : null;
+    $res  = boardServiceGet($base, '/projects/board-summary.php?numbers=' . implode(',', $numbers));
+    return $res['status'] === 'ok' ? (array) ($res['data']['summaries'] ?? []) : [];
+}
+
 // ── FieldClock: who is clocked in right now ────────────────────────────────
 // Read-only, best-effort. Always returns an array with a `status`:
 //   ok | disabled | no_url | http_<code> | curl:<err> | bad_response
 // so `curl <calendar>/api/ops-board` shows exactly why the widget is blank.
 // `workers` is only present (and the band renders) when status === 'ok'.
 function boardFetchClockedIn(): array {
-    if (!defined('FIELDCLOCK_BOARD_TOKEN') || FIELDCLOCK_BOARD_TOKEN === '' || FIELDCLOCK_BOARD_TOKEN === 'CHANGE_ME') {
+    if (boardServiceToken() === '') {
         return ['status' => 'disabled'];
     }
     if (!defined('FIELDCLOCK_API_URL') || FIELDCLOCK_API_URL === '') {
@@ -62,7 +119,7 @@ function boardFetchClockedIn(): array {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 4,
         CURLOPT_CONNECTTIMEOUT => 3,
-        CURLOPT_HTTPHEADER     => ['X-Board-Token: ' . FIELDCLOCK_BOARD_TOKEN],
+        CURLOPT_HTTPHEADER     => ['X-Board-Token: ' . boardServiceToken()],
     ]);
     $body = curl_exec($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

@@ -1,5 +1,6 @@
 import { fmtDate, fmtDateYear, fmtClock, poBadge, scheduleBadge } from './helpers'
 import CrewRow from './CrewRow'
+import ProjectMeta from './ProjectMeta'
 import { useCrewDrop } from '../useCrewDrop'
 import { useBoardT } from '../t'
 
@@ -51,6 +52,8 @@ export default function ScheduledCard({ job, onCrew }) {
       <CrewRow job={job} over={over} onRemove={removeCrew} />
 
       {job.board_notes && <p className="ops-card__notes">{job.board_notes}</p>}
+
+      <ProjectMeta job={job} />
     </article>
   )
 }

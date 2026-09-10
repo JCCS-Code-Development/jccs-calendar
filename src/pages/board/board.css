@@ -217,12 +217,15 @@
 }
 .ops-col__body {
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
   padding: clamp(8px, 0.8vw, 16px);
   display: flex;
   flex-direction: column;
   gap: clamp(8px, 0.8vw, 16px);
 }
+/* Cards keep their natural height and the column scrolls — without this the
+   flex column squashes them and .ops-card's overflow:hidden clips content. */
+.ops-col__body > * { flex: 0 0 auto; }
 .ops-col__body--scroll { overflow-y: auto; }
 
 /* Filas plegables (cuando una columna tiene más de 6 tarjetas) */
@@ -435,6 +438,45 @@
   gap: 0.4em;
 }
 .ops-waiting-strong { color: #b91c1c; font-weight: 800; }
+
+/* Cross-app project info on a job card */
+.ops-pm {
+  margin-top: 0.5em;
+  padding-top: 0.4em;
+  border-top: 1px dashed var(--ops-line);
+  font-size: clamp(11px, 0.9vw, 16px);
+}
+.ops-pm__line { color: var(--ops-ink); }
+.ops-pm__muted { color: #94a3b8; }
+.ops-pm__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em 0.5em;
+  margin-top: 0.25em;
+}
+.ops-pm__chip {
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 0.05em 0.6em;
+  color: #334155;
+}
+.ops-pm__chip--warn { background: #fef3c7; color: #92400e; }
+.ops-pm__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin-top: 0.35em;
+}
+.ops-pm__link {
+  color: #1d4ed8;
+  font-weight: 800;
+  text-decoration: none;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5em;
+  padding: 0.1em 0.6em;
+}
+.ops-pm__link:hover { background: #dbeafe; }
 
 .ops-card--appt.is-today {
   background: #f0fdf4;

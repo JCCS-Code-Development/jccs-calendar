@@ -33,12 +33,19 @@ define('APP_URL', 'https://calendar.jccs-services.com/api');
 // for the Jobs "Sync from FieldClock" action.
 define('FIELDCLOCK_API_URL', 'https://fieldclock.jccs-services.com/api');
 
-// Token the Operations Board's "Clocked In Now" widget sends to FieldClock's
-// read-only api/timeclock/board-active.php. Generate one
+// One shared token for the read-only "board" endpoints on FieldClock,
+// Inventory and Projects (timeclock/board-active.php, projects/board-lookup.php,
+// projects/board-summary.php). Generate one
 // (php -r "echo bin2hex(random_bytes(24));") and paste the SAME value into
-// FieldClock's config.php as OPS_BOARD_TOKEN. Leave as CHANGE_ME to disable
-// the widget (the board just omits it).
+// each of those apps' config.php as OPS_BOARD_TOKEN. Leave CHANGE_ME to
+// disable all three integrations.
+define('OPS_BOARD_TOKEN', 'CHANGE_ME');
+// Legacy alias — if only this is set, it's used as the service token too.
 define('FIELDCLOCK_BOARD_TOKEN', 'CHANGE_ME');
+
+// Sibling apps the board reads from server-to-server (no trailing slash).
+define('INVENTORY_API_URL', 'https://inventory.jccs-services.com/api');
+define('PROJECTS_API_URL',  'https://projects.jccs-services.com/api');
 
 // Web Push (generate with: php api/push/generate-vapid.php)
 define('VAPID_PUBLIC_KEY', 'GENERATE_ME');
