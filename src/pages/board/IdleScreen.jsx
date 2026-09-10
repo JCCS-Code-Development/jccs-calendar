@@ -5,10 +5,11 @@ import { boardLocale } from './lang'
 const TZ = 'America/New_York'
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 
-// Protector de pantalla: sólo el logo de JCCS y un reloj grande. Cualquier
-// toque / tecla / movimiento lo cierra (lo maneja OpsBoard). El tablero sigue
-// actualizándose por detrás, así que al despertar ya está al día.
-export default function IdleScreen() {
+// Protector de pantalla: sólo el logo de JCCS y un reloj grande. Se cierra
+// únicamente con el botón "Salir de reposo" (o el mismo botón del pie) — nada
+// de "toca en cualquier lado", que en la TV lo prendía y apagaba solo. El
+// tablero sigue actualizándose por detrás.
+export default function IdleScreen({ onWake }) {
   const T = useBoardT()
   const [now, setNow] = useState(() => new Date())
 
@@ -26,7 +27,7 @@ export default function IdleScreen() {
   }, [])
 
   return (
-    <div className="ops-idle" role="presentation">
+    <div className="ops-idle">
       <div className="ops-idle__drift">
         <img
           className="ops-idle__logo"
@@ -37,7 +38,9 @@ export default function IdleScreen() {
         <div className="ops-idle__time">{timeFmt.format(now)}</div>
         <div className="ops-idle__date">{cap(dateFmt.format(now))}</div>
       </div>
-      <p className="ops-idle__hint">{T.idleHint}</p>
+      <button type="button" className="ops-idle__wake" onClick={onWake}>
+        {T.wakeBtn}
+      </button>
     </div>
   )
 }

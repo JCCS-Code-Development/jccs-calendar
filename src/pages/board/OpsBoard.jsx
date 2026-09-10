@@ -114,23 +114,10 @@ export default function OpsBoard() {
     }
   }, [])
 
-  // Dismiss the idle screen — only on a deliberate action. Cursor drift
-  // (pointermove) is deliberately NOT here, so a jittery TV pointer can't
-  // flicker it away. A grace window swallows the trailing click/pointer event
-  // that some TV browsers fire right after the "Sleep" button press, which
-  // would otherwise dismiss the screen the instant it appears.
-  useEffect(() => {
-    if (!idle) return
-    const shownAt = Date.now()
-    const dismiss = () => {
-      if (Date.now() - shownAt < 600) return
-      setIdle(false)
-      loadRef.current()   // refresh immediately on wake
-    }
-    const evs = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'click']
-    evs.forEach((e) => window.addEventListener(e, dismiss, { passive: true }))
-    return () => evs.forEach((e) => window.removeEventListener(e, dismiss))
-  }, [idle])
+  // Waking is an explicit action only — the footer "Sleep" button toggles it,
+  // and the idle screen has its own "Wake" button. No tap-anywhere-to-dismiss:
+  // on a TV that made stray remote/touch events flip the screensaver on and off.
+  const wake = useCallback(() => { setIdle(false); loadRef.current() }, [])
 
   const showIdle = idle && !editMode && !pinOpen
 
@@ -202,7 +189,8 @@ export default function OpsBoard() {
         editMode={editMode}
         onEnterEdit={() => setPinOpen(true)}
         onExitEdit={exitEditMode}
-        onRest={() => setIdle(true)}
+        sleeping={idle}
+        onRest={() => setIdle((v) => !v)}
         onExit={isAuthenticated ? exitBoard : null}
       />
 
@@ -215,7 +203,7 @@ export default function OpsBoard() {
 
       {editMode && <EditPanel onChanged={load} onClose={exitEditMode} />}
 
-      {showIdle && <IdleScreen />}
+      {showIdle && <IdleScreen onWake={wake} />}
     </div>
   )
 }

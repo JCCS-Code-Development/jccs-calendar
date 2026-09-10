@@ -727,7 +727,6 @@
   justify-content: center;
   gap: clamp(14px, 2vh, 34px);
   animation: opsIdleFade 700ms ease both;
-  cursor: none;
 }
 @keyframes opsIdleFade { from { opacity: 0; } to { opacity: 1; } }
 .ops-idle__drift {
@@ -762,6 +761,20 @@
   font-weight: 600;
   letter-spacing: 0.03em;
 }
+.ops-idle__wake {
+  position: absolute;
+  bottom: clamp(18px, 5vh, 56px);
+  padding: clamp(10px, 1.4vh, 20px) clamp(24px, 3vw, 52px);
+  font-size: clamp(14px, 1.5vw, 24px);
+  font-weight: 800;
+  color: #fff;
+  background: #1d4ed8;
+  border: 1px solid #2563eb;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.ops-idle__wake:hover { background: #2563eb; }
+.ops-idle__wake:focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
 /* Deriva lenta para evitar el quemado de pantalla ("burn-in") en la TV. */
 @media (prefers-reduced-motion: no-preference) {
   .ops-idle__drift { animation: opsIdleDrift 90s ease-in-out infinite alternate; }

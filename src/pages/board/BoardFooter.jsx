@@ -5,7 +5,7 @@ import { boardLocale } from './lang'
 
 const TZ = 'America/New_York'
 
-export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, onExitEdit, onRest, onExit }) {
+export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, onExitEdit, onRest, sleeping, onExit }) {
   const T = useBoardT()
   const { i18n } = useTranslation()
   const isEs = (i18n.language || 'en').startsWith('es')
@@ -54,8 +54,8 @@ export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, o
           {isEs ? 'EN' : 'ES'}
         </button>
         {onRest && (
-          <button className="ops-btn" onClick={onRest}>
-            {T.restNow}
+          <button className={`ops-btn ${sleeping ? 'ops-btn--edit' : ''}`} onClick={onRest}>
+            {sleeping ? T.wakeBtn : T.restNow}
           </button>
         )}
         <button className="ops-btn" onClick={toggleFs}>

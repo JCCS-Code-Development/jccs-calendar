@@ -72,6 +72,7 @@ const es = {
   exitToApp: 'Volver a la app',
 
   idleHint: 'Toca la pantalla para ver el tablero',
+  wakeBtn: 'Salir de reposo',
 
   clientTBD: 'Cliente por definir',
   est: 'Est.',
@@ -277,6 +278,7 @@ const en = {
   exitToApp: 'Back to app',
 
   idleHint: 'Touch the screen to see the board',
+  wakeBtn: 'Wake the board',
 
   clientTBD: 'Client TBD',
   est: 'Est.',
