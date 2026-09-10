@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/authStore'
 import BoardHeader from './BoardHeader'
 import BoardFooter from './BoardFooter'
 import BoardColumn from './BoardColumn'
-import PersonnelBar from './PersonnelBar'
+import PersonnelColumn from './PersonnelColumn'
 import AwaitingCard from './cards/AwaitingCard'
 import ScheduledCard from './cards/ScheduledCard'
 import AppointmentTimeline from './AppointmentTimeline'
@@ -157,9 +157,9 @@ export default function OpsBoard() {
         </div>
       )}
 
-      <PersonnelBar data={data?.clocked_in ?? null} />
+      <div className="ops-cols ops-cols--4">
+        <PersonnelColumn data={data?.clocked_in ?? null} />
 
-      <div className="ops-cols">
         <BoardColumn
           variant="awaiting"
           title={T.colAwaiting}

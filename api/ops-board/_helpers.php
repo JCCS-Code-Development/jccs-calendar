@@ -140,6 +140,7 @@ function boardFetchClockedIn(): array {
         'as_of'   => $data['as_of'] ?? null,
         'count'   => (int)($data['count'] ?? count($data['workers'])),
         'workers' => $data['workers'],
+        'roster'  => is_array($data['roster'] ?? null) ? $data['roster'] : [],
     ];
 }
 
