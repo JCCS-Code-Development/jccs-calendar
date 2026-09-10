@@ -61,9 +61,7 @@ export default function PersonnelColumn({ data }) {
   })
   const onSite = workers.filter((w) => !used.has(w.user_id))
   const clockedIds = new Set(workers.map((w) => w.user_id))
-  const notClocked = roster.filter((r) => !clockedIds.has(r.user_id)).map((r) => ({ ...r, off: true }))
-  const off = notClocked.filter((r) => r.is_active !== false)
-  const inactive = notClocked.filter((r) => r.is_active === false)
+  const off = roster.filter((r) => !clockedIds.has(r.user_id)).map((r) => ({ ...r, off: true }))
 
   const groups = [
     ...siteGroups,
@@ -115,23 +113,12 @@ export default function PersonnelColumn({ data }) {
               </div>
             )}
 
-            {inactive.length > 0 && (
-              <div className="ops-pc__group ops-pc__group--off">
-                <div className="ops-pc__grouphd">
-                  <span>{T.grpInactive}</span>
-                  <span className="ops-pc__gcount">{inactive.length}</span>
-                </div>
-                <div className="ops-pc__people">
-                  {inactive.map((w) => <Person key={w.user_id} w={w} T={T} statusMap={statusMap} />)}
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
 
       <footer className="ops-col__foot">
-        {ok ? `${workers.length + off.length + inactive.length} ${T.shown}` : ''}
+        {ok ? `${workers.length + off.length} ${T.shown}` : ''}
       </footer>
     </section>
   )
