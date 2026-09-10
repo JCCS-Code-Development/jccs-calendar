@@ -29,6 +29,7 @@ const es = {
   cantConnect: 'Sin conexión. Reintentando…',
   page: 'Página',
   shown: 'en pantalla',
+  tapToExpand: 'toca para expandir',
 
   staleOnline: (t) => `Sin conexión con el servidor — mostrando la última actualización de las ${t}.`,
   staleOffline: (t) => `Sin conexión — mostrando la última actualización de las ${t}. Reconectando…`,
@@ -207,6 +208,7 @@ const en = {
   cantConnect: 'Unable to connect. Retrying…',
   page: 'Page',
   shown: 'shown',
+  tapToExpand: 'tap to expand',
 
   staleOnline: (t) => `Can’t reach the server — showing the last update from ${t}.`,
   staleOffline: (t) => `Offline — showing the last update from ${t}. Reconnecting…`,

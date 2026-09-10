@@ -219,6 +219,53 @@
   flex-direction: column;
   gap: clamp(8px, 0.8vw, 16px);
 }
+.ops-col__body--scroll { overflow-y: auto; }
+
+/* Filas plegables (cuando una columna tiene más de 6 tarjetas) */
+.ops-collapse { display: flex; flex-direction: column; }
+.ops-collapse-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  width: 100%;
+  text-align: left;
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-line);
+  border-radius: var(--ops-radius);
+  padding: clamp(9px, 0.9vw, 15px) clamp(11px, 1vw, 16px);
+  font: inherit;
+  color: var(--ops-ink);
+  cursor: pointer;
+}
+.ops-collapse-row:hover { border-color: #94a3b8; }
+.ops-collapse-row[aria-expanded='true'] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+  background: #f8fafc;
+}
+.ops-collapse-row__chev {
+  width: 1.1em;
+  height: 1.1em;
+  flex: 0 0 auto;
+  color: #64748b;
+  transition: transform 120ms ease;
+}
+.ops-collapse-row__title {
+  font-size: clamp(13px, 1.15vw, 21px);
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ops-collapse__body {
+  border: 1px solid var(--ops-line);
+  border-top: none;
+  border-radius: 0 0 var(--ops-radius) var(--ops-radius);
+  padding: clamp(6px, 0.6vw, 12px);
+  background: #f8fafc;
+}
+.ops-collapse__body .ops-card { box-shadow: none; }
 .ops-col__foot {
   display: flex;
   align-items: center;

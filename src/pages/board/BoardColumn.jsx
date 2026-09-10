@@ -1,63 +1,33 @@
-import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { useBoardT } from './t'
 
-// A board column that never shrinks its text: it measures how many cards
-// actually fit and, when there are more, rotates through "pages" on a timer
-// instead of scaling anything down.
-const ROTATE_MS = 12000
+// Hasta MAX_FULL tarjetas se muestran completas. Si hay más, TODAS pasan a
+// filas plegables: se ven en una línea y se expanden al tocarlas.
+const MAX_FULL = 6
+
+function ChevronIcon({ open }) {
+  return (
+    <svg
+      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}
+      className="ops-collapse-row__chev" style={{ transform: open ? 'rotate(90deg)' : 'none' }}
+      aria-hidden="true"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+  )
+}
 
 export default function BoardColumn({ variant, title, count, items, renderCard, emptyText }) {
   const T = useBoardT()
-  const bodyRef = useRef(null)
-  const measureRef = useRef(null)
-  const [perPage, setPerPage] = useState(items.length || 1)
-  const [page, setPage] = useState(0)
+  const [openIds, setOpenIds] = useState(() => new Set())
 
-  const recompute = useCallback(() => {
-    const body = bodyRef.current
-    const meas = measureRef.current
-    if (!body || !meas) return
-    const avail = body.clientHeight
-    const style = getComputedStyle(body)
-    const gap = parseFloat(style.rowGap || style.gap) || 12
-    let used = 0
-    let n = 0
-    for (const child of meas.children) {
-      const h = child.getBoundingClientRect().height
-      const next = used + (n > 0 ? gap : 0) + h
-      if (next > avail && n > 0) break
-      used = next
-      n++
-    }
-    setPerPage(Math.max(1, n))
-  }, [])
-
-  useLayoutEffect(() => {
-    recompute()
-  }, [recompute, items])
-
-  useEffect(() => {
-    const body = bodyRef.current
-    if (!body || typeof ResizeObserver === 'undefined') return
-    const ro = new ResizeObserver(recompute)
-    ro.observe(body)
-    return () => ro.disconnect()
-  }, [recompute])
-
-  const pages = Math.max(1, Math.ceil(items.length / perPage))
-
-  useEffect(() => {
-    if (page > pages - 1) setPage(0)
-  }, [page, pages])
-
-  useEffect(() => {
-    if (pages <= 1) return
-    const id = setInterval(() => setPage((p) => (p + 1) % pages), ROTATE_MS)
-    return () => clearInterval(id)
-  }, [pages])
-
-  const start = page * perPage
-  const shown = items.slice(start, start + perPage)
+  const collapsible = items.length > MAX_FULL
+  const toggle = (id) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
 
   return (
     <section className="ops-col" aria-label={title}>
@@ -66,47 +36,36 @@ export default function BoardColumn({ variant, title, count, items, renderCard, 
         <span className="ops-col__count">{count}</span>
       </header>
 
-      <div className="ops-col__body" ref={bodyRef}>
+      <div className="ops-col__body ops-col__body--scroll">
         {items.length === 0 ? (
           <p className="ops-col__empty">{emptyText}</p>
+        ) : collapsible ? (
+          items.map((item) => {
+            const open = openIds.has(item.id)
+            return (
+              <div key={item.id} className="ops-collapse">
+                <button
+                  type="button"
+                  className="ops-collapse-row"
+                  aria-expanded={open}
+                  onClick={() => toggle(item.id)}
+                >
+                  <ChevronIcon open={open} />
+                  <span className="ops-collapse-row__title">{item.title}</span>
+                </button>
+                {open && <div className="ops-collapse__body">{renderCard(item)}</div>}
+              </div>
+            )
+          })
         ) : (
-          <div key={page} className="ops-page-enter" style={{ display: 'contents' }}>
-            {shown.map((item) => renderCard(item))}
-          </div>
+          items.map((item) => renderCard(item))
         )}
-
-        {/* hidden measuring pass — full list, same styles, never shown */}
-        <div
-          ref={measureRef}
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            visibility: 'hidden',
-            pointerEvents: 'none',
-            left: -99999,
-            width: bodyRef.current ? bodyRef.current.clientWidth : 320,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-          }}
-        >
-          {items.map((item) => renderCard(item))}
-        </div>
       </div>
 
       <footer className="ops-col__foot">
-        {pages > 1 ? (
-          <>
-            {Array.from({ length: pages }).map((_, i) => (
-              <span key={i} className={`ops-col__dot ${i === page ? 'ops-col__dot--on' : ''}`} />
-            ))}
-            <span style={{ marginLeft: '0.5em' }}>
-              {T.page} {page + 1} / {pages}
-            </span>
-          </>
-        ) : (
-          <span>{items.length} {T.shown}</span>
-        )}
+        {collapsible
+          ? `${items.length} · ${T.tapToExpand}`
+          : `${items.length} ${T.shown}`}
       </footer>
     </section>
   )
