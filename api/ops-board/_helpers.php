@@ -111,25 +111,16 @@ function boardDaysWaiting(array $row): int {
 }
 
 // 'awaiting' | 'scheduled' | null  — a job is on at most one primary column.
+// A finished job (Completed / schedule_status completed), a cancelled one, or
+// an archived one leaves the board immediately. It stays in the database and
+// in Edit Mode's "Completed" filter, so it's never lost — just off the wall.
 function boardColumnFor(array $row): ?string {
-    if ($row['archived_at'] !== null)      return null;
-    if ($row['status'] === 'Cancelled')    return null;
+    if ($row['archived_at'] !== null)                    return null;
+    if ($row['status'] === 'Cancelled')                  return null;
+    if ($row['status'] === 'Completed')                  return null;
+    if ($row['schedule_status'] === 'completed')         return null;
 
-    $done      = $row['status'] === 'Completed' || $row['schedule_status'] === 'completed';
-    $scheduled = in_array($row['schedule_status'], ['confirmed', 'in_progress', 'completed'], true);
-
-    if ($done) {
-        // Keep a finished job visible (grey) on the Scheduled side for 3 days
-        // after it was marked complete, then it drops off on its own.
-        try {
-            $doneOn = new DateTimeImmutable(substr((string)$row['updated_at'], 0, 10), new DateTimeZone(CALENDAR_TIMEZONE));
-        } catch (Exception $e) {
-            return null;
-        }
-        $ageDays = (int)boardToday()->diff($doneOn)->format('%a');
-        return $ageDays <= 3 ? 'scheduled' : null;
-    }
-
+    $scheduled = in_array($row['schedule_status'], ['confirmed', 'in_progress'], true);
     return $scheduled ? 'scheduled' : 'awaiting';
 }
 
