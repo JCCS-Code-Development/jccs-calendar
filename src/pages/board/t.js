@@ -1,12 +1,13 @@
-// Todas las cadenas visibles del Tablero de Operaciones, en un solo lugar.
-// El tablero es sólo en español (pantalla de la oficina). Si algún día se
-// quiere bilingüe, esto se convierte en un diccionario por idioma.
-export const T = {
-  // Encabezado
+// Todas las cadenas visibles del Tablero de Operaciones. El tablero sigue el
+// idioma de la app (el botón EN/ES del calendario). Usa useBoardT() en los
+// componentes; boardT() para código fuera de React.
+import { useTranslation } from 'react-i18next'
+import { boardLang } from './lang'
+
+const es = {
   boardTitle: 'Tablero de Operaciones de Oficina',
   tz: 'ET',
 
-  // Banda de personal
   onTheClock: 'En turno',
   clockUnavailable: 'Estado de asistencia no disponible',
   nobodyClockedIn: 'Nadie ha marcado entrada ahora',
@@ -19,7 +20,6 @@ export const T = {
   statusOnClock: 'En turno',
   lunchParen: ' (almuerzo)',
 
-  // Columnas
   colAwaiting: 'Esperando PO / Por Programar',
   colScheduled: 'Trabajos Programados',
   colAppointments: 'Citas Importantes',
@@ -30,12 +30,10 @@ export const T = {
   page: 'Página',
   shown: 'en pantalla',
 
-  // Banner de conexión
   staleOnline: (t) => `Sin conexión con el servidor — mostrando la última actualización de las ${t}.`,
   staleOffline: (t) => `Sin conexión — mostrando la última actualización de las ${t}. Reconectando…`,
   earlier: 'antes',
 
-  // Pie
   lastUpdated: 'Última actualización',
   online: 'En línea',
   offline: 'Sin conexión — reconectando',
@@ -46,10 +44,8 @@ export const T = {
   restNow: 'Reposo',
   exitToApp: 'Volver a la app',
 
-  // Pantalla de reposo (protector de pantalla)
   idleHint: 'Toca la pantalla para ver el tablero',
 
-  // Tarjetas de trabajo
   clientTBD: 'Cliente por definir',
   est: 'Est.',
   onHold: 'En Pausa',
@@ -70,48 +66,17 @@ export const T = {
   poMissing: '⚠ FALTA LA PO — no iniciar el trabajo sin una PO',
   removeFrom: (name, job) => `Quitar a ${name} de ${job}`,
 
-  // Insignias — PO
-  po: {
-    none: 'Sin PO',
-    requested: 'PO Solicitada',
-    received: 'PO Recibida',
-    approved: 'PO Aprobada',
-  },
-  // Insignias — prioridad
-  priority: {
-    urgent: 'Urgente',
-    high: 'Alta',
-    normal: 'Normal',
-    low: 'Baja',
-  },
-  // Insignias — programación
-  schedule: {
-    unscheduled: 'Sin Programar',
-    tentative: 'Tentativo',
-    confirmed: 'Confirmado',
-    in_progress: 'En Progreso',
-    completed: 'Completado',
-  },
-  // Insignias — estado de la cita
-  confirm: {
-    tentative: 'Tentativo',
-    confirmed: 'Confirmado',
-    completed: 'Completada',
-    canceled: 'Cancelada',
-  },
-  // Insignias — importancia
-  importance: {
-    critical: 'Crítica',
-    important: 'Importante',
-  },
+  po: { none: 'Sin PO', requested: 'PO Solicitada', received: 'PO Recibida', approved: 'PO Aprobada' },
+  priority: { urgent: 'Urgente', high: 'Alta', normal: 'Normal', low: 'Baja' },
+  schedule: { unscheduled: 'Sin Programar', tentative: 'Tentativo', confirmed: 'Confirmado', in_progress: 'En Progreso', completed: 'Completado' },
+  confirm: { tentative: 'Tentativo', confirmed: 'Confirmado', completed: 'Completada', canceled: 'Cancelada' },
+  importance: { critical: 'Crítica', important: 'Importante' },
 
-  // Línea de tiempo de citas
   tlEmpty: 'No hay citas con hora hoy.',
   tlUpcoming: 'Próximas',
   tlNothingElse: 'Nada más programado.',
   tlCanceled: 'Cancelada',
 
-  // Modo Edición — PIN
   pinTitle: 'Entrar a Modo Edición',
   pinBody: 'Para editar trabajos y citas se necesita el PIN de la oficina. Pídelo a un supervisor si no lo tienes.',
   pinLabel: 'PIN del tablero',
@@ -120,7 +85,6 @@ export const T = {
   cancel: 'Cancelar',
   unlock: 'Desbloquear',
 
-  // Modo Edición — panel
   panelTitle: 'Tablero de Operaciones · Modo Edición',
   panelHint: 'Los cambios aparecen en el tablero en 30 segundos.',
   panelLoadError: 'No se pudieron cargar los registros. Tu sesión de PIN pudo haber terminado — sal y vuelve a entrar a Modo Edición.',
@@ -136,7 +100,6 @@ export const T = {
   poShort: 'PO',
   editBtn: 'Editar',
 
-  // Formulario de trabajo
   jfEditTitle: 'Editar Trabajo',
   jfAddTitle: 'Agregar Trabajo',
   jfName: 'Nombre del trabajo *',
@@ -184,7 +147,6 @@ export const T = {
   jfArchiveConfirm: (name) => `¿Archivar «${name}»? Saldrá del tablero pero permanece en los registros.`,
   jfArchiveError: 'No se pudo archivar.',
 
-  // Formulario de cita
   afEditTitle: 'Editar Cita',
   afAddTitle: 'Agregar Cita',
   afTitle: 'Título *',
@@ -216,4 +178,197 @@ export const T = {
   afCancelError: 'No se pudo cancelar.',
   afRemoveConfirm: (name) => `¿Quitar «${name}» del tablero? (Permanece en el calendario.)`,
   afRemoveError: 'No se pudo quitar.',
+
+  amPm: { am: 'a. m.', pm: 'p. m.' },
+}
+
+const en = {
+  boardTitle: 'Office Operations Board',
+  tz: 'ET',
+
+  onTheClock: 'On the clock',
+  clockUnavailable: 'Clock-in status unavailable',
+  nobodyClockedIn: 'Nobody is clocked in right now',
+  atTheShops: 'At the shops',
+  dragHint: 'Drag onto a job to assign',
+  statusWorking: 'Working',
+  statusLunch: 'Lunch',
+  statusMaterial: 'Material run',
+  statusWaiting: 'Waiting',
+  statusOnClock: 'On the clock',
+  lunchParen: ' (lunch)',
+
+  colAwaiting: 'Awaiting PO / Needs Scheduling',
+  colScheduled: 'Scheduled Jobs',
+  colAppointments: 'Important Appointments',
+  emptyAwaiting: 'No jobs currently awaiting a PO.',
+  emptyScheduled: 'No scheduled jobs.',
+  emptyAppointments: 'No important appointments.',
+  cantConnect: 'Unable to connect. Retrying…',
+  page: 'Page',
+  shown: 'shown',
+
+  staleOnline: (t) => `Can’t reach the server — showing the last update from ${t}.`,
+  staleOffline: (t) => `Offline — showing the last update from ${t}. Reconnecting…`,
+  earlier: 'earlier',
+
+  lastUpdated: 'Last updated',
+  online: 'Online',
+  offline: 'Offline — reconnecting',
+  fullscreen: 'Full screen',
+  exitFullscreen: 'Exit full screen',
+  editMode: 'Edit Mode',
+  exitEditMode: 'Exit Edit Mode',
+  restNow: 'Sleep',
+  exitToApp: 'Back to app',
+
+  idleHint: 'Touch the screen to see the board',
+
+  clientTBD: 'Client TBD',
+  est: 'Est.',
+  onHold: 'On Hold',
+  received: 'Received',
+  day: 'day',
+  days: 'days',
+  waiting: 'waiting',
+  next: 'Next',
+  crew: 'Crew',
+  crewEmpty: '— drag a name here',
+  dropToAssign: 'Drop to assign',
+  wasDue: 'Was due',
+  scheduled: 'Scheduled',
+  start: 'Start',
+  doneBy: 'Done by',
+  delayed: 'Delayed',
+  today: 'Today',
+  poMissing: '⚠ PO MISSING — do not start work without a PO',
+  removeFrom: (name, job) => `Remove ${name} from ${job}`,
+
+  po: { none: 'No PO', requested: 'PO Requested', received: 'PO Received', approved: 'PO Approved' },
+  priority: { urgent: 'Urgent', high: 'High', normal: 'Normal', low: 'Low' },
+  schedule: { unscheduled: 'Unscheduled', tentative: 'Tentative', confirmed: 'Confirmed', in_progress: 'In Progress', completed: 'Completed' },
+  confirm: { tentative: 'Tentative', confirmed: 'Confirmed', completed: 'Completed', canceled: 'Canceled' },
+  importance: { critical: 'Critical', important: 'Important' },
+
+  tlEmpty: 'No timed appointments today.',
+  tlUpcoming: 'Upcoming',
+  tlNothingElse: 'Nothing else scheduled.',
+  tlCanceled: 'Canceled',
+
+  pinTitle: 'Enter Edit Mode',
+  pinBody: 'Editing jobs and appointments needs the shared office PIN. Ask a supervisor if you don’t have it.',
+  pinLabel: 'Board PIN',
+  pinEmpty: 'Enter the board PIN.',
+  pinWrong: 'Incorrect PIN.',
+  cancel: 'Cancel',
+  unlock: 'Unlock',
+
+  panelTitle: 'Operations Board · Edit Mode',
+  panelHint: 'Changes appear on the board within 30 seconds.',
+  panelLoadError: 'Could not load records. Your PIN session may have ended — exit and re-enter Edit Mode.',
+  tabJobs: 'Jobs',
+  tabAppointments: 'Appointments',
+  searchPlaceholder: 'Search by name, client, estimate #…',
+  addJob: '+ Add Job',
+  addAppointment: '+ Add Appointment',
+  noJobsMatch: 'No jobs match.',
+  noApptsMatch: 'No appointments match.',
+  archived: '(archived)',
+  noClient: 'No client',
+  poShort: 'PO',
+  editBtn: 'Edit',
+
+  jfEditTitle: 'Edit Job',
+  jfAddTitle: 'Add Job',
+  jfName: 'Job name *',
+  jfClient: 'Client / company',
+  jfNewClientName: 'New client name',
+  jfNone: '— none —',
+  jfPickExisting: 'Pick an existing client',
+  jfNewClient: '+ New client',
+  jfLocation: 'Job location',
+  jfEstimate: 'Estimate / job #',
+  jfPriority: 'Priority',
+  jfOverallStatus: 'Overall status',
+  jfStatusActive: 'Active',
+  jfStatusOnHold: 'On Hold',
+  jfStatusCompleted: 'Completed',
+  jfStatusCancelled: 'Cancelled',
+  jfPO: 'PO',
+  jfPOStatus: 'PO status',
+  jfPONone: 'No PO',
+  jfPORequested: 'Requested',
+  jfPOReceived: 'Received',
+  jfPOApproved: 'Approved',
+  jfPONumber: 'PO number',
+  jfPOReceivedDate: 'PO received date',
+  jfSchedule: 'Schedule',
+  jfScheduleStatus: 'Schedule status',
+  jfSchUnscheduled: 'Unscheduled',
+  jfSchTentative: 'Tentative',
+  jfSchConfirmed: 'Confirmed',
+  jfSchInProgress: 'In progress',
+  jfSchCompleted: 'Completed',
+  jfSchedDate: 'Scheduled date',
+  jfStartTime: 'Start time',
+  jfExpectedCompletion: 'Expected completion',
+  jfCrew: 'Assigned crew',
+  jfNextAction: 'Person responsible for next action',
+  jfNotes: 'Notes',
+  jfArchive: 'Archive',
+  jfSave: 'Save changes',
+  jfAdd: 'Add job',
+  jfNameRequired: 'Job name is required.',
+  jfConflict: 'Someone else changed this job while you were editing.',
+  jfLoadLatest: 'Load latest values',
+  jfSaveError: 'Could not save. Try again.',
+  jfArchiveConfirm: (name) => `Archive “${name}”? It will leave the board but stays in the records.`,
+  jfArchiveError: 'Could not archive.',
+
+  afEditTitle: 'Edit Appointment',
+  afAddTitle: 'Add Appointment',
+  afTitle: 'Title *',
+  afStart: 'Start *',
+  afEnd: 'End',
+  afLocation: 'Location or meeting method',
+  afType: 'Type',
+  afMeetingDefault: 'Meeting (default)',
+  afResponsible: 'Responsible person',
+  afRelatedJob: 'Related job',
+  afImportance: 'Importance',
+  afImpNormal: 'Normal',
+  afImpImportant: 'Important',
+  afImpCritical: 'Critical',
+  afConfirmation: 'Confirmation',
+  afConfTentative: 'Tentative',
+  afConfConfirmed: 'Confirmed',
+  afConfCompleted: 'Completed',
+  afConfCanceled: 'Canceled',
+  afNotes: 'Notes',
+  afCancelAppt: 'Cancel appt.',
+  afRemoveBoard: 'Remove from board',
+  afClose: 'Close',
+  afSave: 'Save changes',
+  afAdd: 'Add appointment',
+  afRequired: 'Title and start date/time are required.',
+  afConflict: 'Someone else changed this appointment while you were editing.',
+  afCancelConfirm: (name) => `Mark “${name}” as canceled?`,
+  afCancelError: 'Could not cancel.',
+  afRemoveConfirm: (name) => `Remove “${name}” from the board? (It stays in the calendar.)`,
+  afRemoveError: 'Could not remove.',
+
+  amPm: { am: 'AM', pm: 'PM' },
+}
+
+const dicts = { es, en }
+
+// Para componentes React — re-renderiza al cambiar el idioma de la app.
+export function useBoardT() {
+  const { i18n } = useTranslation()
+  return dicts[(i18n.language || 'en').slice(0, 2)] ?? en
+}
+
+// Para módulos fuera de React (helpers).
+export function boardT() {
+  return dicts[boardLang()] ?? en
 }

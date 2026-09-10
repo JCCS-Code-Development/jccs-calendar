@@ -245,11 +245,13 @@ exposed anywhere in the board payload.
 
 ## 7. Assumptions & open questions
 
-- **Board is Spanish-only** (pantalla de la oficina). Every UI string lives in
-  `src/pages/board/t.js` — one file, easy to edit or turn into a per-language dictionary
-  later. Dates/times are Spanish-formatted regardless of the app's `jccs_lang` setting.
+- **Board follows the app's language** (the calendar's EN/ES toggle / `jccs_lang`).
+  All UI strings live in `src/pages/board/t.js` as `{ en, es }`; components read them via
+  `useBoardT()` and re-render on a language switch. Dates/times follow the same setting.
   Job/appointment *content* (titles, notes) is whatever the office types; the native
   `<input type=date>` placeholder follows the browser's locale, not the page.
+  On the unattended TV (no session, language never toggled) it defaults to English —
+  set it once from any logged-in browser, or change the app default in `src/i18n.js`.
 - **Crew drag-and-drop on the main board is not PIN-gated** (your call). Anyone on the
   office network who can open the TV URL can reassign crews. Every change is logged to
   `ops_board_audit` (with IP), but there's no per-person identity. If that's too open,

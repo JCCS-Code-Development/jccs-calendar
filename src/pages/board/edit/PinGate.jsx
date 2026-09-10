@@ -3,9 +3,10 @@ import Modal from '../../../components/ui/Modal'
 import Input from '../../../components/ui/Input'
 import Button from '../../../components/ui/Button'
 import { verifyPin } from '../../../api/board'
-import { T } from '../t'
+import { useBoardT } from '../t'
 
 export default function PinGate({ onClose, onUnlocked }) {
+  const T = useBoardT()
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)

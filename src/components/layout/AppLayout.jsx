@@ -137,10 +137,15 @@ export default function AppLayout() {
     : [
         { to: '/',          icon: <CalendarIcon />,   label: t('nav.calendar'), end: true },
         { to: '/jobs',      icon: <ProductionIcon />, label: t('nav.jobDeadlines'), badge: t('nav.soon') },
-        { to: '/board',     icon: <BoardIcon />,      label: t('nav.opsBoard') },
         { to: '/my-events', icon: <MyEventsIcon />,   label: t('nav.mySchedule') },
         ...(canManageUsers ? [{ to: '/users', icon: <UsersIcon />, label: t('nav.users') }] : []),
       ]
+
+  // Pinned to the bottom of the nav — it's the "put this on the TV" action,
+  // not day-to-day navigation.
+  const bottomItems = isField
+    ? []
+    : [{ to: '/board', icon: <BoardIcon />, label: t('nav.opsBoard') }]
 
   const SidebarContent = ({ onNavClick }) => (
     <>
@@ -149,10 +154,17 @@ export default function AppLayout() {
         <p className="text-brand-100 text-sm font-semibold truncate">Welcome, {user?.name?.split(' ')[0]}!</p>
         <p className="text-brand-400/60 text-xs">{user?.role}</p>
       </div>
-      <nav className="flex-1 py-3 overflow-y-auto">
+      <nav className="flex-1 py-3 overflow-y-auto flex flex-col">
         {navItems.map((item) => (
           <NavItem key={item.to} {...item} onClick={onNavClick} />
         ))}
+        {bottomItems.length > 0 && (
+          <div className="mt-auto pt-2 border-t border-brand-700/40">
+            {bottomItems.map((item) => (
+              <NavItem key={item.to} {...item} onClick={onNavClick} />
+            ))}
+          </div>
+        )}
       </nav>
       <div className="px-3 py-3 border-t border-brand-700/60 flex items-center justify-between gap-2">
         <NotificationToggle />
@@ -188,10 +200,17 @@ export default function AppLayout() {
               <p className="text-brand-100 text-sm font-semibold truncate">Welcome, {user?.name?.split(' ')[0]}!</p>
               <p className="text-brand-400/60 text-xs">{user?.role}</p>
             </div>
-            <nav className="flex-1 py-3 overflow-y-auto">
+            <nav className="flex-1 py-3 overflow-y-auto flex flex-col">
               {navItems.map((item) => (
                 <NavItem key={item.to} {...item} onClick={close} />
               ))}
+              {bottomItems.length > 0 && (
+                <div className="mt-auto pt-2 border-t border-brand-700/40">
+                  {bottomItems.map((item) => (
+                    <NavItem key={item.to} {...item} onClick={close} />
+                  ))}
+                </div>
+              )}
             </nav>
             <div className="px-3 py-3 border-t border-brand-700/60">
               <NotificationToggle />

@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react'
-import { T } from './t'
+import { useState, useEffect, useMemo } from 'react'
+import { useBoardT } from './t'
+import { boardLocale } from './lang'
 
 const TZ = 'America/New_York'
-const syncFmt = new Intl.DateTimeFormat('es-US', {
-  timeZone: TZ, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true,
-})
 
 export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, onExitEdit, onRest, onExit }) {
+  const T = useBoardT()
   const [isFs, setIsFs] = useState(() => !!document.fullscreenElement)
+  const syncFmt = useMemo(
+    () => new Intl.DateTimeFormat(boardLocale(), { timeZone: TZ, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }),
+    [T]
+  )
 
   useEffect(() => {
     const on = () => setIsFs(!!document.fullscreenElement)

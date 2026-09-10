@@ -4,7 +4,7 @@ import Input from '../../../components/ui/Input'
 import Select from '../../../components/ui/Select'
 import Button from '../../../components/ui/Button'
 import { createAppointment, updateAppointment, cancelAppointment, unpinAppointment } from '../../../api/board'
-import { T } from '../t'
+import { useBoardT } from '../t'
 
 const FIELD = 'w-full rounded-xl border border-gray-300 px-4 py-3 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100'
 
@@ -28,6 +28,7 @@ function fromAppt(a) {
 }
 
 export default function AppointmentEditForm({ appt, refs, onSaved, onClose }) {
+  const T = useBoardT()
   const isEdit = !!appt
   const [f, setF] = useState(() => fromAppt(appt))
   const [busy, setBusy] = useState(false)

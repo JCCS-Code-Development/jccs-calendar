@@ -1,13 +1,14 @@
-import { fmtDateYear, PO_BADGE, PRIORITY_BADGE } from './helpers'
+import { fmtDateYear, poBadge, priorityBadge } from './helpers'
 import CrewRow from './CrewRow'
 import { useCrewDrop } from '../useCrewDrop'
-import { T } from '../t'
+import { useBoardT } from '../t'
 
 const WAIT_ALERT_DAYS = 14
 
 export default function AwaitingCard({ job, onCrew }) {
-  const po = PO_BADGE[job.po_status] ?? PO_BADGE.none
-  const prio = PRIORITY_BADGE[job.priority] ?? PRIORITY_BADGE.normal
+  const T = useBoardT()
+  const po = poBadge(T)[job.po_status] ?? poBadge(T).none
+  const prio = priorityBadge(T)[job.priority] ?? priorityBadge(T).normal
   const overdue = job.days_waiting >= WAIT_ALERT_DAYS
   const { dropProps, over, removeCrew } = useCrewDrop(job, onCrew)
 

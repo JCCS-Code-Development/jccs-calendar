@@ -1,17 +1,10 @@
 import { CREW_MIME } from './useCrewDrop'
-import { T } from './t'
+import { useBoardT } from './t'
 
 // Sitios base que JCCS opera a diario. Los trabajadores con entrada marcada
 // en un trabajo de FieldClock cuyo nombre coincida aparecen en "En los talleres".
 // Edita esta lista si cambian los nombres de los trabajos en FieldClock.
 const HOME_SITES = ['Carpinteria Mauldin', 'Carpinteria Principal', 'Oficina']
-
-const STATUS = {
-  working: { label: T.statusWorking, cls: 'ops-clock-chip--working' },
-  lunch: { label: T.statusLunch, cls: 'ops-clock-chip--lunch' },
-  material_run: { label: T.statusMaterial, cls: 'ops-clock-chip--material' },
-  waiting: { label: T.statusWaiting, cls: 'ops-clock-chip--waiting' },
-}
 
 function since(ts) {
   if (!ts) return null
@@ -28,6 +21,13 @@ const matchesSite = (jobName, site) =>
   (jobName ?? '').toLowerCase().includes(site.toLowerCase())
 
 export default function PersonnelBar({ data }) {
+  const T = useBoardT()
+  const STATUS = {
+    working: { label: T.statusWorking, cls: 'ops-clock-chip--working' },
+    lunch: { label: T.statusLunch, cls: 'ops-clock-chip--lunch' },
+    material_run: { label: T.statusMaterial, cls: 'ops-clock-chip--material' },
+    waiting: { label: T.statusWaiting, cls: 'ops-clock-chip--waiting' },
+  }
   const workers = data?.workers ?? []
 
   return (

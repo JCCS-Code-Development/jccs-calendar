@@ -1,5 +1,5 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
-import { T } from './t'
+import { useBoardT } from './t'
 
 // A board column that never shrinks its text: it measures how many cards
 // actually fit and, when there are more, rotates through "pages" on a timer
@@ -7,6 +7,7 @@ import { T } from './t'
 const ROTATE_MS = 12000
 
 export default function BoardColumn({ variant, title, count, items, renderCard, emptyText }) {
+  const T = useBoardT()
   const bodyRef = useRef(null)
   const measureRef = useRef(null)
   const [perPage, setPerPage] = useState(items.length || 1)

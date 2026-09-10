@@ -1,17 +1,21 @@
-import { useState, useEffect } from 'react'
-import { T } from './t'
+import { useState, useEffect, useMemo } from 'react'
+import { useBoardT } from './t'
+import { boardLocale } from './lang'
 
 const TZ = 'America/New_York'
-const timeFmt = new Intl.DateTimeFormat('es-US', {
-  timeZone: TZ, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true,
-})
-const dateFmt = new Intl.DateTimeFormat('es-US', {
-  timeZone: TZ, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
-})
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1)
 
 export default function BoardHeader() {
+  const T = useBoardT()
   const [now, setNow] = useState(() => new Date())
+
+  const { timeFmt, dateFmt } = useMemo(() => {
+    const loc = boardLocale()
+    return {
+      timeFmt: new Intl.DateTimeFormat(loc, { timeZone: TZ, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }),
+      dateFmt: new Intl.DateTimeFormat(loc, { timeZone: TZ, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+    }
+  }, [T])
 
   useEffect(() => {
     // Avanza cada segundo; sin red, sin re-render del resto del tablero.
@@ -25,7 +29,7 @@ export default function BoardHeader() {
         className="ops-header__logo"
         src="/jccs-logo.jpg"
         alt="JCCS Services"
-        style={{ filter: 'invert(1) brightness(10)' }}
+        style={{ filter: 'brightness(0) invert(1)' }}
       />
       <h1 className="ops-header__title">{T.boardTitle}</h1>
       <div className="ops-header__clock">

@@ -1,8 +1,9 @@
-import { T } from '../t'
+import { useBoardT } from '../t'
 
 // Fichas de cuadrilla en una tarjeta de trabajo. Cada una se puede quitar (✕).
-// Al arrastrar una persona sobre la tarjeta, muestra la pista "Suelta para asignar".
+// Al arrastrar una persona sobre la tarjeta, muestra la pista para asignar.
 export default function CrewRow({ job, over, onRemove }) {
+  const T = useBoardT()
   const workers = job.workers ?? []
   return (
     <div className={`ops-crew ${over ? 'is-drop' : ''}`}>
@@ -15,7 +16,7 @@ export default function CrewRow({ job, over, onRemove }) {
           <button
             type="button"
             className="ops-crew__x"
-            aria-label={T.removeFrom(w.name || 'trabajador', job.title)}
+            aria-label={T.removeFrom(w.name || '?', job.title)}
             onClick={() => onRemove(w.id)}
           >
             ✕

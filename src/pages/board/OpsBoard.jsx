@@ -14,17 +14,18 @@ import AppointmentTimeline from './AppointmentTimeline'
 import PinGate from './edit/PinGate'
 import EditPanel from './edit/EditPanel'
 import IdleScreen from './IdleScreen'
-import { T } from './t'
+import { useBoardT } from './t'
+import { boardLocale } from './lang'
 
 const POLL_MS = 30000
 // Minutos sin ninguna interacción antes de mostrar la pantalla de reposo.
 const IDLE_MS = 4 * 60 * 1000
 
-const syncFmt = new Intl.DateTimeFormat('es-US', {
-  timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true,
-})
-
 export default function OpsBoard() {
+  const T = useBoardT()
+  const syncFmt = new Intl.DateTimeFormat(boardLocale(), {
+    timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true,
+  })
   const [data, setData] = useState(null)      // last SUCCESSFUL payload — never cleared on error
   const [lastSync, setLastSync] = useState(null)
   const [stale, setStale] = useState(false)
@@ -84,29 +85,48 @@ export default function OpsBoard() {
     return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down) }
   }, [load])
 
-  // Pantalla de reposo: aparece tras IDLE_MS sin interacción; cualquier
-  // toque/tecla/movimiento la cierra. Se desactiva en Modo Edición.
+  // Refs so the idle effects don't re-subscribe on every 30s poll (which
+  // would keep resetting the countdown and it'd never fire).
+  const idleRef = useRef(idle)
+  idleRef.current = idle
+  const editModeRef = useRef(editMode)
+  editModeRef.current = editMode
+  const loadRef = useRef(load)
+  loadRef.current = load
+
+  // Count down to the idle screen. Any input (incl. cursor movement) while the
+  // board is showing resets the timer. Runs once — never re-subscribes.
   useEffect(() => {
     let timer
-    const arm = () => {
+    const reset = () => {
       clearTimeout(timer)
-      if (!editMode) timer = setTimeout(() => setIdle(true), IDLE_MS)
+      timer = setTimeout(() => {
+        if (!editModeRef.current) setIdle(true)
+      }, IDLE_MS)
     }
-    const wake = () => {
-      setIdle((was) => {
-        if (was) load()          // al despertar, refresca de inmediato
-        return false
-      })
-      arm()
-    }
-    const events = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']
-    events.forEach((e) => window.addEventListener(e, wake, { passive: true }))
-    arm()
+    const onActivity = () => { if (!idleRef.current) reset() }
+    const evs = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart']
+    evs.forEach((e) => window.addEventListener(e, onActivity, { passive: true }))
+    reset()
     return () => {
       clearTimeout(timer)
-      events.forEach((e) => window.removeEventListener(e, wake))
+      evs.forEach((e) => window.removeEventListener(e, onActivity))
     }
-  }, [editMode, load])
+  }, [])
+
+  // Dismiss the idle screen — only on a deliberate action. Cursor drift
+  // (pointermove) is deliberately NOT here, so a jittery TV pointer can't
+  // flicker it away.
+  useEffect(() => {
+    if (!idle) return
+    const dismiss = () => {
+      setIdle(false)
+      loadRef.current()   // refresh immediately on wake
+    }
+    const evs = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'click']
+    evs.forEach((e) => window.addEventListener(e, dismiss, { passive: true }))
+    return () => evs.forEach((e) => window.removeEventListener(e, dismiss))
+  }, [idle])
 
   const showIdle = idle && !editMode && !pinOpen
 
@@ -178,7 +198,7 @@ export default function OpsBoard() {
         editMode={editMode}
         onEnterEdit={() => setPinOpen(true)}
         onExitEdit={exitEditMode}
-        onRest={() => requestAnimationFrame(() => setIdle(true))}
+        onRest={() => setIdle(true)}
         onExit={isAuthenticated ? exitBoard : null}
       />
 

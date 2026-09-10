@@ -1,11 +1,12 @@
-import { fmtDate, fmtDateYear, fmtClock, PO_BADGE, SCHEDULE_BADGE } from './helpers'
+import { fmtDate, fmtDateYear, fmtClock, poBadge, scheduleBadge } from './helpers'
 import CrewRow from './CrewRow'
 import { useCrewDrop } from '../useCrewDrop'
-import { T } from '../t'
+import { useBoardT } from '../t'
 
 export default function ScheduledCard({ job, onCrew }) {
-  const po = PO_BADGE[job.po_status] ?? PO_BADGE.none
-  const sched = SCHEDULE_BADGE[job.schedule_status] ?? SCHEDULE_BADGE.confirmed
+  const T = useBoardT()
+  const po = poBadge(T)[job.po_status] ?? poBadge(T).none
+  const sched = scheduleBadge(T)[job.schedule_status] ?? scheduleBadge(T).confirmed
   const { dropProps, over, removeCrew } = useCrewDrop(job, onCrew)
 
   return (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { fmtDate, fmtTime, CONFIRM_BADGE, IMPORTANCE_BADGE } from './cards/helpers'
-import { T } from './t'
+import { fmtDate, fmtTime, confirmBadge, importanceBadge } from './cards/helpers'
+import { useBoardT } from './t'
 
 const START_HOUR = 6
 const END_HOUR = 20
@@ -38,8 +38,10 @@ function assignLanes(items) {
 }
 
 function Block({ a }) {
-  const confirm = CONFIRM_BADGE[a.confirm_state] ?? CONFIRM_BADGE.tentative
-  const importance = IMPORTANCE_BADGE[a.board_importance]
+  const T = useBoardT()
+  const CB = confirmBadge(T)
+  const confirm = CB[a.confirm_state] ?? CB.tentative
+  const importance = importanceBadge(T)[a.board_importance]
   const canceled = a.confirm_state === 'canceled'
   const top = (a._start - START_HOUR) * HOUR_PX
   const height = Math.max(34, (a._end - a._start) * HOUR_PX - 4)
@@ -64,6 +66,8 @@ function Block({ a }) {
 }
 
 export default function AppointmentTimeline({ appts }) {
+  const T = useBoardT()
+  const IB = importanceBadge(T)
   const [now, setNow] = useState(() => new Date())
   const scrollRef = useRef(null)
 
@@ -101,7 +105,7 @@ export default function AppointmentTimeline({ appts }) {
   const hours = []
   for (let h = START_HOUR; h <= END_HOUR; h++) hours.push(h)
   const label = (h) => {
-    const ap = h >= 12 ? 'p. m.' : 'a. m.'
+    const ap = h >= 12 ? T.amPm.pm : T.amPm.am
     const h12 = h % 12 || 12
     return `${h12} ${ap}`
   }
@@ -148,7 +152,7 @@ export default function AppointmentTimeline({ appts }) {
         ) : (
           <ul>
             {upcoming.map((a) => {
-              const imp = IMPORTANCE_BADGE[a.board_importance]
+              const imp = IB[a.board_importance]
               return (
                 <li key={a.id} className={a.confirm_state === 'canceled' ? 'is-canceled' : ''}>
                   <span className="ops-tl-upcoming__when">

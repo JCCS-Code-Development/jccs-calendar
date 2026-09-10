@@ -3,11 +3,12 @@ import Button from '../../../components/ui/Button'
 import Spinner from '../../../components/ui/Spinner'
 import { getRefs } from '../../../api/board'
 import { fmtDateYear } from '../cards/helpers'
-import { T } from '../t'
+import { useBoardT } from '../t'
 import JobEditForm from './JobEditForm'
 import AppointmentEditForm from './AppointmentEditForm'
 
 export default function EditPanel({ onChanged, onClose }) {
+  const T = useBoardT()
   const [refs, setRefs] = useState(null)
   const [err, setErr] = useState('')
   const [tab, setTab] = useState('jobs')
@@ -22,7 +23,7 @@ export default function EditPanel({ onChanged, onClose }) {
     } catch {
       setErr(T.panelLoadError)
     }
-  }, [])
+  }, [T])
 
   useEffect(() => { reload() }, [reload])
 
