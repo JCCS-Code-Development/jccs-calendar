@@ -116,10 +116,14 @@ export default function OpsBoard() {
 
   // Dismiss the idle screen — only on a deliberate action. Cursor drift
   // (pointermove) is deliberately NOT here, so a jittery TV pointer can't
-  // flicker it away.
+  // flicker it away. A grace window swallows the trailing click/pointer event
+  // that some TV browsers fire right after the "Sleep" button press, which
+  // would otherwise dismiss the screen the instant it appears.
   useEffect(() => {
     if (!idle) return
+    const shownAt = Date.now()
     const dismiss = () => {
+      if (Date.now() - shownAt < 600) return
       setIdle(false)
       loadRef.current()   // refresh immediately on wake
     }
