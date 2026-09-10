@@ -83,5 +83,8 @@ echo json_encode([
     'awaiting'      => $awaiting,
     'scheduled'     => $scheduled,
     'appointments'  => $appointments,
-    'clocked_in'    => $clockedIn,   // null if FieldClock unreachable / disabled
+    // Always an object: { status: ok | disabled | no_url | http_401 | curl:… },
+    // with workers[] only when status === 'ok'. The status is the debug hook —
+    // `curl <calendar>/api/ops-board` tells you why the band is blank.
+    'clocked_in'    => $clockedIn,
 ]);

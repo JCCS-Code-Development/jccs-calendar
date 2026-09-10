@@ -44,14 +44,16 @@ function boardAudit(PDO $pdo, string $action, string $entityType, ?int $entityId
 }
 
 // ── FieldClock: who is clocked in right now ────────────────────────────────
-// Read-only, best-effort. Any failure (FieldClock down, token unset, timeout)
-// returns null so the board still renders everything else.
-function boardFetchClockedIn(): ?array {
+// Read-only, best-effort. Always returns an array with a `status`:
+//   ok | disabled | no_url | http_<code> | curl:<err> | bad_response
+// so `curl <calendar>/api/ops-board` shows exactly why the widget is blank.
+// `workers` is only present (and the band renders) when status === 'ok'.
+function boardFetchClockedIn(): array {
     if (!defined('FIELDCLOCK_BOARD_TOKEN') || FIELDCLOCK_BOARD_TOKEN === '' || FIELDCLOCK_BOARD_TOKEN === 'CHANGE_ME') {
-        return null;
+        return ['status' => 'disabled'];
     }
     if (!defined('FIELDCLOCK_API_URL') || FIELDCLOCK_API_URL === '') {
-        return null;
+        return ['status' => 'no_url'];
     }
 
     $url = rtrim(FIELDCLOCK_API_URL, '/') . '/timeclock/board-active.php';
@@ -64,14 +66,20 @@ function boardFetchClockedIn(): ?array {
     ]);
     $body = curl_exec($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    // No curl_close(): it's a deprecated no-op on PHP 8.0+ and this file's
-    // error handler would promote the E_DEPRECATED to a fatal.
+    $cerr = curl_errno($ch) ? curl_error($ch) : null;
+    // No curl_close(): deprecated no-op on PHP 8.0+ and this file's error
+    // handler would promote the E_DEPRECATED to a fatal.
 
-    if ($body === false || $code !== 200) return null;
+    if ($body === false || $cerr !== null) return ['status' => 'curl:' . ($cerr ?: 'unknown'), 'url' => $url];
+    if ($code !== 200)                     return ['status' => 'http_' . $code, 'url' => $url, 'body' => mb_substr((string)$body, 0, 200)];
+
     $data = json_decode($body, true);
-    if (!is_array($data) || !isset($data['workers']) || !is_array($data['workers'])) return null;
+    if (!is_array($data) || !isset($data['workers']) || !is_array($data['workers'])) {
+        return ['status' => 'bad_response', 'url' => $url, 'body' => mb_substr((string)$body, 0, 200)];
+    }
 
     return [
+        'status'  => 'ok',
         'as_of'   => $data['as_of'] ?? null,
         'count'   => (int)($data['count'] ?? count($data['workers'])),
         'workers' => $data['workers'],

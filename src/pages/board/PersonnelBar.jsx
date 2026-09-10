@@ -28,18 +28,26 @@ export default function PersonnelBar({ data }) {
     material_run: { label: T.statusMaterial, cls: 'ops-clock-chip--material' },
     waiting: { label: T.statusWaiting, cls: 'ops-clock-chip--waiting' },
   }
-  const workers = data?.workers ?? []
+  // `data` is the payload's `clocked_in`: { status, workers? }. Only render
+  // people when the FieldClock call actually succeeded.
+  const ok = data?.status === 'ok'
+  const workers = ok ? (data.workers ?? []) : []
 
   return (
     <div className="ops-personnel">
       <div className="ops-clock">
         <span className="ops-clock__label">
           {T.onTheClock}
-          {data && <span className="ops-clock__count">{workers.length}</span>}
+          {ok && <span className="ops-clock__count">{workers.length}</span>}
         </span>
         <div className="ops-clock__list">
-          {!data ? (
-            <span className="ops-clock__muted">{T.clockUnavailable}</span>
+          {!ok ? (
+            <span className="ops-clock__muted">
+              {T.clockUnavailable}
+              {data?.status && data.status !== 'disabled' && (
+                <span style={{ opacity: 0.5, marginLeft: '0.5em' }}>({data.status})</span>
+              )}
+            </span>
           ) : workers.length === 0 ? (
             <span className="ops-clock__muted">{T.nobodyClockedIn}</span>
           ) : (
