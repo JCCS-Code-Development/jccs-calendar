@@ -1,18 +1,39 @@
 import { useState, useEffect, useCallback } from 'react'
 import Button from '../../../components/ui/Button'
 import Spinner from '../../../components/ui/Spinner'
-import { getRefs } from '../../../api/board'
+import { getRefs, updateJob } from '../../../api/board'
 import { fmtDateYear } from '../cards/helpers'
 import { useBoardT } from '../t'
 import JobEditForm from './JobEditForm'
 import AppointmentEditForm from './AppointmentEditForm'
+
+// Fecha de hoy en America/New_York, formato YYYY-MM-DD.
+const etToday = () =>
+  new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' })
+
+const FILTERS = [
+  ['all', 'filterAll'],
+  ['awaiting', 'filterAwaiting'],
+  ['scheduled', 'filterScheduled'],
+  ['completed', 'filterCompleted'],
+  ['archived', 'filterArchived'],
+]
+
+function jobBucket(j) {
+  if (j.archived_at) return 'archived'
+  if (j.status === 'Completed' || j.schedule_status === 'completed') return 'completed'
+  if (['confirmed', 'in_progress'].includes(j.schedule_status)) return 'scheduled'
+  return 'awaiting'
+}
 
 export default function EditPanel({ onChanged, onClose }) {
   const T = useBoardT()
   const [refs, setRefs] = useState(null)
   const [err, setErr] = useState('')
   const [tab, setTab] = useState('jobs')
+  const [filter, setFilter] = useState('all')
   const [q, setQ] = useState('')
+  const [busyId, setBusyId] = useState(null)
   const [editingJob, setEditingJob] = useState(null)      // job object | 'new' | null
   const [editingAppt, setEditingAppt] = useState(null)
 
@@ -34,13 +55,29 @@ export default function EditPanel({ onChanged, onClose }) {
     onChanged?.()
   }
 
+  // One-tap transition on a job — no full form.
+  const quickAction = async (job, patch) => {
+    setBusyId(job.id)
+    setErr('')
+    try {
+      await updateJob(job.id, { ...patch, expected_updated_at: job.updated_at })
+      await reload()
+      onChanged?.()
+    } catch {
+      setErr(T.qaFailed)
+    }
+    setBusyId(null)
+  }
+
   const term = q.trim().toLowerCase()
-  const jobs = (refs?.jobs ?? []).filter((j) =>
-    !term ||
-    j.title.toLowerCase().includes(term) ||
-    (j.client_name ?? '').toLowerCase().includes(term) ||
-    (j.estimate_number ?? '').toLowerCase().includes(term)
-  )
+  const jobs = (refs?.jobs ?? [])
+    .filter((j) => filter === 'all' || jobBucket(j) === filter)
+    .filter((j) =>
+      !term ||
+      j.title.toLowerCase().includes(term) ||
+      (j.client_name ?? '').toLowerCase().includes(term) ||
+      (j.estimate_number ?? '').toLowerCase().includes(term)
+    )
   const appts = (refs?.appointments ?? []).filter((a) =>
     !term ||
     a.title.toLowerCase().includes(term) ||
@@ -64,7 +101,7 @@ export default function EditPanel({ onChanged, onClose }) {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
           <div className="flex items-center bg-gray-200 rounded-xl p-1 gap-1">
             {[['jobs', T.tabJobs], ['appointments', T.tabAppointments]].map(([k, lbl]) => (
               <button
@@ -91,36 +128,100 @@ export default function EditPanel({ onChanged, onClose }) {
           )}
         </div>
 
+        {tab === 'jobs' && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {FILTERS.map(([k, lbl]) => (
+              <button
+                key={k}
+                onClick={() => setFilter(k)}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg border ${
+                  filter === k ? 'bg-brand-500 text-white border-brand-500' : 'bg-white text-gray-600 border-gray-300'
+                }`}
+              >
+                {T[lbl]}
+              </button>
+            ))}
+          </div>
+        )}
+
         {!refs ? (
           <div className="flex justify-center py-20"><Spinner size="lg" className="text-brand-500" /></div>
         ) : tab === 'jobs' ? (
           <ul className="flex flex-col gap-2">
-            {jobs.length === 0 && <li className="text-sm text-gray-500 py-8 text-center">{T.noJobsMatch}</li>}
-            {jobs.map((j) => (
-              <li
-                key={j.id}
-                className={`bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center justify-between gap-3 ${j.archived_at ? 'opacity-60' : ''}`}
-              >
-                <div className="min-w-0">
-                  <p className="font-bold text-gray-900 truncate">
-                    {j.title}
-                    {j.archived_at && <span className="ml-2 text-xs font-semibold text-gray-500">{T.archived}</span>}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {j.client_name || T.noClient}
-                    {j.estimate_number ? ` · ${T.est} #${j.estimate_number}` : ''}
-                    {` · ${T.poShort}: ${T.po[j.po_status] ?? j.po_status}`}
-                    {` · ${T.schedule[j.schedule_status] ?? j.schedule_status}`}
-                    {j.projected_start ? ` · ${fmtDateYear(j.projected_start)}` : ''}
-                  </p>
-                </div>
-                <Button variant="secondary" size="sm" onClick={() => setEditingJob(j)}>{T.editBtn}</Button>
+            {jobs.length === 0 && (
+              <li className="text-sm text-gray-500 py-8 text-center">
+                {T.noJobsMatch}{' '}
+                <button className="text-brand-600 font-semibold" onClick={() => setEditingJob('new')}>{T.addFirstJob}</button>
               </li>
-            ))}
+            )}
+            {jobs.map((j) => {
+              const busy = busyId === j.id
+              const done = j.status === 'Completed' || j.schedule_status === 'completed'
+              const poDone = ['received', 'approved'].includes(j.po_status)
+              const isScheduled = ['confirmed', 'in_progress'].includes(j.schedule_status)
+              return (
+                <li
+                  key={j.id}
+                  className={`bg-white rounded-xl border border-gray-200 px-4 py-3 ${j.archived_at ? 'opacity-60' : ''}`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-gray-900 truncate">
+                        {j.title}
+                        {j.archived_at && <span className="ml-2 text-xs font-semibold text-gray-500">{T.archived}</span>}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {j.client_name || T.noClient}
+                        {j.estimate_number ? ` · ${T.est} #${j.estimate_number}` : ''}
+                        {` · ${T.poShort}: ${T.po[j.po_status] ?? j.po_status}`}
+                        {` · ${T.schedule[j.schedule_status] ?? j.schedule_status}`}
+                        {j.projected_start ? ` · ${fmtDateYear(j.projected_start)}` : ''}
+                      </p>
+                    </div>
+                    <Button variant="secondary" size="sm" onClick={() => setEditingJob(j)}>{T.editBtn}</Button>
+                  </div>
+
+                  {!j.archived_at && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {!poDone && (
+                        <QuickBtn busy={busy} onClick={() => quickAction(j, { po_status: 'received', po_received_date: etToday() })}>
+                          {T.qaPoReceived}
+                        </QuickBtn>
+                      )}
+                      {!isScheduled && !done && (
+                        <QuickBtn busy={busy} onClick={() => quickAction(j, { schedule_status: 'confirmed', projected_start: j.projected_start || etToday() })}>
+                          {T.qaScheduleToday}
+                        </QuickBtn>
+                      )}
+                      {!done && (
+                        <QuickBtn busy={busy} onClick={() => quickAction(j, { status: 'Completed', schedule_status: 'completed' })}>
+                          {T.qaComplete}
+                        </QuickBtn>
+                      )}
+                      {j.priority !== 'urgent' && !done && (
+                        <QuickBtn busy={busy} onClick={() => quickAction(j, { priority: 'urgent' })}>
+                          {T.qaBumpUrgent}
+                        </QuickBtn>
+                      )}
+                    </div>
+                  )}
+                  {j.archived_at && (
+                    <div className="mt-2">
+                      <QuickBtn busy={busy} onClick={() => quickAction(j, { archived_at: '' })}>{T.qaRestore}</QuickBtn>
+                    </div>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         ) : (
           <ul className="flex flex-col gap-2">
-            {appts.length === 0 && <li className="text-sm text-gray-500 py-8 text-center">{T.noApptsMatch}</li>}
+            {appts.length === 0 && (
+              <li className="text-sm text-gray-500 py-8 text-center">
+                {T.noApptsMatch}{' '}
+                <button className="text-brand-600 font-semibold" onClick={() => setEditingAppt('new')}>{T.addFirstAppt}</button>
+              </li>
+            )}
             {appts.map((a) => (
               <li
                 key={a.id}
@@ -159,5 +260,18 @@ export default function EditPanel({ onChanged, onClose }) {
         />
       )}
     </div>
+  )
+}
+
+function QuickBtn({ busy, onClick, children }) {
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={onClick}
+      className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-brand-300 text-brand-700 bg-brand-50 hover:bg-brand-100 disabled:opacity-50"
+    >
+      {children}
+    </button>
   )
 }

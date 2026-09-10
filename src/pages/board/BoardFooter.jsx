@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useBoardT } from './t'
 import { boardLocale } from './lang'
 
@@ -6,6 +7,13 @@ const TZ = 'America/New_York'
 
 export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, onExitEdit, onRest, onExit }) {
   const T = useBoardT()
+  const { i18n } = useTranslation()
+  const isEs = (i18n.language || 'en').startsWith('es')
+  const toggleLang = () => {
+    const next = isEs ? 'en' : 'es'
+    i18n.changeLanguage(next)
+    try { localStorage.setItem('jccs_lang', next) } catch { /* private mode */ }
+  }
   const [isFs, setIsFs] = useState(() => !!document.fullscreenElement)
   const syncFmt = useMemo(
     () => new Intl.DateTimeFormat(boardLocale(), { timeZone: TZ, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }),
@@ -42,6 +50,9 @@ export default function BoardFooter({ lastSync, online, editMode, onEnterEdit, o
       </div>
 
       <div className="ops-footer__group">
+        <button className="ops-btn" onClick={toggleLang} title={isEs ? 'Switch to English' : 'Cambiar a Español'}>
+          {isEs ? 'EN' : 'ES'}
+        </button>
         {onRest && (
           <button className="ops-btn" onClick={onRest}>
             {T.restNow}

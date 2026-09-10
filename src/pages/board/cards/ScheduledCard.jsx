@@ -25,7 +25,7 @@ export default function ScheduledCard({ job, onCrew }) {
       <div className="ops-card__row">
         <span>
           {job.schedule_state === 'delayed' ? T.wasDue : T.scheduled}{' '}
-          <b>{fmtDate(job.projected_start) ?? fmtDateYear(job.projected_end) ?? '—'}</b>
+          <b>{fmtDate(job.projected_start) ?? fmtDateYear(job.projected_end) ?? T.dateTBD}</b>
         </span>
         {job.scheduled_start_time && (
           <span>
