@@ -21,6 +21,7 @@ $routes = [
     '#^/ops-board/refs$#'                 => ['ops-board/refs.php', null],
     '#^/ops-board/jobs$#'                 => ['ops-board/jobs.php', null],
     '#^/ops-board/jobs/(\d+)/crew$#'      => ['ops-board/job_crew.php', 'id'],
+    '#^/ops-board/jobs/(\d+)/photos$#'    => ['ops-board/job_photos.php', 'id'],
     '#^/ops-board/jobs/(\d+)$#'           => ['ops-board/job_item.php', 'id'],
     '#^/ops-board/appointments$#'         => ['ops-board/appointments.php', null],
     '#^/ops-board/appointments/(\d+)$#'   => ['ops-board/appointment_item.php', 'id'],

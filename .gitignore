@@ -33,6 +33,9 @@ api/auth/logout.php
 # Uploaded job photos — the directory + .htaccess stay tracked, uploads don't.
 api/uploads/jobs/*
 !api/uploads/jobs/.gitkeep
+!api/uploads/jobs/board
+api/uploads/jobs/board/*
+!api/uploads/jobs/board/.gitkeep
 
 # Server-side ICS fetch cache (created at runtime by _ics_parse.php)
 api/cache/

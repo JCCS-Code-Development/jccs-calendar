@@ -57,6 +57,16 @@ const es = {
   pmOpenPunch: (n) => `${n} pendiente${n === 1 ? '' : 's'}`,
   pmNotInProjects: 'sin ficha en Proyectos',
 
+  photos: 'Fotos',
+  photoCaption: 'Descripción (opcional) — se aplica a las fotos que agregues ahora',
+  photoPasteHint: 'Elige varias a la vez, o pega una imagen con Ctrl+V.',
+  photoSaveFirst: 'Guarda el trabajo primero; después podrás agregar fotos.',
+  photoRemove: 'Quitar foto',
+  photoUploading: 'Subiendo…',
+  photoError: 'No se pudo subir la imagen.',
+  photoClose: 'Cerrar',
+  photoOf: (i, n) => `${i} de ${n}`,
+
   staleOnline: (t) => `Sin conexión con el servidor — mostrando la última actualización de las ${t}.`,
   staleOffline: (t) => `Sin conexión — mostrando la última actualización de las ${t}. Reconectando…`,
   earlier: 'antes',
@@ -262,6 +272,16 @@ const en = {
   pmPhase: 'Phase',
   pmOpenPunch: (n) => `${n} open item${n === 1 ? '' : 's'}`,
   pmNotInProjects: 'not in Projects',
+
+  photos: 'Photos',
+  photoCaption: 'Caption (optional) — applies to photos you add now',
+  photoPasteHint: 'Pick several at once, or paste an image with Ctrl+V.',
+  photoSaveFirst: 'Save the job first, then you can add photos.',
+  photoRemove: 'Remove photo',
+  photoUploading: 'Uploading…',
+  photoError: 'Could not upload the image.',
+  photoClose: 'Close',
+  photoOf: (i, n) => `${i} of ${n}`,
 
   staleOnline: (t) => `Can’t reach the server — showing the last update from ${t}.`,
   staleOffline: (t) => `Offline — showing the last update from ${t}. Reconnecting…`,

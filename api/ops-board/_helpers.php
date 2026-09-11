@@ -200,6 +200,28 @@ function boardPoMissing(array $row): bool {
     return !in_array($row['po_status'], ['received', 'approved'], true);
 }
 
+// Job-site photos for a job, oldest first. Each row's file_path is relative
+// to api/uploads/ (e.g. "jobs/board/42-….jpg"); APP_URL already points at
+// the api/ root, so the served URL is APP_URL . '/uploads/' . file_path —
+// same convention as api/jobs/photo.php.
+function boardJobPhotos(PDO $pdo, int $jobId): array {
+    static $stmt = null;
+    if ($stmt === null) {
+        $stmt = $pdo->prepare(
+            'SELECT id, file_path, caption
+             FROM job_photos WHERE job_id = ?
+             ORDER BY sort_order, id'
+        );
+    }
+    $stmt->execute([$jobId]);
+    $base = rtrim(defined('APP_URL') ? APP_URL : '', '/');
+    return array_map(static fn($p) => [
+        'id'      => (int)$p['id'],
+        'url'     => $base . '/uploads/' . ltrim((string)$p['file_path'], '/'),
+        'caption' => $p['caption'],
+    ], $stmt->fetchAll());
+}
+
 function formatBoardJob(PDO $pdo, array $row): array {
     static $workerStmt = null;
     if ($workerStmt === null) {
@@ -239,6 +261,7 @@ function formatBoardJob(PDO $pdo, array $row): array {
         'archived_at'          => $row['archived_at'],
         'workers'              => array_map(fn($w) => ['id' => (int)$w['id'], 'name' => $w['name']], $workers),
         'worker_ids'           => array_map(fn($w) => (int)$w['id'], $workers),
+        'photos'               => boardJobPhotos($pdo, (int)$row['id']),
         'updated_at'           => $row['updated_at'],
         'created_at'           => $row['created_at'],
     ];

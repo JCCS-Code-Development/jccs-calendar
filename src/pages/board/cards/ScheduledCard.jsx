@@ -1,5 +1,6 @@
 import { fmtDate, fmtDateYear, fmtClock, poBadge, scheduleBadge } from './helpers'
 import CrewRow from './CrewRow'
+import PhotoStrip from './PhotoStrip'
 import ProjectMeta from './ProjectMeta'
 import { useCrewDrop } from '../useCrewDrop'
 import { useBoardT } from '../t'
@@ -22,6 +23,8 @@ export default function ScheduledCard({ job, onCrew }) {
       </p>
 
       {job.address && <div className="ops-card__row">{job.address}</div>}
+
+      <PhotoStrip photos={job.photos} />
 
       <div className="ops-card__row">
         <span>

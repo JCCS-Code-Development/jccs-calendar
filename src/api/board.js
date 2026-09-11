@@ -48,6 +48,24 @@ export const addJobCrew = (jobId, worker_id, worker_name) =>
 export const removeJobCrew = (jobId, worker_id) =>
   board.delete(`/ops-board/jobs/${jobId}/crew?worker_id=${worker_id}`).then((r) => r.data)
 
+// ── Job photos ───────────────────────────────────────────────────────────
+// Multipart, so it skips the shared `board` instance (which forces
+// Content-Type: application/json) — a plain axios.post lets the browser set
+// the multipart boundary itself. PIN goes on by hand.
+export const addJobPhoto = (jobId, file, caption) => {
+  const fd = new FormData()
+  fd.append('image', file)
+  if (caption) fd.append('caption', caption)
+  return axios
+    .post(`${import.meta.env.VITE_API_BASE_URL}/ops-board/jobs/${jobId}/photos`, fd, {
+      headers: { 'X-Board-Pin': useBoardStore.getState().pin || '' },
+    })
+    .then((r) => r.data)
+}
+
+export const removeJobPhoto = (jobId, photoId) =>
+  board.delete(`/ops-board/jobs/${jobId}/photos?photo_id=${photoId}`).then((r) => r.data)
+
 // ── Appointments ─────────────────────────────────────────────────────────
 export const createAppointment = (data) =>
   board.post('/ops-board/appointments', data).then((r) => r.data)

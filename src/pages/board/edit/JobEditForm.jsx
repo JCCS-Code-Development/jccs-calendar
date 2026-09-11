@@ -4,6 +4,7 @@ import Input from '../../../components/ui/Input'
 import Select from '../../../components/ui/Select'
 import Button from '../../../components/ui/Button'
 import { createJob, updateJob, archiveJob } from '../../../api/board'
+import PhotoUploader from './PhotoUploader'
 import { useBoardT } from '../t'
 
 const FIELD = 'w-full rounded-xl border border-gray-300 px-4 py-3 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100'
@@ -216,6 +217,8 @@ export default function JobEditForm({ job, refs, onSaved, onClose }) {
             </div>
           </div>
         </fieldset>
+
+        <PhotoUploader jobId={job?.id} photos={job?.photos ?? []} />
 
         <Input label={T.jfNextAction} value={f.next_action_by} onChange={set('next_action_by')} />
         <div className="flex flex-col gap-1">
