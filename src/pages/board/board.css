@@ -211,6 +211,9 @@
   margin-bottom: 0.3em;
 }
 .ops-pc__group--off .ops-pc__grouphd { color: #94a3b8; }
+/* Top "On lunch" group — amber, matching the lunch status tag. */
+.ops-pc__group--lunch .ops-pc__grouphd { color: #d97706; }
+.ops-pc__group--lunch .ops-pc__gcount { background: #fef3c7; color: #92400e; }
 .ops-pc__gcount {
   background: #e2e8f0;
   color: #334155;

@@ -52,10 +52,14 @@ export default function PersonnelColumn({ data }) {
   const workers = ok ? (data.workers ?? []) : []
   const roster = ok ? (data.roster ?? []) : []
 
-  // Build the groups.
+  // Build the groups. "On lunch" is always the top group so the office can
+  // see at a glance who's on break; those workers are pulled out of their
+  // site group rather than listed twice.
   const used = new Set()
+  const onLunch = workers.filter((w) => w.status_label === 'lunch')
+  onLunch.forEach((w) => used.add(w.user_id))
   const siteGroups = HOME_SITES.map((site) => {
-    const people = workers.filter((w) => matchesSite(w.job_name, site))
+    const people = workers.filter((w) => !used.has(w.user_id) && matchesSite(w.job_name, site))
     people.forEach((w) => used.add(w.user_id))
     return { label: site, people }
   })
@@ -64,6 +68,7 @@ export default function PersonnelColumn({ data }) {
   const off = roster.filter((r) => !clockedIds.has(r.user_id)).map((r) => ({ ...r, off: true }))
 
   const groups = [
+    { label: T.grpLunch, people: onLunch, cls: 'ops-pc__group--lunch' },
     ...siteGroups,
     ...(onSite.length ? [{ label: T.grpEnObra, people: onSite }] : []),
   ]
@@ -86,7 +91,7 @@ export default function PersonnelColumn({ data }) {
         ) : (
           <>
             {groups.map((g) => (
-              <div key={g.label} className="ops-pc__group">
+              <div key={g.label} className={`ops-pc__group ${g.cls ?? ''}`}>
                 <div className="ops-pc__grouphd">
                   <span>{g.label}</span>
                   <span className="ops-pc__gcount">{g.people.length}</span>
